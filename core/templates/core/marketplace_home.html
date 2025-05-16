@@ -7,48 +7,147 @@
 <link rel="stylesheet" href="{% static 'core/css/variables.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/marketplace.css' %}">
 <style>
+/* Correcciones críticas para el scroll global */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden; /* Evitar scroll horizontal en todos los casos */
+}
+
+body {
+    overflow-y: auto !important; /* Garantizar que el scroll vertical siempre esté disponible */
+    position: relative;
+}
+
 /* Estilos críticos para asegurar la visibilidad de elementos y correcta transición */
 .welcome-title, .community-name, .welcome-subtitle, .btn-start {
     opacity: 1 !important;
     transform: translateY(0) !important;
 }
 
-/* Estilo inicial para contenedor de tarjetas - importante para la transición */
+/* Contenedor principal con scroll habilitado - Asegurando que no haya restricciones */
+.welcome-container {
+    position: relative;
+    min-height: 100vh;
+    height: auto !important; /* Forzar altura automática */
+    width: 100%;
+    overflow-y: auto !important; /* Forzar scroll vertical cuando sea necesario */
+    padding-bottom: 80px; /* Espacio adicional en la parte inferior */
+}
+
+/* Estilo inicial para contenedor de tarjetas */
 .cards-container {
     display: none;
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 /* Estilo específico para cuando se muestran las tarjetas */
 .cards-container.show-cards {
     display: flex !important;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch;
+    gap: 25px;
     opacity: 1 !important;
     transform: translateY(0) !important;
+    /* Asegurar espaciado adecuado para scroll */
+    padding-bottom: 50px;
+    margin-bottom: 50px;
 }
 
-/* Si hay algún problema con las tarjetas, estos estilos deberían solucionarlo */
+/* Contenedor principal - asegurar que no haya restricciones de altura */
+.main-content {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    height: auto !important; /* Forzar altura automática */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Ajustar el estilo para las tarjetas - alineación y tamaño flexible */
 .card-link {
     text-decoration: none;
     color: inherit;
-    display: block;
+    flex: 1 0 300px; /* Base flexible con mínimo de 300px */
+    max-width: 350px; /* Limitar ancho máximo */
+    margin-bottom: 25px;
+    display: flex;
+}
+
+/* La tarjeta ocupa todo el espacio de su contenedor */
+.neon-card {
+    display: flex;
+    flex-direction: column;
     width: 100%;
-    max-width: calc(33.333% - 2rem);
-    margin-bottom: 2rem;
+    height: 100%;
+    min-height: 380px; /* Altura mínima para contenido */
 }
 
-@media (max-width: 1100px) {
-    .card-link {
-        max-width: calc(50% - 2rem);
-    }
-}
-
+/* Ajustar para dispositivos móviles */
 @media (max-width: 768px) {
+    /* Estructura en columna para móviles */
     .cards-container.show-cards {
         flex-direction: column;
         align-items: center;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    /* Tarjetas a ancho completo en móvil */
+    .card-link {
+        max-width: 100%;
+        width: 100%;
+        margin-bottom: 30px;
+    }
+    
+    /* Scroll garantizado y espacio adicional */
+    .welcome-container, body {
+        overflow-y: auto !important;
+        height: auto !important;
+        padding-bottom: 50px;
+    }
+    
+    /* Tamaños reducidos para pantallas pequeñas */
+    .welcome-title {
+        font-size: clamp(1.8rem, 6vw, 2.5rem);
+        margin-bottom: 0.5rem;
+    }
+    
+    .community-name {
+        font-size: clamp(1.4rem, 4vw, 1.8rem);
+        margin-bottom: 0.5rem;
+    }
+    
+    .welcome-subtitle {
+        font-size: clamp(0.8rem, 2vw, 1rem);
+        margin-bottom: 1.5rem;
+    }
+    
+    .btn-start {
+        padding: 0.7rem 2rem;
+        margin-bottom: 2rem;
+    }
+}
+
+/* Media query para tablets */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .cards-container.show-cards {
+        justify-content: space-evenly;
     }
     
     .card-link {
-        max-width: 100%;
+        flex: 1 0 300px;
+        max-width: 45%;
     }
 }
 </style>
@@ -151,9 +250,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 
 <script>
-// Script completo y optimizado para mostrar correctamente las tarjetas
+// Script optimizado para mostrar correctamente las tarjetas y asegurar el funcionamiento del scroll
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM cargado, inicializando efectos...');
+    
+    // Forzar el scroll desde el inicio si es necesario
+    forceScrollIfNeeded();
     
     // Inicializar animaciones al cargar la página
     initParticles();
@@ -191,6 +293,25 @@ document.addEventListener('DOMContentLoaded', () => {
     setupStartButton();
 });
 
+// Forzar scroll si es necesario en cualquier dispositivo
+function forceScrollIfNeeded() {
+    // Asegurar que el scroll esté habilitado en todos los dispositivos
+    document.documentElement.style.overflow = 'auto';
+    document.body.style.overflow = 'auto';
+    document.querySelector('.welcome-container').style.overflow = 'auto';
+    
+    // Eliminar restricciones de altura que podrían impedir el scroll
+    document.querySelector('.welcome-container').style.maxHeight = 'none';
+    document.querySelector('.welcome-container').style.height = 'auto';
+    
+    // Para móviles, especialmente importante
+    if (window.innerWidth <= 768) {
+        console.log('Dispositivo móvil detectado, optimizando para scroll');
+        document.body.style.height = 'auto';
+        document.body.style.minHeight = '100%';
+    }
+}
+
 // Método específico para manejar el botón de inicio
 function setupStartButton() {
     const btnStart = document.getElementById('btn-start');
@@ -213,38 +334,47 @@ function setupStartButton() {
             btnStart.style.display = 'none';
             console.log('Botón ocultado');
             
-            // 2. Mostrar las tarjetas con múltiples métodos para asegurar que funcione
-            // Método 1: Estilo directo
+            // 2. Mostrar las tarjetas (múltiples métodos para garantizar que funcione)
             cardsContainer.style.display = 'flex';
             cardsContainer.style.opacity = '1';
-            
-            // Método 2: Clase específica
             cardsContainer.classList.add('show-cards');
             
-            // Método 3: Manipulación directa del elemento
-            cardsContainer.setAttribute('style', 'display: flex !important; opacity: 1 !important;');
+            // Forzar visibilidad con alto nivel de especificidad
+            cardsContainer.setAttribute('style', 'display: flex !important; opacity: 1 !important; z-index: 100 !important');
             
             console.log('Tarjetas mostradas');
             
             // 3. Efecto de destello
             createFlashEffect();
             
-            // 4. Verificación posterior
+            // 4. Garantizar scroll y ajustar layout después de mostrar tarjetas
             setTimeout(() => {
-                // Verificar si las tarjetas están realmente visibles
-                const computedStyle = window.getComputedStyle(cardsContainer);
-                console.log('Estado de las tarjetas:', computedStyle.display, computedStyle.opacity);
+                forceScrollIfNeeded();
                 
-                // Si aún no están visibles, forzar visibilidad
-                if (computedStyle.display === 'none' || computedStyle.opacity === '0') {
-                    console.log('Forzando visibilidad de tarjetas...');
-                    document.body.appendChild(cardsContainer);
-                    cardsContainer.style.display = 'flex';
-                    cardsContainer.style.position = 'fixed';
-                    cardsContainer.style.top = '50%';
-                    cardsContainer.style.left = '50%';
-                    cardsContainer.style.transform = 'translate(-50%, -50%)';
-                    cardsContainer.style.zIndex = '9999';
+                // Forzar redibujado de la página
+                document.body.style.display = 'none';
+                document.body.offsetHeight; // Forzar reflow
+                document.body.style.display = '';
+                
+                // Si estamos en móvil, hacer scroll a las tarjetas para que sean visibles
+                if (window.innerWidth <= 768) {
+                    const firstCard = document.querySelector('.card-link');
+                    if (firstCard) {
+                        firstCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+                
+                // Verificar altura total del contenido y ajustar overflow si es necesario
+                const contentHeight = document.querySelector('.main-content').scrollHeight;
+                const windowHeight = window.innerHeight;
+                
+                console.log(`Altura del contenido: ${contentHeight}, Altura de la ventana: ${windowHeight}`);
+                
+                if (contentHeight > windowHeight) {
+                    console.log('Contenido más alto que la ventana - activando scroll');
+                    document.documentElement.style.overflow = 'auto';
+                    document.body.style.overflow = 'auto';
+                    document.querySelector('.welcome-container').style.overflow = 'auto';
                 }
             }, 500);
         } catch (error) {
@@ -324,7 +454,7 @@ function createFlashEffect() {
     });
 }
 
-// Sistema de partículas con Three.js (código original)
+// Sistema de partículas con Three.js
 function initParticles() {
     const particlesContainer = document.getElementById('particles');
     
@@ -347,8 +477,8 @@ function initParticles() {
         const particlesGroup = new THREE.Group();
         scene.add(particlesGroup);
         
-        // Crear partículas
-        const particleCount = window.innerWidth < 768 ? 100 : 200;
+        // Crear partículas - reducir cantidad en móviles para mejor rendimiento
+        const particleCount = window.innerWidth < 768 ? 70 : 150;
         const particles = [];
         
         for (let i = 0; i < particleCount; i++) {
@@ -412,6 +542,9 @@ function initParticles() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            
+            // Verificar scroll en cada cambio de dimensión
+            forceScrollIfNeeded();
         });
         
         // Iniciar animación
@@ -422,8 +555,10 @@ function initParticles() {
     }
 }
 
-// Agregar evento load para asegurar que todo esté cargado
+// Verificar y garantizar el scroll después de que se carga todo
 window.addEventListener('load', function() {
+    console.log('Página completamente cargada');
+    
     // Asegurar que el botón sea visible
     const btnStart = document.getElementById('btn-start');
     if (btnStart) {
@@ -431,6 +566,25 @@ window.addEventListener('load', function() {
         btnStart.style.visibility = 'visible';
         btnStart.style.display = 'inline-block';
     }
+    
+    // Forzar scroll si es necesario
+    forceScrollIfNeeded();
+});
+
+// Manejar cambios de orientación en dispositivos móviles
+window.addEventListener('orientationchange', function() {
+    // Esperar un momento para que se actualice el layout
+    setTimeout(() => {
+        console.log('Orientación cambiada - ajustando scroll');
+        forceScrollIfNeeded();
+        
+        // Si las tarjetas están visibles, asegurar que se vean correctamente
+        const cardsContainer = document.getElementById('cards-container');
+        if (cardsContainer && cardsContainer.classList.contains('show-cards')) {
+            cardsContainer.style.display = 'flex';
+            cardsContainer.style.opacity = '1';
+        }
+    }, 300);
 });
 </script>
-{% endblock %}
+{% endblock %}  

@@ -9,4 +9,5 @@ urlpatterns = [
     path('recovery/', views.password_recovery, name='password_recovery'),
     path('register/', views.register, name='register'),
     path('marketplace/', views.marketplace, name='marketplace'),
+    path('noticias/', views.noticias, name='noticias'),
 ]
