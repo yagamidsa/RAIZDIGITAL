@@ -74,10 +74,19 @@ WSGI_APPLICATION = 'raizdigital.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'raiz_digital',
+            'USER': 'yagami',
+            'PASSWORD': 'Ipsos2012*',
+            'HOST': 'localhost',
+            'PORT': '5432',
+            'ATOMIC_REQUESTS': True,
+            'OPTIONS': {
+                'isolation_level': 1,  # READ COMMITTED isolation level
+                'connect_timeout': 10,
+            },
+        }
 }
 
 
