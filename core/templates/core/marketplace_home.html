@@ -1,142 +1,457 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}Raíz Digital - Marketplace de Comunidades Indígenas{% endblock %}
+{% block title %}Comunidad Raíz Digital{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'core/css/variables.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/marketplace.css' %}">
+<style>
+/* Estilos de emergencia para forzar visibilidad */
+.welcome-title, .community-name, .welcome-subtitle, .btn-start {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+.cards-container {
+    display: none;
+}
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- Barra de navegación -->
-<nav class="navbar" id="navbar">
-    <div class="nav-container">
-        <div class="nav-left">
-            <a href="{% url 'core:index' %}" class="nav-logo">
-                <img src="{% static 'core/img/logo.svg' %}" alt="Raíz Digital" class="logo-img">
-                <span class="logo-text">Raíz Digital</span>
-            </a>
-        </div>
+<div class="welcome-container">
+    <!-- Elementos de fondo -->
+    <div class="cyber-grid" id="cyberGrid"></div>
+    <div class="organic-shapes">
+        <div class="organic-shape shape1"></div>
+        <div class="organic-shape shape2"></div>
+    </div>
+    <div class="particles-container" id="particles"></div>
+    
+    <!-- Contenido principal -->
+    <div class="main-content">
+        <h1 class="welcome-title">Bienvenido Comunidad</h1>
+        <h2 class="community-name">{{ community_name|default:"Wayúu" }}</h2>
+        <p class="welcome-subtitle">Conectando ancestralidad con el mundo moderno</p>
         
-        <div class="nav-center">
-            <div class="search-container">
-                <input type="text" class="search-input" placeholder="Buscar artesanías, alimentos, arte...">
-                <button class="search-btn">
-                    <svg viewBox="0 0 24 24" class="search-icon">
-                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        <button id="btn-start" class="btn-start">Iniciar</button>
+        
+        <div class="cards-container" id="cards-container">
+            <!-- Tarjeta 1: Noticias -->
+            <div class="neon-card">
+                <div class="card-corner corner-top-left"></div>
+                <div class="card-corner corner-top-right"></div>
+                <div class="card-corner corner-bottom-left"></div>
+                <div class="card-corner corner-bottom-right"></div>
+                
+                <div class="card-icon-container">
+                    <svg class="card-icon" viewBox="0 0 24 24">
+                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-1 14H5c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h14c.55 0 1 .45 1 1v10c0 .55-.45 1-1 1z"/>
+                        <path d="M8.5 15h2v2h-2zm0-8h2v6h-2zm3.5 0h2v2h-2zm0 3h2v5h-2zm3.5 0h2v2h-2zm0 3h2v2h-2z"/>
                     </svg>
-                </button>
-            </div>
-        </div>
-        
-        <div class="nav-right">
-            <a href="#" class="nav-link">Productos</a>
-            <a href="#" class="nav-link">Comunidades</a>
-            <a href="#" class="nav-link">Noticias</a>
-            <a href="#" class="nav-link">Eventos</a>
-            
-            {% if user.is_authenticated %}
-                <div class="user-menu">
-                    <button class="user-btn">
-                        {% if user.foto_perfil %}
-                            <img src="{{ user.foto_perfil.url }}" alt="{{ user.nombre }}" class="user-img">
-                        {% else %}
-                            <div class="user-icon">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                                </svg>
-                            </div>
-                        {% endif %}
-                        <span class="user-name">{{ user.nombre }}</span>
-                        <svg class="dropdown-icon" viewBox="0 0 24 24">
-                            <path d="M7 10l5 5 5-5z"/>
-                        </svg>
-                    </button>
-                    <div class="dropdown-menu">
-                        <a href="#" class="dropdown-item">Mi Perfil</a>
-                        {% if 'vendedor' in user.roles %}
-                            <a href="#" class="dropdown-item">Mis Productos</a>
-                        {% endif %}
-                        {% if 'administrador' in user.roles %}
-                            <a href="#" class="dropdown-item">Panel Admin</a>
-                        {% endif %}
-                        <a href="#" class="dropdown-item">Mis Pedidos</a>
-                        <a href="{% url 'core:logout' %}" class="dropdown-item">Cerrar Sesión</a>
-                    </div>
                 </div>
-            {% else %}
-                <a href="{% url 'core:login' %}" class="nav-btn btn-login">Ingresar</a>
-                <a href="{% url 'core:register' %}" class="nav-btn btn-register">Registrarse</a>
-            {% endif %}
+                
+                <h3 class="card-title">Noticias</h3>
+                <p class="card-description">Mantente al día con las últimas novedades y acontecimientos de tu comunidad y el mundo artesanal.</p>
+                <button class="card-button">Explorar</button>
+            </div>
             
-            <button class="cart-btn">
-                <svg viewBox="0 0 24 24" class="cart-icon">
-                    <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
-                </svg>
-                <span class="cart-count">0</span>
-            </button>
+            <!-- Tarjeta 2: Eventos -->
+            <div class="neon-card">
+                <div class="card-corner corner-top-left"></div>
+                <div class="card-corner corner-top-right"></div>
+                <div class="card-corner corner-bottom-left"></div>
+                <div class="card-corner corner-bottom-right"></div>
+                
+                <div class="card-icon-container">
+                    <svg class="card-icon" viewBox="0 0 24 24">
+                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V9h14v10zM5 7V5h14v2H5z"/>
+                        <path d="M7 11h10v2H7zm0 4h7v2H7z"/>
+                    </svg>
+                </div>
+                
+                <h3 class="card-title">Eventos</h3>
+                <p class="card-description">Descubre ferias, talleres y ceremonias tradicionales donde participar y conectar con tus raíces.</p>
+                <button class="card-button">Calendario</button>
+            </div>
             
-            <button class="menu-toggle" id="menuToggle">
-                <span class="menu-icon"></span>
-            </button>
+            <!-- Tarjeta 3: Productos -->
+            <div class="neon-card">
+                <div class="card-corner corner-top-left"></div>
+                <div class="card-corner corner-top-right"></div>
+                <div class="card-corner corner-bottom-left"></div>
+                <div class="card-corner corner-bottom-right"></div>
+                
+                <div class="card-icon-container">
+                    <svg class="card-icon" viewBox="0 0 24 24">
+                        <path d="M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-8 4c0 .55-.45 1-1 1s-1-.45-1-1V8h2v2zm4 0c0 .55-.45 1-1 1s-1-.45-1-1V8h2v2z"/>
+                        <path d="M12 3c1.67 0 3 1.33 3 3H9c0-1.67 1.33-3 3-3z"/>
+                    </svg>
+                </div>
+                
+                <h3 class="card-title">Productos</h3>
+                <p class="card-description">Explora nuestra selección de artesanías auténticas creadas con las técnicas tradicionales de tu comunidad.</p>
+                <button class="card-button">Catálogo</button>
+            </div>
         </div>
     </div>
     
-    <!-- Menú móvil -->
-    <div class="mobile-menu" id="mobileMenu">
-        <div class="mobile-search">
-            <input type="text" class="mobile-search-input" placeholder="Buscar...">
-            <button class="mobile-search-btn">
-                <svg viewBox="0 0 24 24" class="search-icon">
-                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                </svg>
-            </button>
-        </div>
-        <div class="mobile-links">
-            <a href="#" class="mobile-link">Productos</a>
-            <a href="#" class="mobile-link">Comunidades</a>
-            <a href="#" class="mobile-link">Noticias</a>
-            <a href="#" class="mobile-link">Eventos</a>
-            
-            {% if user.is_authenticated %}
-                <a href="#" class="mobile-link">Mi Perfil</a>
-                {% if 'vendedor' in user.roles %}
-                    <a href="#" class="mobile-link">Mis Productos</a>
-                {% endif %}
-                {% if 'administrador' in user.roles %}
-                    <a href="#" class="mobile-link">Panel Admin</a>
-                {% endif %}
-                <a href="#" class="mobile-link">Mis Pedidos</a>
-                <a href="{% url 'core:logout' %}" class="mobile-link">Cerrar Sesión</a>
-            {% else %}
-                <a href="{% url 'core:login' %}" class="mobile-link highlight">Ingresar</a>
-                <a href="{% url 'core:register' %}" class="mobile-link highlight">Registrarse</a>
-            {% endif %}
-        </div>
+    <!-- Sección oculta para mostrar después de la animación -->
+    <div id="content-section" class="section-hidden">
+        <!-- Aquí irá el contenido que se mostrará después de hacer clic en Iniciar -->
     </div>
-</nav>
+</div>
+{% endblock %}
 
-<!-- Contenido principal -->
-<main class="main-content">
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="hero-content">
-            <div class="hero-text">
-                <h1 class="hero-title">Arte y Tradición Indígena</h1>
-                <p class="hero-subtitle">Conectando ancestralidad con el mundo moderno</p>
-                <div class="hero-buttons">
-                    <a href="#productos" class="hero-btn primary-btn">Explorar Productos</a>
-                    <a href="#comunidades" class="hero-btn secondary-btn">Conocer Comunidades</a>
-                </div>
-            </div>
-            <div class="hero-decoration">
-                <div class="decoration-element el1"></div>
-                <div class="decoration-element el2"></div>
-                <div class="decoration-element el3"></div>
-            </div>
-        </div>
-        <div class="hero-pattern"></div>
-    </section>
-</main>
+{% block extra_js %}
+<!-- GSAP para animaciones avanzadas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<!-- Three.js para efectos 3D -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.1/three.min.js"></script>
+<!-- Anime.js para animaciones específicas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar animaciones al cargar la página
+    initParticles();
+    initAnimations();
+    
+    // Animación del grid cibernético
+    gsap.to('#cyberGrid', {
+        backgroundPosition: '0 50px',
+        duration: 20,
+        repeat: -1,
+        ease: 'linear'
+    });
+    
+    // Animación de las formas orgánicas
+    gsap.to('.shape1', {
+        y: -30,
+        x: 20,
+        duration: 12,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut'
+    });
+    
+    gsap.to('.shape2', {
+        y: 40,
+        x: -15,
+        duration: 15,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+        delay: 0.5
+    });
+    
+    // Botón de inicio con animación de clic
+    const btnStart = document.getElementById('btn-start');
+    
+    btnStart.addEventListener('click', () => {
+        // Crea una timeline de GSAP para la secuencia de animación
+        const tl = gsap.timeline();
+        
+        // Animación del botón
+        tl.to(btnStart, {
+            scale: 1.1,
+            duration: 0.2,
+            boxShadow: '0 0 30px var(--neon-green), 0 0 50px var(--neon-green)',
+            backgroundColor: 'var(--neon-green)',
+            color: '#000'
+        })
+        .to(btnStart, {
+            scale: 0,
+            opacity: 0,
+            duration: 0.5,
+            ease: 'back.in(1.7)',
+            onComplete: () => {
+                btnStart.style.display = 'none';
+            }
+        }, '+=0.1')
+        
+        // Animar la aparición de las tarjetas
+        .to('.cards-container', {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: 'power3.out'
+        }, '-=0.2')
+        
+        // Animar cada tarjeta individualmente
+        .from('.neon-card', {
+            opacity: 0,
+            y: 50,
+            scale: 0.9,
+            duration: 0.8,
+            stagger: 0.15,
+            ease: 'back.out(1.7)'
+        }, '-=0.5');
+        
+        // Efecto de destello de luz
+        createFlashEffect();
+    });
+});
+
+// Inicialización de animaciones iniciales
+function initAnimations() {
+    const tl = gsap.timeline();
+    
+    tl.to('.welcome-title', {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: 'power3.out'
+    })
+    .to('.community-name', {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: 'power3.out'
+    }, '-=0.7')
+    .to('.welcome-subtitle', {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: 'power3.out'
+    }, '-=0.7')
+    .to('.btn-start', {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: 'power3.out'
+    }, '-=0.7');
+    
+    // Animación continua del título
+    gsap.to('.welcome-title', {
+        backgroundPosition: '200% center',
+        duration: 8,
+        repeat: -1,
+        ease: 'linear'
+    });
+    
+    // Efecto de pulsación para las tarjetas
+    const cardsAnimation = anime({
+        targets: '.card-icon-container',
+        scale: [1, 1.05, 1],
+        opacity: [0.8, 1, 0.8],
+        duration: 3000,
+        easing: 'easeInOutSine',
+        loop: true,
+        direction: 'alternate',
+        delay: anime.stagger(200)
+    });
+}
+
+// Efecto de destello cuando se presiona el botón de inicio
+function createFlashEffect() {
+    // Crear un elemento para el efecto de destello
+    const flash = document.createElement('div');
+    flash.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: white;
+        z-index: 1000;
+        pointer-events: none;
+        opacity: 0;
+    `;
+    document.body.appendChild(flash);
+    
+    // Animar el destello
+    gsap.to(flash, {
+        opacity: 0.7,
+        duration: 0.2,
+        onComplete: () => {
+            gsap.to(flash, {
+                opacity: 0,
+                duration: 0.5,
+                onComplete: () => {
+                    flash.remove();
+                }
+            });
+        }
+    });
+}
+
+// Sistema de partículas con Three.js
+function initParticles() {
+    const particlesContainer = document.getElementById('particles');
+    
+    // Configuración básica de Three.js
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true });
+    
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x000000, 0);
+    particlesContainer.appendChild(renderer.domElement);
+    
+    // Crear grupo de partículas
+    const particlesGroup = new THREE.Group();
+    scene.add(particlesGroup);
+    
+    // Crear partículas
+    const particleCount = window.innerWidth < 768 ? 100 : 200;
+    const particles = [];
+    
+    for (let i = 0; i < particleCount; i++) {
+        const geometry = new THREE.SphereGeometry(0.1, 8, 8);
+        
+        // Alternar colores entre verde y azul neón
+        const color = i % 3 === 0 ? 0x00ff9d : (i % 3 === 1 ? 0x00f6ff : 0xff00c8);
+        
+        const material = new THREE.MeshBasicMaterial({
+            color: color,
+            transparent: true,
+            opacity: Math.random() * 0.5 + 0.1
+        });
+        
+        const particle = new THREE.Mesh(geometry, material);
+        
+        // Posicionar aleatoriamente
+        particle.position.x = Math.random() * 40 - 20;
+        particle.position.y = Math.random() * 40 - 20;
+        particle.position.z = Math.random() * 40 - 20;
+        
+        // Añadir velocidad aleatoria
+        particle.velocity = {
+            x: (Math.random() - 0.5) * 0.05,
+            y: (Math.random() - 0.5) * 0.05,
+            z: (Math.random() - 0.5) * 0.05
+        };
+        
+        particlesGroup.add(particle);
+        particles.push(particle);
+    }
+    
+    // Posicionar cámara
+    camera.position.z = 25;
+    
+    // Función de animación
+    function animate() {
+        requestAnimationFrame(animate);
+        
+        // Animar partículas
+        particles.forEach(particle => {
+            particle.position.x += particle.velocity.x;
+            particle.position.y += particle.velocity.y;
+            particle.position.z += particle.velocity.z;
+            
+            // Limitar rango de movimiento
+            if (Math.abs(particle.position.x) > 20) particle.velocity.x *= -1;
+            if (Math.abs(particle.position.y) > 20) particle.velocity.y *= -1;
+            if (Math.abs(particle.position.z) > 20) particle.velocity.z *= -1;
+            
+            // Efecto de rotación suave a todo el grupo
+            particlesGroup.rotation.y += 0.0002;
+            particlesGroup.rotation.x += 0.0001;
+        });
+        
+        renderer.render(scene, camera);
+    }
+    
+    // Ajustar tamaño al cambiar dimensiones de ventana
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+    
+    // Iniciar animación
+    animate();
+}
+
+// Interacción con las tarjetas
+document.querySelectorAll('.neon-card').forEach(card => {
+    card.addEventListener('mouseenter', () => {
+        // Intensificar efectos de luz en hover
+        gsap.to(card.querySelectorAll('.card-corner'), {
+            boxShadow: '0 0 15px currentColor',
+            duration: 0.3
+        });
+        
+        // Efecto de pulsación en el icono
+        gsap.to(card.querySelector('.card-icon-container'), {
+            scale: 1.1,
+            duration: 0.5,
+            yoyo: true,
+            repeat: 1,
+            ease: 'power2.inOut'
+        });
+    });
+    
+    card.addEventListener('mouseleave', () => {
+        // Restaurar efectos originales
+        gsap.to(card.querySelectorAll('.card-corner'), {
+            boxShadow: '0 0 10px currentColor',
+            duration: 0.3
+        });
+    });
+    
+    // Efecto de clic en los botones de las tarjetas
+    const button = card.querySelector('.card-button');
+    button.addEventListener('click', (e) => {
+        // Prevenir navegación
+        e.preventDefault();
+        
+        // Obtener el color neón de la tarjeta actual
+        const cardTitle = card.querySelector('.card-title');
+        const cardColor = window.getComputedStyle(cardTitle).color;
+        
+        // Animación de clic en botón
+        gsap.timeline()
+            .to(button, {
+                scale: 0.9,
+                duration: 0.1
+            })
+            .to(button, {
+                scale: 1,
+                duration: 0.2,
+                backgroundColor: cardColor,
+                color: '#000'
+            })
+            .to(button, {
+                backgroundColor: 'transparent',
+                color: cardColor,
+                duration: 0.5,
+                delay: 0.2
+            });
+            
+        // Aquí puedes agregar la lógica para cargar el contenido correspondiente
+        console.log(`Navegando a: ${cardTitle.textContent}`);
+    });
+});
+
+// Animación adicional para esquinas de neón
+gsap.fromTo('.card-corner', 
+    { opacity: 0.5, scale: 0.8 },
+    { 
+        opacity: 1, 
+        scale: 1, 
+        duration: 2,
+        stagger: 0.1,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut'
+    }
+);
+
+// Efecto de luz dinámica que sigue al ratón
+document.addEventListener('mousemove', (e) => {
+    // Crear un seguimiento de luz sutil
+    const mouseX = e.clientX / window.innerWidth;
+    const mouseY = e.clientY / window.innerHeight;
+    
+    // Aplicar efecto a las formas orgánicas
+    gsap.to('.organic-shapes', {
+        duration: 2,
+        x: (mouseX - 0.5) * 20,
+        y: (mouseY - 0.5) * 20,
+        ease: 'power2.out'
+    });
+});
+</script>
 {% endblock %}
