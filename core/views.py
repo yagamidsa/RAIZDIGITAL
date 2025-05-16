@@ -10,6 +10,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 import uuid
 import datetime
+from django.shortcuts import render, get_object_or_404
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
+from .models import *
 
 def index(request):
     return render(request, 'core/index.html')
@@ -73,89 +77,96 @@ def register(request):
 def password_recovery(request):
     return render(request, 'core/password_recovery.html')
 
-@login_required
-def marketplace(request):
-    return render(request, 'core/marketplace.html')
+#@login_required
+#def marketplace(request):
+#    return render(request, 'core/marketplace.html')
 
 def marketplace(request):
+    return render(request, 'core/marketplace_home.html')
+
+
+def noticias(request):
+    """
+    Vista para mostrar el listado de noticias.
+    
+    Obtiene todas las noticias publicadas y las muestra paginadas,
+    con la posibilidad de filtrar por búsqueda.
+    """
+    # Obtener parámetros de la URL
+    query = request.GET.get('q', '')
+    page = request.GET.get('page', 1)
+    
+    # Obtener todas las noticias publicadas ordenadas por fecha (más recientes primero)
+    noticias_list = Noticia.objects.filter(estado='publicado').order_by('-fecha_publicacion')
+    
+    # Aplicar filtro de búsqueda si existe
+    if query:
+        noticias_list = noticias_list.filter(
+            Q(titulo__icontains=query) | 
+            Q(resumen__icontains=query) | 
+            Q(contenido__icontains=query)
+        )
+    
+    # Configurar paginación - 9 artículos por página
+    paginator = Paginator(noticias_list, 9)
+    
+    try:
+        noticias = paginator.page(page)
+    except PageNotAnInteger:
+        # Si la página no es un entero, mostrar la primera página
+        noticias = paginator.page(1)
+    except EmptyPage:
+        # Si la página está fuera de rango, mostrar la última página
+        noticias = paginator.page(paginator.num_pages)
+    
+    # Preparar datos para la plantilla
     context = {
-        'comunidades': [
-            {
-                'nombre': 'Wayúu',
-                'region': 'La Guajira',
-                'pais': 'Colombia',
-                'imagen': 'wayuu.jpg',
-                'descripcion': 'Comunidad indígena reconocida por sus tejidos y mochilas tradicionales.'
-            },
-            {
-                'nombre': 'Embera',
-                'region': 'Chocó',
-                'pais': 'Colombia',
-                'imagen': 'embera.jpg',
-                'descripcion': 'Conocidos por su artesanía en chaquira y cestería tradicional.'
-            },
-            {
-                'nombre': 'Arhuaco',
-                'region': 'Sierra Nevada',
-                'pais': 'Colombia',
-                'imagen': 'arhuaco.jpg',
-                'descripcion': 'Tejedores de mochilas con diseños que representan su cosmovisión.'
-            }
-        ],
-        'productos': [
-            {
-                'nombre': 'Mochila Wayúu',
-                'descripcion': 'Tejido a mano por artesanas Wayúu',
-                'precio': 150000,
-                'descuento': 10,
-                'precio_original': 167000,
-                'precio_actual': 150000,
-                'imagen': 'mochila_wayuu.jpg',
-                'categoria': 'Textiles',
-                'comunidad': 'Wayúu',
-                'calificacion': 4.8,
-                'num_resenas': 24,
-                'vendedor': 'María Pushaina',
-                'es_nuevo': True
-            },
-            # Añade más productos...
-        ],
-        'artesanos': [
-            {
-                'nombre': 'María',
-                'apellido': 'Pushaina',
-                'foto': 'maria_pushaina.jpg',
-                'comunidad': 'Wayúu',
-                'especialidad': 'Tejido tradicional',
-                'productos': 23,
-                'ventas': 142,
-                'calificacion': 4.9
-            },
-            # Añade más artesanos...
-        ],
-        'noticias': [
-            {
-                'titulo': 'Festival de Cultura Indígena 2023',
-                'resumen': 'El festival anual celebrará la diversidad cultural de las comunidades indígenas de Colombia.',
-                'imagen': 'festival.jpg',
-                'fecha': '2023-09-15',
-                'autor': 'Juan Carlos Rodríguez',
-                'categoria': 'Eventos'
-            },
-            # Añade más noticias...
-        ],
-        'eventos': [
-            {
-                'titulo': 'Taller de Tejido Wayúu',
-                'descripcion': 'Aprende las técnicas ancestrales de tejido Wayúu de la mano de artesanas tradicionales.',
-                'fecha': '2023-08-25',
-                'hora': '10:00 AM',
-                'ubicacion': 'Centro Cultural La Candelaria, Bogotá',
-                'comunidad': 'Wayúu'
-            },
-            # Añade más eventos...
-        ]
+        'noticias': noticias,
+        'query': query,
+        'current_page': int(page),
+        'total_pages': paginator.num_pages,
     }
-    return render(request, 'core/marketplace_home.html', context)
+    
+    return render(request, 'core/noticias.html', context)
 
-
+def noticia_detalle(request, slug):
+    """
+    Vista para mostrar el detalle de una noticia.
+    
+    Obtiene la noticia correspondiente al slug proporcionado
+    y aumenta su contador de vistas.
+    """
+    # Obtener la noticia por su slug o devolver 404 si no existe
+    noticia = get_object_or_404(Noticia, slug=slug, estado='publicado')
+    
+    # Incrementar el contador de vistas
+    noticia.vistas += 1
+    noticia.save(update_fields=['vistas'])
+    
+    # Obtener autor de la noticia
+    try:
+        autor = Usuario.objects.get(id=noticia.id_autor)
+        nombre_autor = f"{autor.nombre} {autor.apellido}"
+        foto_autor = autor.foto_perfil
+    except Usuario.DoesNotExist:
+        nombre_autor = "Autor desconocido"
+        foto_autor = None
+    
+    # Obtener noticias relacionadas (misma comunidad o mismo autor)
+    noticias_relacionadas = Noticia.objects.filter(
+        Q(id_comunidad=noticia.id_comunidad) | Q(id_autor=noticia.id_autor),
+        estado='publicado'
+    ).exclude(id=noticia.id).order_by('-fecha_publicacion')[:3]
+    
+    # Preparar datos para la plantilla
+    context = {
+        'noticia': noticia,
+        'autor': {
+            'nombre': nombre_autor,
+            'foto': foto_autor,
+            'id': noticia.id_autor
+        },
+        'noticias_relacionadas': noticias_relacionadas,
+    }
+    
+    return render(request, 'core/noticia_detalle.html', context)
