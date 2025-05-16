@@ -1,86 +1,202 @@
+// login-effects.js
 document.addEventListener('DOMContentLoaded', () => {
-    // Animación de entrada
-    const timeline = anime.timeline({
+    // Efecto de partículas en el fondo
+    const particlesContainer = document.createElement('div');
+    particlesContainer.className = 'particles-container';
+    document.body.appendChild(particlesContainer);
+
+    for (let i = 0; i < 50; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particlesContainer.appendChild(particle);
+
+        const x = anime.random(0, window.innerWidth);
+        const y = anime.random(0, window.innerHeight);
+        const size = anime.random(2, 6);
+
+        particle.style.cssText = `
+            left: ${x}px;
+            top: ${y}px;
+            width: ${size}px;
+            height: ${size}px;
+        `;
+
+        anime({
+            targets: particle,
+            translateX: () => anime.random(-150, 150),
+            translateY: () => anime.random(-150, 150),
+            scale: [
+                { value: 1.5, duration: 1000, delay: anime.random(0, 1000) },
+                { value: 1, duration: 1000 }
+            ],
+            opacity: [
+                { value: 0.8, duration: 1000 },
+                { value: 0.2, duration: 1000 }
+            ],
+            easing: 'easeInOutQuad',
+            loop: true,
+            delay: anime.random(0, 1000)
+        });
+    }
+
+    // Animación de entrada del formulario
+    const loginTimeline = anime.timeline({
         easing: 'easeOutExpo'
     });
 
-    timeline
+    loginTimeline
+        // Efecto de aparición del contenedor
         .add({
             targets: '.login-container',
+            scale: [0.9, 1],
             opacity: [0, 1],
-            translateY: [20, 0],
-            duration: 1000
+            translateY: [-50, 0],
+            rotate: [-5, 0],
+            duration: 1500,
+            easing: 'spring(1, 80, 10, 0)'
         })
+        // Efecto de líneas neón
+        .add({
+            targets: '.neon-line',
+            scaleX: [0, 1],
+            opacity: [0, 1],
+            duration: 1000,
+            delay: anime.stagger(100),
+            easing: 'easeOutQuart'
+        }, '-=800')
+        // Título con efecto de glitch
         .add({
             targets: '.login-title',
             opacity: [0, 1],
-            translateY: [20, 0],
-            duration: 800
+            duration: 100,
+            easing: 'steps(1)',
+            delay: anime.stagger(50, {direction: 'reverse'}),
+            complete: () => initGlitchEffect()
         }, '-=500')
+        // Campos del formulario con efecto de cyber
         .add({
             targets: '.form-group',
+            translateX: [-30, 0],
             opacity: [0, 1],
-            translateX: [20, 0],
-            delay: anime.stagger(100),
-            duration: 800
-        }, '-=500')
-        .add({
-            targets: '.btn-submit',
-            opacity: [0, 1],
-            translateY: [20, 0],
-            duration: 800
-        }, '-=400')
-        .add({
-            targets: '.back-button',
-            opacity: [0, 1],
-            translateX: [-20, 0],
-            duration: 800
-        }, '-=800');
+            duration: 800,
+            delay: anime.stagger(150),
+            begin: (anim) => {
+                initCyberEffect(anim.targets);
+            }
+        }, '-=500');
 
-    // Efecto hover en inputs
-    document.querySelectorAll('.form-input').forEach(input => {
-        input.addEventListener('focus', () => {
-            anime({
-                targets: input,
-                boxShadow: [
-                    { value: '0 0 0 rgba(0,255,157,0)' },
-                    { value: '0 0 15px rgba(0,255,157,0.3)' }
-                ],
-                duration: 500,
-                easing: 'easeOutExpo'
+    // Efecto Glitch para el título
+    function initGlitchEffect() {
+        const glitchText = document.querySelector('.login-title');
+        setInterval(() => {
+            const glitchTimeline = anime.timeline({
+                duration: 100,
+                easing: 'steps(1)'
             });
-        });
 
-        input.addEventListener('blur', () => {
-            anime({
-                targets: input,
-                boxShadow: '0 0 0 rgba(0,255,157,0)',
-                duration: 500,
-                easing: 'easeOutExpo'
-            });
+            glitchTimeline
+                .add({
+                    targets: glitchText,
+                    translateX: 2,
+                    translateY: -2,
+                    color: '#0ff'
+                })
+                .add({
+                    targets: glitchText,
+                    translateX: -2,
+                    translateY: 2,
+                    color: '#f0f'
+                })
+                .add({
+                    targets: glitchText,
+                    translateX: 0,
+                    translateY: 0,
+                    color: '#0f0'
+                });
+        }, 3000);
+    }
+
+    // Efecto Cyber para los inputs
+    function initCyberEffect(targets) {
+        anime({
+            targets: targets,
+            borderColor: [
+                { value: '#0ff', duration: 500 },
+                { value: '#f0f', duration: 500 },
+                { value: '#0f0', duration: 500 }
+            ],
+            boxShadow: [
+                { value: '0 0 10px #0ff', duration: 500 },
+                { value: '0 0 10px #f0f', duration: 500 },
+                { value: '0 0 10px #0f0', duration: 500 }
+            ],
+            loop: true,
+            direction: 'alternate',
+            easing: 'easeInOutSine'
         });
+    }
+
+    // Efecto hover para el botón
+    const buttonHover = anime({
+        targets: '.btn-submit',
+        scale: 1.1,
+        boxShadow: [
+            '0 0 10px rgba(0, 255, 157, 0.5)',
+            '0 0 20px rgba(0, 255, 157, 0.5)',
+            '0 0 30px rgba(0, 255, 157, 0.5)'
+        ],
+        backgroundColor: 'rgba(0, 255, 157, 0.2)',
+        color: '#fff',
+        duration: 800,
+        autoplay: false
     });
 
-    // Animación de iconos
+    document.querySelector('.btn-submit').addEventListener('mouseenter', () => buttonHover.play());
+    document.querySelector('.btn-submit').addEventListener('mouseleave', () => buttonHover.reverse());
+
+    // Efecto de pulso para los iconos
     anime({
         targets: '.input-icon',
+        scale: [1, 1.2],
         opacity: [0.5, 1],
-        scale: [0.95, 1.05],
-        duration: 1500,
+        filter: ['blur(0px)', 'blur(1px)'],
+        duration: 1000,
         loop: true,
         direction: 'alternate',
-        easing: 'easeInOutSine'
+        easing: 'easeInOutQuad'
     });
 
-    // Efecto del borde
-    anime({
-        targets: '.login-border',
-        background: [
-            { value: 'linear-gradient(45deg, #00ff9d, #00f6ff, #00ff9d)' },
-            { value: 'linear-gradient(225deg, #00ff9d, #00f6ff, #00ff9d)' }
-        ],
-        duration: 4000,
-        easing: 'linear',
-        loop: true
+    // Efecto de onda al hacer click en los inputs
+    document.querySelectorAll('.form-input').forEach(input => {
+        input.addEventListener('click', (e) => {
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
+            input.appendChild(ripple);
+
+            const rect = input.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+
+            anime({
+                targets: ripple,
+                scale: [0, 5],
+                opacity: [1, 0],
+                duration: 1000,
+                easing: 'easeOutExpo',
+                complete: () => ripple.remove()
+            });
+        });
+    });
+
+    // Efecto de scanner para el borde del formulario
+    const scannerEffect = anime({
+        targets: '.scanner-line',
+        translateY: ['-100%', '100%'],
+        duration: 1500,
+        loop: true,
+        easing: 'linear'
     });
 });
