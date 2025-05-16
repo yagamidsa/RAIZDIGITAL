@@ -1,0 +1,453 @@
+@import 'variables.css';
+
+/* Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--dark-matter);
+    font-family: 'Arial', sans-serif;
+    min-height: 100vh;
+    overflow: hidden;
+    color: #fff;
+}
+
+/* Holographic Container */
+#holographic-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Recovery Interface */
+.recovery-interface {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+/* Glitch Scanner Effect */
+.glitch-scanner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+    box-shadow: 0 0 20px var(--neon-green);
+    animation: scan 3s linear infinite;
+}
+
+/* Holographic Portal */
+.holo-portal {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    pointer-events: none;
+}
+
+.holo-rings {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.ring {
+    position: absolute;
+    border: 2px solid var(--neon-green);
+    border-radius: 50%;
+    animation: pulse 3s ease-out infinite;
+}
+
+.ring:nth-child(1) { width: 100%; height: 100%; animation-delay: 0s; }
+.ring:nth-child(2) { width: 80%; height: 80%; animation-delay: 1s; }
+.ring:nth-child(3) { width: 60%; height: 60%; animation-delay: 2s; }
+
+/* Recovery Container */
+.recovery-container {
+    background: rgba(10, 25, 47, 0.3);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 3rem;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    overflow: hidden;
+}
+
+.holo-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, 
+        rgba(0, 255, 157, 0.1),
+        rgba(0, 246, 255, 0.1));
+    pointer-events: none;
+}
+
+/* Glitch Text */
+.glitch-text {
+    color: var(--neon-green);
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    text-shadow: 0 0 10px var(--neon-green);
+}
+
+.glitch-text::before,
+.glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    clip: rect(0, 0, 0, 0);
+}
+
+.glitch-text::before {
+    left: 2px;
+    text-shadow: -2px 0 #ff00c1;
+    animation: glitch-1 2s infinite linear alternate-reverse;
+}
+
+.glitch-text::after {
+    left: -2px;
+    text-shadow: 2px 0 #00fff9;
+    animation: glitch-2 2s infinite linear alternate-reverse;
+}
+
+/* Neural Form */
+.neural-form {
+    position: relative;
+}
+
+.form-header {
+    position: relative;
+    height: 40px;
+    margin-bottom: 2rem;
+}
+
+.scan-line {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: var(--neon-green);
+    animation: scan-vertical 2s ease-in-out infinite;
+}
+
+.neural-dots {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    background: var(--neon-green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+/* Form Steps */
+.form-step {
+    display: none;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+}
+
+.form-step.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Neural Input */
+.input-container {
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.cyber-label {
+    color: var(--neon-green);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.neural-input {
+    width: 100%;
+    padding: 1rem;
+    background: rgba(0, 255, 157, 0.1);
+    border: 1px solid var(--neon-green);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.neural-input:focus {
+    outline: none;
+    box-shadow: 0 0 20px rgba(0, 255, 157, 0.3);
+    transform: scale(1.02);
+}
+
+/* Neural Validation */
+.neural-validation {
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    overflow: hidden;
+}
+
+.scan-bar {
+    height: 100%;
+    background: var(--neon-green);
+    width: 20%;
+    animation: scan-horizontal 2s ease-in-out infinite;
+}
+
+/* Verification Grid */
+.verification-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.code-input {
+    width: 100%;
+    aspect-ratio: 1;
+    text-align: center;
+    font-size: 1.5rem;
+    background: rgba(0, 255, 157, 0.1);
+    border: 1px solid var(--neon-green);
+    border-radius: 8px;
+    color: #fff;
+}
+
+/* Timer */
+.time-remaining {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    margin: 2rem auto;
+}
+
+.timer-circle {
+    width: 52px;
+    height: 52px;
+    transform: rotate(-90deg);
+}
+
+.timer-circle circle {
+    fill: none;
+    stroke: var(--neon-green);
+    stroke-width: 2;
+    stroke-dasharray: 151;
+    stroke-dashoffset: 151;
+    animation: timer 300s linear forwards;
+}
+
+.timer-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.8rem;
+    color: var(--neon-green);
+}
+
+/* Buttons */
+.next-step-btn,
+.submit-btn {
+    width: 100%;
+    padding: 1rem;
+    background: transparent;
+    color: var(--neon-green);
+    border: 2px solid var(--neon-green);
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.btn-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.btn-holo {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(0, 255, 157, 0.4),
+        transparent
+    );
+    transition: 0.5s;
+}
+
+.next-step-btn:hover,
+.submit-btn:hover {
+    background: var(--neon-green);
+    color: var(--dark-matter);
+    box-shadow: 0 0 30px var(--neon-green);
+}
+
+.submit-btn:hover .btn-holo {
+    left: 100%;
+}
+
+/* Data Visualization */
+.data-visualization {
+    margin-top: 2rem;
+    position: relative;
+}
+
+#dataCanvas {
+    width: 100%;
+    height: 100px;
+}
+
+.data-metrics {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 1rem;
+}
+
+.metric {
+    text-align: center;
+}
+
+.metric .label {
+    font-size: 0.8rem;
+    color: var(--cyber-blue);
+    display: block;
+}
+
+.metric .value {
+    font-size: 1.2rem;
+    color: var(--neon-green);
+}
+
+/* Ambient Effects */
+.ambient-effects {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.digital-rain,
+.grid-overlay,
+.noise-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Animations */
+@keyframes scan {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+@keyframes scan-vertical {
+    0%, 100% { transform: scaleY(0); }
+    50% { transform: scaleY(1); }
+}
+
+@keyframes scan-horizontal {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(500%); }
+}
+
+@keyframes timer {
+    0% { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: 151; }
+}
+
+@keyframes glitch-1 {
+    0% { clip: rect(20px, 450px, 56px, 0); }
+    20% { clip: rect(15px, 450px, 78px, 0); }
+    40% { clip: rect(25px, 450px, 24px, 0); }
+    60% { clip: rect(45px, 450px, 34px, 0); }
+    80% { clip: rect(32px, 450px, 89px, 0); }
+    100% { clip: rect(12px, 450px, 45px, 0); }
+}
+
+@keyframes glitch-2 {
+    0% { clip: rect(12px, 450px, 45px, 0); }
+    20% { clip: rect(32px, 450px, 89px, 0); }
+    40% { clip: rect(45px, 450px, 34px, 0); }
+    60% { clip: rect(25px, 450px, 24px, 0); }
+    80% { clip: rect(15px, 450px, 78px, 0); }
+    100% { clip: rect(20px, 450px, 56px, 0); }
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+    .recovery-container {
+        padding: 2rem;
+    }
+
+    .verification-grid {
+        gap: 0.5rem;
+    }
+
+    .code-input {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .glitch-text {
+        font-size: 1.5rem;
+    }
+
+    .recovery-container {
+        padding: 1.5rem;
+    }
+}
