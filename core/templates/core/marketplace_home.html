@@ -7,13 +7,49 @@
 <link rel="stylesheet" href="{% static 'core/css/variables.css' %}">
 <link rel="stylesheet" href="{% static 'core/css/marketplace.css' %}">
 <style>
-/* Estilos de emergencia para forzar visibilidad */
+/* Estilos críticos para asegurar la visibilidad de elementos y correcta transición */
 .welcome-title, .community-name, .welcome-subtitle, .btn-start {
     opacity: 1 !important;
     transform: translateY(0) !important;
 }
+
+/* Estilo inicial para contenedor de tarjetas - importante para la transición */
 .cards-container {
     display: none;
+}
+
+/* Estilo específico para cuando se muestran las tarjetas */
+.cards-container.show-cards {
+    display: flex !important;
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+/* Si hay algún problema con las tarjetas, estos estilos deberían solucionarlo */
+.card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    width: 100%;
+    max-width: calc(33.333% - 2rem);
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 1100px) {
+    .card-link {
+        max-width: calc(50% - 2rem);
+    }
+}
+
+@media (max-width: 768px) {
+    .cards-container.show-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .card-link {
+        max-width: 100%;
+    }
 }
 </style>
 {% endblock %}
@@ -30,75 +66,78 @@
     
     <!-- Contenido principal -->
     <div class="main-content">
-        <h1 class="welcome-title">Bienvenido Comunidad</h1>
-        <h2 class="community-name">{{ community_name|default:"Wayúu" }}</h2>
+        <h1 class="welcome-title">Bienvenido a Raíz Digital</h1>
+        <h2 class="community-name">{{ community_name|default:"Comunidad Wayúu" }}</h2>
         <p class="welcome-subtitle">Conectando ancestralidad con el mundo moderno</p>
         
+        <!-- Botón de inicio con ID específico -->
         <button id="btn-start" class="btn-start">Iniciar</button>
         
-        <div class="cards-container" id="cards-container">
+        <!-- Contenedor de tarjetas con ID específico -->
+        <div id="cards-container" class="cards-container">
             <!-- Tarjeta 1: Noticias -->
-            <div class="neon-card">
-                <div class="card-corner corner-top-left"></div>
-                <div class="card-corner corner-top-right"></div>
-                <div class="card-corner corner-bottom-left"></div>
-                <div class="card-corner corner-bottom-right"></div>
-                
-                <div class="card-icon-container">
-                    <svg class="card-icon" viewBox="0 0 24 24">
-                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-1 14H5c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h14c.55 0 1 .45 1 1v10c0 .55-.45 1-1 1z"/>
-                        <path d="M8.5 15h2v2h-2zm0-8h2v6h-2zm3.5 0h2v2h-2zm0 3h2v5h-2zm3.5 0h2v2h-2zm0 3h2v2h-2z"/>
-                    </svg>
+            <a href="#noticias" class="card-link">
+                <div class="neon-card">
+                    <div class="card-corner corner-top-left"></div>
+                    <div class="card-corner corner-top-right"></div>
+                    <div class="card-corner corner-bottom-left"></div>
+                    <div class="card-corner corner-bottom-right"></div>
+                    
+                    <div class="card-icon-container">
+                        <svg class="card-icon" viewBox="0 0 24 24">
+                            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-1 14H5c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h14c.55 0 1 .45 1 1v10c0 .55-.45 1-1 1z"/>
+                            <path d="M8.5 15h2v2h-2zm0-8h2v6h-2zm3.5 0h2v2h-2zm0 3h2v5h-2zm3.5 0h2v2h-2zm0 3h2v2h-2z"/>
+                        </svg>
+                    </div>
+                    
+                    <h3 class="card-title">Noticias</h3>
+                    <p class="card-description">Mantente al día con las últimas novedades y acontecimientos de tu comunidad y el mundo artesanal.</p>
+                    <div class="card-button">Explorar</div>
                 </div>
-                
-                <h3 class="card-title">Noticias</h3>
-                <p class="card-description">Mantente al día con las últimas novedades y acontecimientos de tu comunidad y el mundo artesanal.</p>
-                <button class="card-button">Explorar</button>
-            </div>
+            </a>
             
             <!-- Tarjeta 2: Eventos -->
-            <div class="neon-card">
-                <div class="card-corner corner-top-left"></div>
-                <div class="card-corner corner-top-right"></div>
-                <div class="card-corner corner-bottom-left"></div>
-                <div class="card-corner corner-bottom-right"></div>
-                
-                <div class="card-icon-container">
-                    <svg class="card-icon" viewBox="0 0 24 24">
-                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V9h14v10zM5 7V5h14v2H5z"/>
-                        <path d="M7 11h10v2H7zm0 4h7v2H7z"/>
-                    </svg>
+            <a href="#eventos" class="card-link">
+                <div class="neon-card">
+                    <div class="card-corner corner-top-left"></div>
+                    <div class="card-corner corner-top-right"></div>
+                    <div class="card-corner corner-bottom-left"></div>
+                    <div class="card-corner corner-bottom-right"></div>
+                    
+                    <div class="card-icon-container">
+                        <svg class="card-icon" viewBox="0 0 24 24">
+                            <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V9h14v10zM5 7V5h14v2H5z"/>
+                            <path d="M7 11h10v2H7zm0 4h7v2H7z"/>
+                        </svg>
+                    </div>
+                    
+                    <h3 class="card-title">Eventos</h3>
+                    <p class="card-description">Descubre ferias, talleres y ceremonias tradicionales donde participar y conectar con tus raíces.</p>
+                    <div class="card-button">Calendario</div>
                 </div>
-                
-                <h3 class="card-title">Eventos</h3>
-                <p class="card-description">Descubre ferias, talleres y ceremonias tradicionales donde participar y conectar con tus raíces.</p>
-                <button class="card-button">Calendario</button>
-            </div>
+            </a>
             
             <!-- Tarjeta 3: Productos -->
-            <div class="neon-card">
-                <div class="card-corner corner-top-left"></div>
-                <div class="card-corner corner-top-right"></div>
-                <div class="card-corner corner-bottom-left"></div>
-                <div class="card-corner corner-bottom-right"></div>
-                
-                <div class="card-icon-container">
-                    <svg class="card-icon" viewBox="0 0 24 24">
-                        <path d="M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-8 4c0 .55-.45 1-1 1s-1-.45-1-1V8h2v2zm4 0c0 .55-.45 1-1 1s-1-.45-1-1V8h2v2z"/>
-                        <path d="M12 3c1.67 0 3 1.33 3 3H9c0-1.67 1.33-3 3-3z"/>
-                    </svg>
+            <a href="#productos" class="card-link">
+                <div class="neon-card">
+                    <div class="card-corner corner-top-left"></div>
+                    <div class="card-corner corner-top-right"></div>
+                    <div class="card-corner corner-bottom-left"></div>
+                    <div class="card-corner corner-bottom-right"></div>
+                    
+                    <div class="card-icon-container">
+                        <svg class="card-icon" viewBox="0 0 24 24">
+                            <path d="M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-8 4c0 .55-.45 1-1 1s-1-.45-1-1V8h2v2zm4 0c0 .55-.45 1-1 1s-1-.45-1-1V8h2v2z"/>
+                            <path d="M12 3c1.67 0 3 1.33 3 3H9c0-1.67 1.33-3 3-3z"/>
+                        </svg>
+                    </div>
+                    
+                    <h3 class="card-title">Productos</h3>
+                    <p class="card-description">Explora nuestra selección de artesanías auténticas creadas con las técnicas tradicionales de tu comunidad.</p>
+                    <div class="card-button">Catálogo</div>
                 </div>
-                
-                <h3 class="card-title">Productos</h3>
-                <p class="card-description">Explora nuestra selección de artesanías auténticas creadas con las técnicas tradicionales de tu comunidad.</p>
-                <button class="card-button">Catálogo</button>
-            </div>
+            </a>
         </div>
-    </div>
-    
-    <!-- Sección oculta para mostrar después de la animación -->
-    <div id="content-section" class="section-hidden">
-        <!-- Aquí irá el contenido que se mostrará después de hacer clic en Iniciar -->
     </div>
 </div>
 {% endblock %}
@@ -112,7 +151,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 
 <script>
+// Script completo y optimizado para mostrar correctamente las tarjetas
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM cargado, inicializando efectos...');
+    
     // Inicializar animaciones al cargar la página
     initParticles();
     initAnimations();
@@ -145,79 +187,97 @@ document.addEventListener('DOMContentLoaded', () => {
         delay: 0.5
     });
     
-    // Botón de inicio con animación de clic
-    const btnStart = document.getElementById('btn-start');
-    
-    btnStart.addEventListener('click', () => {
-        // Crea una timeline de GSAP para la secuencia de animación
-        const tl = gsap.timeline();
-        
-        // Animación del botón
-        tl.to(btnStart, {
-            scale: 1.1,
-            duration: 0.2,
-            boxShadow: '0 0 30px var(--neon-green), 0 0 50px var(--neon-green)',
-            backgroundColor: 'var(--neon-green)',
-            color: '#000'
-        })
-        .to(btnStart, {
-            scale: 0,
-            opacity: 0,
-            duration: 0.5,
-            ease: 'back.in(1.7)',
-            onComplete: () => {
-                btnStart.style.display = 'none';
-            }
-        }, '+=0.1')
-        
-        // Animar la aparición de las tarjetas
-        .to('.cards-container', {
-            opacity: 1,
-            y: 0,
-            duration: 1,
-            ease: 'power3.out'
-        }, '-=0.2')
-        
-        // Animar cada tarjeta individualmente
-        .from('.neon-card', {
-            opacity: 0,
-            y: 50,
-            scale: 0.9,
-            duration: 0.8,
-            stagger: 0.15,
-            ease: 'back.out(1.7)'
-        }, '-=0.5');
-        
-        // Efecto de destello de luz
-        createFlashEffect();
-    });
+    // Configurar evento de clic para el botón de inicio
+    setupStartButton();
 });
+
+// Método específico para manejar el botón de inicio
+function setupStartButton() {
+    const btnStart = document.getElementById('btn-start');
+    const cardsContainer = document.getElementById('cards-container');
+    
+    if (!btnStart || !cardsContainer) {
+        console.error('No se encontró el botón o el contenedor de tarjetas');
+        return;
+    }
+    
+    console.log('Botón de inicio configurado');
+    
+    // Configurar evento de clic
+    btnStart.addEventListener('click', function(event) {
+        console.log('Botón de inicio clickeado');
+        event.preventDefault();
+        
+        try {
+            // 1. Ocultar el botón de inicio
+            btnStart.style.display = 'none';
+            console.log('Botón ocultado');
+            
+            // 2. Mostrar las tarjetas con múltiples métodos para asegurar que funcione
+            // Método 1: Estilo directo
+            cardsContainer.style.display = 'flex';
+            cardsContainer.style.opacity = '1';
+            
+            // Método 2: Clase específica
+            cardsContainer.classList.add('show-cards');
+            
+            // Método 3: Manipulación directa del elemento
+            cardsContainer.setAttribute('style', 'display: flex !important; opacity: 1 !important;');
+            
+            console.log('Tarjetas mostradas');
+            
+            // 3. Efecto de destello
+            createFlashEffect();
+            
+            // 4. Verificación posterior
+            setTimeout(() => {
+                // Verificar si las tarjetas están realmente visibles
+                const computedStyle = window.getComputedStyle(cardsContainer);
+                console.log('Estado de las tarjetas:', computedStyle.display, computedStyle.opacity);
+                
+                // Si aún no están visibles, forzar visibilidad
+                if (computedStyle.display === 'none' || computedStyle.opacity === '0') {
+                    console.log('Forzando visibilidad de tarjetas...');
+                    document.body.appendChild(cardsContainer);
+                    cardsContainer.style.display = 'flex';
+                    cardsContainer.style.position = 'fixed';
+                    cardsContainer.style.top = '50%';
+                    cardsContainer.style.left = '50%';
+                    cardsContainer.style.transform = 'translate(-50%, -50%)';
+                    cardsContainer.style.zIndex = '9999';
+                }
+            }, 500);
+        } catch (error) {
+            console.error('Error al mostrar tarjetas:', error);
+        }
+    });
+}
 
 // Inicialización de animaciones iniciales
 function initAnimations() {
     const tl = gsap.timeline();
     
-    tl.to('.welcome-title', {
-        opacity: 1,
-        y: 0,
+    tl.from('.welcome-title', {
+        opacity: 0,
+        y: -30,
         duration: 1,
         ease: 'power3.out'
     })
-    .to('.community-name', {
-        opacity: 1,
-        y: 0,
+    .from('.community-name', {
+        opacity: 0,
+        y: -20,
         duration: 1,
         ease: 'power3.out'
     }, '-=0.7')
-    .to('.welcome-subtitle', {
-        opacity: 1,
-        y: 0,
+    .from('.welcome-subtitle', {
+        opacity: 0,
+        y: -10,
         duration: 1,
         ease: 'power3.out'
     }, '-=0.7')
-    .to('.btn-start', {
-        opacity: 1,
-        y: 0,
+    .from('.btn-start', {
+        opacity: 0,
+        y: 20,
         duration: 1,
         ease: 'power3.out'
     }, '-=0.7');
@@ -228,18 +288,6 @@ function initAnimations() {
         duration: 8,
         repeat: -1,
         ease: 'linear'
-    });
-    
-    // Efecto de pulsación para las tarjetas
-    const cardsAnimation = anime({
-        targets: '.card-icon-container',
-        scale: [1, 1.05, 1],
-        opacity: [0.8, 1, 0.8],
-        duration: 3000,
-        easing: 'easeInOutSine',
-        loop: true,
-        direction: 'alternate',
-        delay: anime.stagger(200)
     });
 }
 
@@ -276,182 +324,113 @@ function createFlashEffect() {
     });
 }
 
-// Sistema de partículas con Three.js
+// Sistema de partículas con Three.js (código original)
 function initParticles() {
     const particlesContainer = document.getElementById('particles');
     
-    // Configuración básica de Three.js
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true });
-    
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x000000, 0);
-    particlesContainer.appendChild(renderer.domElement);
-    
-    // Crear grupo de partículas
-    const particlesGroup = new THREE.Group();
-    scene.add(particlesGroup);
-    
-    // Crear partículas
-    const particleCount = window.innerWidth < 768 ? 100 : 200;
-    const particles = [];
-    
-    for (let i = 0; i < particleCount; i++) {
-        const geometry = new THREE.SphereGeometry(0.1, 8, 8);
-        
-        // Alternar colores entre verde y azul neón
-        const color = i % 3 === 0 ? 0x00ff9d : (i % 3 === 1 ? 0x00f6ff : 0xff00c8);
-        
-        const material = new THREE.MeshBasicMaterial({
-            color: color,
-            transparent: true,
-            opacity: Math.random() * 0.5 + 0.1
-        });
-        
-        const particle = new THREE.Mesh(geometry, material);
-        
-        // Posicionar aleatoriamente
-        particle.position.x = Math.random() * 40 - 20;
-        particle.position.y = Math.random() * 40 - 20;
-        particle.position.z = Math.random() * 40 - 20;
-        
-        // Añadir velocidad aleatoria
-        particle.velocity = {
-            x: (Math.random() - 0.5) * 0.05,
-            y: (Math.random() - 0.5) * 0.05,
-            z: (Math.random() - 0.5) * 0.05
-        };
-        
-        particlesGroup.add(particle);
-        particles.push(particle);
+    if (!particlesContainer) {
+        console.error('No se encontró el contenedor de partículas');
+        return;
     }
     
-    // Posicionar cámara
-    camera.position.z = 25;
-    
-    // Función de animación
-    function animate() {
-        requestAnimationFrame(animate);
+    try {
+        // Configuración básica de Three.js
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true });
         
-        // Animar partículas
-        particles.forEach(particle => {
-            particle.position.x += particle.velocity.x;
-            particle.position.y += particle.velocity.y;
-            particle.position.z += particle.velocity.z;
-            
-            // Limitar rango de movimiento
-            if (Math.abs(particle.position.x) > 20) particle.velocity.x *= -1;
-            if (Math.abs(particle.position.y) > 20) particle.velocity.y *= -1;
-            if (Math.abs(particle.position.z) > 20) particle.velocity.z *= -1;
-            
-            // Efecto de rotación suave a todo el grupo
-            particlesGroup.rotation.y += 0.0002;
-            particlesGroup.rotation.x += 0.0001;
-        });
-        
-        renderer.render(scene, camera);
-    }
-    
-    // Ajustar tamaño al cambiar dimensiones de ventana
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-    
-    // Iniciar animación
-    animate();
-}
-
-// Interacción con las tarjetas
-document.querySelectorAll('.neon-card').forEach(card => {
-    card.addEventListener('mouseenter', () => {
-        // Intensificar efectos de luz en hover
-        gsap.to(card.querySelectorAll('.card-corner'), {
-            boxShadow: '0 0 15px currentColor',
-            duration: 0.3
-        });
+        renderer.setClearColor(0x000000, 0);
+        particlesContainer.appendChild(renderer.domElement);
         
-        // Efecto de pulsación en el icono
-        gsap.to(card.querySelector('.card-icon-container'), {
-            scale: 1.1,
-            duration: 0.5,
-            yoyo: true,
-            repeat: 1,
-            ease: 'power2.inOut'
-        });
-    });
-    
-    card.addEventListener('mouseleave', () => {
-        // Restaurar efectos originales
-        gsap.to(card.querySelectorAll('.card-corner'), {
-            boxShadow: '0 0 10px currentColor',
-            duration: 0.3
-        });
-    });
-    
-    // Efecto de clic en los botones de las tarjetas
-    const button = card.querySelector('.card-button');
-    button.addEventListener('click', (e) => {
-        // Prevenir navegación
-        e.preventDefault();
+        // Crear grupo de partículas
+        const particlesGroup = new THREE.Group();
+        scene.add(particlesGroup);
         
-        // Obtener el color neón de la tarjeta actual
-        const cardTitle = card.querySelector('.card-title');
-        const cardColor = window.getComputedStyle(cardTitle).color;
+        // Crear partículas
+        const particleCount = window.innerWidth < 768 ? 100 : 200;
+        const particles = [];
         
-        // Animación de clic en botón
-        gsap.timeline()
-            .to(button, {
-                scale: 0.9,
-                duration: 0.1
-            })
-            .to(button, {
-                scale: 1,
-                duration: 0.2,
-                backgroundColor: cardColor,
-                color: '#000'
-            })
-            .to(button, {
-                backgroundColor: 'transparent',
-                color: cardColor,
-                duration: 0.5,
-                delay: 0.2
+        for (let i = 0; i < particleCount; i++) {
+            const geometry = new THREE.SphereGeometry(0.1, 8, 8);
+            
+            // Alternar colores entre verde y azul neón
+            const color = i % 3 === 0 ? 0x00ff9d : (i % 3 === 1 ? 0x00f6ff : 0xff00c8);
+            
+            const material = new THREE.MeshBasicMaterial({
+                color: color,
+                transparent: true,
+                opacity: Math.random() * 0.5 + 0.1
             });
             
-        // Aquí puedes agregar la lógica para cargar el contenido correspondiente
-        console.log(`Navegando a: ${cardTitle.textContent}`);
-    });
-});
-
-// Animación adicional para esquinas de neón
-gsap.fromTo('.card-corner', 
-    { opacity: 0.5, scale: 0.8 },
-    { 
-        opacity: 1, 
-        scale: 1, 
-        duration: 2,
-        stagger: 0.1,
-        repeat: -1,
-        yoyo: true,
-        ease: 'sine.inOut'
+            const particle = new THREE.Mesh(geometry, material);
+            
+            // Posicionar aleatoriamente
+            particle.position.x = Math.random() * 40 - 20;
+            particle.position.y = Math.random() * 40 - 20;
+            particle.position.z = Math.random() * 40 - 20;
+            
+            // Añadir velocidad aleatoria
+            particle.velocity = {
+                x: (Math.random() - 0.5) * 0.05,
+                y: (Math.random() - 0.5) * 0.05,
+                z: (Math.random() - 0.5) * 0.05
+            };
+            
+            particlesGroup.add(particle);
+            particles.push(particle);
+        }
+        
+        // Posicionar cámara
+        camera.position.z = 25;
+        
+        // Función de animación
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Animar partículas
+            particles.forEach(particle => {
+                particle.position.x += particle.velocity.x;
+                particle.position.y += particle.velocity.y;
+                particle.position.z += particle.velocity.z;
+                
+                // Limitar rango de movimiento
+                if (Math.abs(particle.position.x) > 20) particle.velocity.x *= -1;
+                if (Math.abs(particle.position.y) > 20) particle.velocity.y *= -1;
+                if (Math.abs(particle.position.z) > 20) particle.velocity.z *= -1;
+                
+                // Efecto de rotación suave a todo el grupo
+                particlesGroup.rotation.y += 0.0002;
+                particlesGroup.rotation.x += 0.0001;
+            });
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Ajustar tamaño al cambiar dimensiones de ventana
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Iniciar animación
+        animate();
+        console.log('Sistema de partículas inicializado correctamente');
+    } catch (error) {
+        console.error('Error al inicializar partículas:', error);
     }
-);
+}
 
-// Efecto de luz dinámica que sigue al ratón
-document.addEventListener('mousemove', (e) => {
-    // Crear un seguimiento de luz sutil
-    const mouseX = e.clientX / window.innerWidth;
-    const mouseY = e.clientY / window.innerHeight;
-    
-    // Aplicar efecto a las formas orgánicas
-    gsap.to('.organic-shapes', {
-        duration: 2,
-        x: (mouseX - 0.5) * 20,
-        y: (mouseY - 0.5) * 20,
-        ease: 'power2.out'
-    });
+// Agregar evento load para asegurar que todo esté cargado
+window.addEventListener('load', function() {
+    // Asegurar que el botón sea visible
+    const btnStart = document.getElementById('btn-start');
+    if (btnStart) {
+        btnStart.style.opacity = '1';
+        btnStart.style.visibility = 'visible';
+        btnStart.style.display = 'inline-block';
+    }
 });
 </script>
 {% endblock %}
