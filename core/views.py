@@ -85,6 +85,7 @@ def marketplace(request):
     return render(request, 'core/marketplace_home.html')
 
 
+# Vistas para las noticias
 def noticias(request):
     """
     Vista para mostrar el listado de noticias.
@@ -119,6 +120,20 @@ def noticias(request):
         # Si la página está fuera de rango, mostrar la última página
         noticias = paginator.page(paginator.num_pages)
     
+    # Enriquecer los datos con información de los autores
+    noticias_with_authors = []
+    for noticia in noticias:
+        try:
+            autor = Usuario.objects.get(id=noticia.id_autor)
+            autor_nombre = autor.nombre
+            autor_apellido = autor.apellido
+        except Usuario.DoesNotExist:
+            autor_nombre = "Usuario"
+            autor_apellido = "Desconocido"
+        
+        noticia.autor_nombre = autor_nombre
+        noticia.autor_apellido = autor_apellido
+    
     # Preparar datos para la plantilla
     context = {
         'noticias': noticias,
@@ -127,7 +142,7 @@ def noticias(request):
         'total_pages': paginator.num_pages,
     }
     
-    return render(request, 'core/noticias.html', context)
+    return render(request, 'core/news.html', context)
 
 def noticia_detalle(request, slug):
     """

@@ -185,7 +185,7 @@ body {
                 </article>
                 {% else %}
                 <!-- Tarjetas de noticias regulares -->
-                <article class="news-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|multiply:100 }}">
+                <article class="news-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:"0" }}">
                     {% with image_url='core/img/news/'|add:noticia.imagen_portada %}
                     <div class="card-image" data-bg-url="{% static image_url %}">
                         <div class="card-corner corner-top-left"></div>
@@ -249,6 +249,18 @@ body {
             <a href="{% url 'core:index' %}" class="read-more">Volver al inicio</a>
         </div>
         {% endif %}
+        
+        <!-- Mensaje de datos de demostración -->
+        {% if using_demo_data %}
+        <div class="demo-data-message" style="text-align: center; margin-top: 30px; padding: 15px; background: rgba(0, 255, 157, 0.1); border-radius: 10px; border: 1px solid var(--news-accent);">
+            <p style="margin: 0; color: var(--news-accent);">
+                <svg viewBox="0 0 24 24" width="20" height="20" style="vertical-align: middle; margin-right: 8px; fill: var(--news-accent);">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+                Visualizando datos de demostración. Los modelos de base de datos no están disponibles.
+            </p>
+        </div>
+        {% endif %}
     </main>
     
     <!-- Botón para volver arriba -->
@@ -272,6 +284,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (bgUrl) {
             element.style.backgroundImage = `url('${bgUrl}')`;
         }
+    });
+    
+    // Asignar retrasos personalizados a las tarjetas para animación escalonada
+    document.querySelectorAll('.news-card').forEach(function(card, index) {
+        // Aumentar el retraso para cada tarjeta
+        const delay = 100 * (index + 1);
+        card.setAttribute('data-aos-delay', delay);
     });
 });
 </script>
