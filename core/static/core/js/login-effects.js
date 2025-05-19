@@ -64,14 +64,13 @@ document.addEventListener('DOMContentLoaded', () => {
             delay: anime.stagger(100),
             easing: 'easeOutQuart'
         }, '-=800')
-        // Título con efecto de glitch
+        // Título - animación simple sin efecto glitch
         .add({
             targets: '.login-title',
             opacity: [0, 1],
-            duration: 100,
-            easing: 'steps(1)',
-            delay: anime.stagger(50, {direction: 'reverse'}),
-            complete: () => initGlitchEffect()
+            duration: 800,
+            easing: 'easeOutQuad'
+            // Ya no llamamos a initGlitchEffect() aquí
         }, '-=500')
         // Campos del formulario con efecto de cyber
         .add({
@@ -85,36 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }, '-=500');
 
-    // Efecto Glitch para el título
-    function initGlitchEffect() {
-        const glitchText = document.querySelector('.login-title');
-        setInterval(() => {
-            const glitchTimeline = anime.timeline({
-                duration: 100,
-                easing: 'steps(1)'
-            });
-
-            glitchTimeline
-                .add({
-                    targets: glitchText,
-                    translateX: 2,
-                    translateY: -2,
-                    color: '#0ff'
-                })
-                .add({
-                    targets: glitchText,
-                    translateX: -2,
-                    translateY: 2,
-                    color: '#f0f'
-                })
-                .add({
-                    targets: glitchText,
-                    translateX: 0,
-                    translateY: 0,
-                    color: '#0f0'
-                });
-        }, 3000);
-    }
+    // La función initGlitchEffect se elimina o ya no se llama
 
     // Efecto Cyber para los inputs
     function initCyberEffect(targets) {

@@ -95,10 +95,42 @@ body {
         margin-bottom: 2rem;
     }
 }
+
+/* Parche para modo depuración */
+.debug-panel {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: lime;
+    padding: 10px;
+    border-radius: 5px;
+    font-family: monospace;
+    font-size: 12px;
+    z-index: 9999;
+    max-width: 300px;
+    max-height: 200px;
+    overflow: auto;
+}
 </style>
 {% endblock %}
 
 {% block content %}
+<!-- Panel de depuración (solo visible en desarrollo) -->
+{% if debug_info or using_demo_data %}
+<div class="debug-panel">
+    <h4>DEBUG INFO:</h4>
+    {% if debug_info %}
+    <p>Total noticias: {{ debug_info.total_noticias }}</p>
+    <p>Noticias en página: {{ debug_info.noticias_en_pagina }}</p>
+    <p>Página actual: {{ debug_info.pagina_actual }}</p>
+    {% endif %}
+    {% if using_demo_data %}
+    <p style="color: yellow;">USANDO DATOS DE DEMOSTRACIÓN</p>
+    {% endif %}
+</div>
+{% endif %}
+
 <div class="news-container">
     <!-- Elementos de fondo -->
     <div class="news-background">
@@ -146,6 +178,15 @@ body {
             <p class="news-subtitle">Mantente informado sobre las últimas novedades, eventos y avances en las comunidades artesanales.</p>
         </div>
         
+        <!-- Debug: Mostrar cuántas noticias hay -->
+        <div style="text-align: center; margin-bottom: 20px; color: #00ff9d;">
+            {% if noticias %}
+                <p>Mostrando {{ noticias|length }} noticias</p>
+            {% else %}
+                <p>No hay noticias para mostrar</p>
+            {% endif %}
+        </div>
+        
         <!-- Grid de noticias -->
         {% if noticias %}
         <div class="news-grid">
@@ -153,23 +194,19 @@ body {
             {% for noticia in noticias %}
                 {% if forloop.first %}
                 <article class="featured-article" data-aos="fade-up">
-                    {% with image_url='core/img/news/'|add:noticia.imagen_portada %}
-                    <div class="featured-image" data-bg-url="{% static image_url %}">
+                    <div class="featured-image" data-bg-url="{% if noticia.imagen_portada %}{% static 'core/img/news/'|add:noticia.imagen_portada %}{% else %}{% static 'core/img/news/default.jpg' %}{% endif %}">
                         <div class="card-corner corner-top-left"></div>
                         <div class="card-corner corner-top-right"></div>
                         <div class="card-corner corner-bottom-left"></div>
                         <div class="card-corner corner-bottom-right"></div>
                     </div>
-                    {% endwith %}
                     <div class="featured-content">
                         <span class="article-tag">Destacado</span>
                         <h2 class="article-title">{{ noticia.titulo }}</h2>
                         <p class="article-excerpt">{{ noticia.resumen }}</p>
                         <div class="article-meta">
                             <div class="article-author">
-                                {% with avatar_url='core/img/avatars/autor_'|add:noticia.id_autor|stringformat:"s"|add:'.jpg' %}
-                                <div class="author-avatar" data-bg-url="{% static avatar_url %}"></div>
-                                {% endwith %}
+                                <div class="author-avatar" style="background-color: #052016;"></div>
                                 <span>{{ noticia.autor_nombre }} {{ noticia.autor_apellido }}</span>
                             </div>
                             <div class="article-date">
@@ -186,14 +223,12 @@ body {
                 {% else %}
                 <!-- Tarjetas de noticias regulares -->
                 <article class="news-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:"0" }}">
-                    {% with image_url='core/img/news/'|add:noticia.imagen_portada %}
-                    <div class="card-image" data-bg-url="{% static image_url %}">
+                    <div class="card-image" data-bg-url="{% if noticia.imagen_portada %}{% static 'core/img/news/'|add:noticia.imagen_portada %}{% else %}{% static 'core/img/news/default.jpg' %}{% endif %}">
                         <div class="card-corner corner-top-left"></div>
                         <div class="card-corner corner-top-right"></div>
                         <div class="card-corner corner-bottom-left"></div>
                         <div class="card-corner corner-bottom-right"></div>
                     </div>
-                    {% endwith %}
                     <div class="card-content">
                         <h3 class="card-title">{{ noticia.titulo }}</h3>
                         <p class="card-excerpt">{{ noticia.resumen }}</p>
@@ -278,13 +313,49 @@ body {
 <script>
 // Script para establecer las imágenes de fondo después de que el DOM cargue
 document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar AOS para animaciones de scroll
+    AOS.init({
+        duration: 800,
+        easing: 'ease-out-cubic',
+        once: false,
+        mirror: false,
+        offset: 50
+    });
+    
     // Establecer imágenes de fondo para elementos con data-bg-url
     document.querySelectorAll('[data-bg-url]').forEach(function(element) {
         const bgUrl = element.getAttribute('data-bg-url');
         if (bgUrl) {
             element.style.backgroundImage = `url('${bgUrl}')`;
+            console.log(`Configurando imagen de fondo: ${bgUrl}`);
+        } else {
+            console.warn('Elemento sin URL de fondo');
+            // Usar una imagen predeterminada
+            element.style.backgroundImage = `url('{% static 'core/img/news/default.jpg' %}')`;
         }
     });
+    
+    // Configurar el botón para volver arriba
+    const backToTopButton = document.getElementById('backToTop');
+    if (backToTopButton) {
+        // Mostrar/ocultar botón basado en la posición de scroll
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopButton.classList.add('visible');
+            } else {
+                backToTopButton.classList.remove('visible');
+            }
+        });
+        
+        // Añadir funcionalidad de scroll suave al hacer clic
+        backToTopButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
     
     // Asignar retrasos personalizados a las tarjetas para animación escalonada
     document.querySelectorAll('.news-card').forEach(function(card, index) {
@@ -292,6 +363,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const delay = 100 * (index + 1);
         card.setAttribute('data-aos-delay', delay);
     });
+    
+    console.log('DOM cargado, inicializados efectos de la página de noticias');
 });
 </script>
 {% endblock %}

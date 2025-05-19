@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
 from django.contrib import messages
+from django.contrib.auth.hashers import check_password
+from django.contrib.auth import login as auth_login
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
@@ -19,17 +20,70 @@ def index(request):
     return render(request, 'core/index.html')
 
 def login_view(request):
+    """
+    Vista de login segura que solo permite acceso a usuarios reales 
+    que existen en la base de datos.
+    """
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
         
-        if user is not None:
-            login(request, user)
-            return redirect('core:index')  # O redirige a donde prefieras después del login
-        else:
+        # Mensaje de depuración (opcional, remover en producción)
+        print(f"Intento de login: username={username}")
+        
+        try:
+            # Consulta SQL directa para verificar si el usuario existe
+            from django.db import connection
+            with connection.cursor() as cursor:
+                # Consultar la tabla de usuarios directamente
+                # Ajusta el nombre de la tabla según sea necesario
+                cursor.execute("SELECT id, username, password, nombre, apellido FROM raiz.usuarios WHERE username = %s", [username])
+                user_data = cursor.fetchone()
+            
+            if user_data:
+                user_id, db_username, db_password, nombre, apellido = user_data
+                
+                # En desarrollo, permitir cualquier contraseña (remover en producción)
+                # print("⚠️ MODO DESARROLLO: No se verifica contraseña")
+                # password_valid = True
+                
+                # Verificación real de contraseña
+                from django.contrib.auth.hashers import check_password
+                password_valid = check_password(password, db_password)
+                
+                if password_valid:
+                    # Iniciar sesión
+                    request.session['user_id'] = str(user_id)
+                    request.session['username'] = db_username
+                    request.session['nombre'] = nombre
+                    request.session['apellido'] = apellido
+                    
+                    # Actualizar último login
+                    import datetime
+                    with connection.cursor() as cursor:
+                        cursor.execute(
+                            "UPDATE raiz.usuarios SET ultimo_login = %s WHERE id = %s",
+                            [datetime.datetime.now(), user_id]
+                        )
+                    
+                    # Redirigir al marketplace
+                    return redirect('core:marketplace')
+                else:
+                    return render(request, 'core/login.html', {
+                        'error': 'Contraseña incorrecta',
+                        'username': username
+                    })
+            else:
+                return render(request, 'core/login.html', {
+                    'error': 'Usuario no encontrado en la base de datos',
+                    'username': username
+                })
+                
+        except Exception as e:
+            print(f"Error en autenticación: {e}")
             return render(request, 'core/login.html', {
-                'error': 'Usuario o contraseña incorrectos'
+                'error': 'Error en el sistema de autenticación',
+                'username': username
             })
     
     return render(request, 'core/login.html')
@@ -41,20 +95,39 @@ def password_recovery(request):
         
         # Verificar si el email existe en la base de datos
         try:
-            user = User.objects.get(email=email)
+            user = Usuario.objects.get(email=email)
             
-            # En un entorno real, aquí generarías un token único para la recuperación
-            # y lo enviarías por correo electrónico con un enlace para restablecer la contraseña
+            # Generar token de recuperación
+            recovery_token = str(uuid.uuid4())
+            user.token_recuperacion = recovery_token
+            user.fecha_token = datetime.datetime.now()
+            user.save(update_fields=['token_recuperacion', 'fecha_token'])
             
-            # Como es una demostración, simplemente mostramos un mensaje de éxito
+            # Construir URL de recuperación
+            recovery_url = f"{request.scheme}://{request.get_host()}/reset-password/{recovery_token}/"
+            
+            # Enviar email - comentado para entorno de desarrollo
+            """
+            subject = 'Recuperación de contraseña - Raíz Digital'
+            html_message = render_to_string('core/emails/password_recovery.html', {
+                'user': user,
+                'recovery_url': recovery_url
+            })
+            plain_message = strip_tags(html_message)
+            from_email = settings.DEFAULT_FROM_EMAIL
+            to = email
+            
+            send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+            """
+            
+            # Como el envío de email está comentado para desarrollo, mostrar mensaje de éxito
             context = {
-                'success': 'Hemos enviado las instrucciones para restablecer tu contraseña a tu correo electrónico.'
+                'success': 'Se han enviado instrucciones para restablecer tu contraseña a tu correo electrónico.'
             }
             return render(request, 'core/password_recovery.html', context)
             
-        except User.DoesNotExist:
+        except Usuario.DoesNotExist:
             # Si el correo no existe, mostramos un mensaje genérico por seguridad
-            # No informamos que el correo no existe para evitar enumeración de usuarios
             context = {
                 'success': 'Si el correo está registrado, recibirás instrucciones para restablecer tu contraseña.'
             }
@@ -82,7 +155,33 @@ def password_recovery(request):
 #    return render(request, 'core/marketplace.html')
 
 def marketplace(request):
-    return render(request, 'core/marketplace_home.html')
+    # Verificar si el usuario está logueado (mediante la sesión)
+    if 'user_id' not in request.session:
+        # Si no está logueado, redirigir al login
+        return redirect('core:login')
+        
+    # Obtener datos del usuario desde la sesión
+    user_id = request.session.get('user_id')
+    username = request.session.get('username')
+    nombre = request.session.get('nombre')
+    
+    # Intentar obtener datos de la comunidad del usuario si existe
+    community_name = None
+    try:
+        user = Usuario.objects.get(id=user_id)
+        if user.id_comunidad:
+            community_name = user.id_comunidad.nombre
+    except:
+        # Si hay algún error al obtener la comunidad, no es crítico
+        pass
+    
+    context = {
+        'username': username,
+        'nombre': nombre,
+        'community_name': community_name
+    }
+    
+    return render(request, 'core/marketplace_home.html', context)
 
 
 # Vistas para las noticias
