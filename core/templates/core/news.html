@@ -4,8 +4,8 @@
 {% block title %}Noticias - Raíz Digital{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'core/css/variables.css' %}">
-<link rel="stylesheet" href="{% static 'core/css/news.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/variables.css' %}?v=2">
+<link rel="stylesheet" href="{% static 'core/css/news.css' %}?v=3">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
 <style>
     /* Correcciones para resolver errores CSS */
@@ -169,7 +169,7 @@
         </div>
 
 
-        {% if request.session.is_admin %}
+        {% if request.session.is_admin or is_admin %}
         <div class="admin-action-container" data-aos="fade-up">
             <a href="{% url 'core:crear_noticia' %}" class="btn-create-news">
                 <svg viewBox="0 0 24 24" width="18" height="18">
@@ -381,7 +381,7 @@
 </script>
 <script>
     // Solo mostrará esta información en la consola del navegador
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const adminInfo = document.getElementById('admin-debug-info');
         if (adminInfo) {
             console.log('Información de administrador:', adminInfo.innerText);

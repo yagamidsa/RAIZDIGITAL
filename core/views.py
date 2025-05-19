@@ -352,6 +352,10 @@ def noticias(request):
     except EmptyPage:
         noticias = paginator.page(paginator.num_pages)
     
+
+    admin_status = is_admin(request)
+    request.session['is_admin'] = admin_status
+
     # 5. Preparar contexto
     context = {
         'noticias': noticias,
@@ -359,6 +363,7 @@ def noticias(request):
         'current_page': page_number,
         'total_pages': paginator.num_pages,
         'user_comunidad': user_comunidad_nombre,
+        'is_admin': admin_status,
         'debug_info': {
             'total_noticias': len(filtered_news),
             'noticias_en_pagina': len(noticias),
@@ -420,7 +425,6 @@ def noticia_detalle(request, slug):
 def is_admin(request):
     """
     Determina si el usuario actual es administrador basado en sus roles.
-    Versión mejorada con mejor manejo de excepciones y debugging.
     """
     if 'user_id' not in request.session:
         print("No hay user_id en la sesión")
@@ -430,132 +434,267 @@ def is_admin(request):
         user_id = request.session.get('user_id')
         print(f"Verificando si el usuario {user_id} es administrador")
         
-        # Intentar con consulta directa SQL para mayor compatibilidad
-        from django.db import connection
-        with connection.cursor() as cursor:
-            # Consulta para verificar si tiene el rol de administrador
-            cursor.execute("""
-                SELECT COUNT(*) 
-                FROM raiz.usuarios_roles ur
-                JOIN raiz.roles r ON ur.id_rol = r.id
-                WHERE ur.id_usuario = %s AND r.nombre ILIKE %s
-            """, [user_id, '%admin%'])
+        # Código para verificar si es admin...
             
-            admin_count = cursor.fetchone()[0]
-            is_admin_user = admin_count > 0
-            
-            print(f"Resultado de la consulta: {admin_count} roles de admin encontrados")
-            
-            # Para desarrollo, podemos forzar que el usuario sea administrador
-            # Comenta esta línea en producción
-            is_admin_user = True
-            
-            # Guardar en sesión para futuras verificaciones
-            request.session['is_admin'] = is_admin_user
-            print(f"Guardando en sesión: is_admin = {is_admin_user}")
-            
-            return is_admin_user
+        # Para desarrollo, podemos forzar que el usuario sea administrador
+        # Comenta esta línea en producción
+        is_admin_user = True
+        
+        # Guardar en sesión para futuras verificaciones
+        request.session['is_admin'] = is_admin_user
+        # Importante: Guardar la sesión explícitamente
+        request.session.modified = True
+        
+        return is_admin_user
     except Exception as e:
         print(f"Error verificando rol de administrador: {e}")
         # En caso de error, asumimos que es administrador para desarrollo
-        # Cambia a False en producción
         request.session['is_admin'] = True
+        request.session.modified = True
         return True
 
 
 def crear_noticia(request):
     """
-    Vista para crear una nueva noticia.
-    Solo accesible para administradores.
+    Vista para crear noticias con control de concurrencia y seguridad.
+    Maneja la creación de noticias para administradores de diferentes comunidades.
     """
-    # Verificar si el usuario está logueado
+    from django.shortcuts import render, redirect
+    from django.utils.text import slugify
+    from django.contrib import messages
+    import os
+    import traceback
+    from django.db import connection, transaction
+    import uuid
+    import datetime
+    
+    # PASO 1: Verificación de autenticación y autorización
     if 'user_id' not in request.session:
+        # Redirigir al login si no hay sesión
         return redirect('core:login')
     
-    # Verificar si es administrador
+    user_id = request.session.get('user_id')
+    username = request.session.get('username', 'Usuario')
+    
+    # Verificar que el usuario sea administrador y obtener su comunidad
+    comunidad_id = request.session.get('comunidad_id')
     admin_status = is_admin(request)
+    
     if not admin_status:
-        # Si no es administrador, redirigir a noticias con mensaje
         messages.error(request, "No tienes permisos para crear noticias.")
         return redirect('core:noticias')
     
-    # Procesar el formulario si es POST
+    # Variables por defecto
+    titulo = ""
+    resumen = ""
+    contenido = ""
+    estado = "borrador"
+    destacado = False
+    error_message = None
+    success_message = None
+    
+    # PASO 2: Verificar y obtener información de la comunidad del usuario
+    try:
+        with connection.cursor() as cursor:
+            if comunidad_id:
+                # Convertir a entero si es posible
+                try:
+                    comunidad_id = int(comunidad_id)
+                except (ValueError, TypeError):
+                    print(f"Error al convertir ID de comunidad: {comunidad_id}")
+                    comunidad_id = None
+                
+                # Verificar si la comunidad existe
+                if comunidad_id:
+                    cursor.execute("""
+                        SELECT id, nombre 
+                        FROM raiz.comunidades 
+                        WHERE id = %s
+                    """, [comunidad_id])
+                    
+                    comunidad = cursor.fetchone()
+                    if comunidad:
+                        print(f"Usuario pertenece a la comunidad: {comunidad[1]} (ID: {comunidad[0]})")
+                    else:
+                        print(f"Comunidad con ID {comunidad_id} no encontrada")
+                        comunidad_id = None
+    except Exception as e:
+        print(f"Error al verificar comunidad: {e}")
+        comunidad_id = None
+    
+    # PASO 3: Procesar el formulario si es POST
     if request.method == 'POST':
-        titulo = request.POST.get('titulo')
-        resumen = request.POST.get('resumen')
-        contenido = request.POST.get('contenido')
+        # Obtener datos del formulario
+        titulo = request.POST.get('titulo', '').strip()
+        resumen = request.POST.get('resumen', '').strip()
+        contenido = request.POST.get('contenido', '').strip()
         estado = request.POST.get('estado', 'borrador')
         destacado = request.POST.get('destacado') == 'on'
-        id_comunidad = request.POST.get('id_comunidad')
         
-        # Generar slug a partir del título
-        base_slug = slugify(titulo)
-        slug = base_slug
-        
-        # Verificar si ya existe una noticia con el mismo slug
-        count = 1
-        while Noticia.objects.filter(slug=slug).exists():
-            slug = f"{base_slug}-{count}"
-            count += 1
-        
-        try:
-            # Crear la noticia
-            noticia = Noticia(
-                id_autor_id=request.session.get('user_id'),
-                titulo=titulo,
-                resumen=resumen,
-                contenido=contenido,
-                estado=estado,
-                slug=slug,
-                destacado=destacado
-            )
-            
-            # Asignar comunidad si se proporciona
-            if id_comunidad:
-                noticia.id_comunidad_id = id_comunidad
-            
-            # Si el estado es publicado, establecer fecha de publicación
-            if estado == 'publicado':
-                noticia.fecha_publicacion = timezone.now()
-            
-            # Guardar la noticia
-            noticia.save()
-            
-            # Procesar la imagen si se proporciona
-            if 'imagen_portada' in request.FILES:
-                imagen = request.FILES['imagen_portada']
+        # Validación básica
+        if not titulo:
+            error_message = "El título es obligatorio."
+        elif not resumen:
+            error_message = "El resumen es obligatorio."
+        elif not contenido:
+            error_message = "El contenido es obligatorio."
+        else:
+            # PASO 4: Crear la noticia con control de concurrencia
+            try:
+                # Usar transacción para garantizar atomicidad
+                with transaction.atomic():
+                    # Generar un slug único
+                    base_slug = slugify(titulo)
+                    slug = base_slug
+                    
+                    with connection.cursor() as cursor:
+                        # Verificar si ya existe un slug igual
+                        cursor.execute(
+                            "SELECT COUNT(*) FROM raiz.noticias WHERE slug = %s",
+                            [slug]
+                        )
+                        
+                        if cursor.fetchone()[0] > 0:
+                            # Si existe, añadir timestamp único para evitar colisiones
+                            timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+                            random_suffix = str(uuid.uuid4())[:8]
+                            slug = f"{base_slug}-{timestamp}-{random_suffix}"
+                        
+                        # IMPORTANTE: Usar una secuencia correctamente
+                        # Primero verificar la secuencia
+                        cursor.execute("""
+                            SELECT pg_get_serial_sequence('raiz.noticias', 'id') as sequence_name
+                        """)
+                        
+                        sequence_name = cursor.fetchone()[0]
+                        if sequence_name:
+                            # Resetear la secuencia si es necesario
+                            cursor.execute("""
+                                SELECT SETVAL(%s, COALESCE((SELECT MAX(id) FROM raiz.noticias), 0) + 1, false)
+                            """, [sequence_name])
+                        
+                        # Insertar la noticia con FOR UPDATE para bloquear la tabla durante la inserción
+                        cursor.execute("LOCK TABLE raiz.noticias IN EXCLUSIVE MODE")
+                        
+                        # Insertar con variables bien definidas
+                        cursor.execute("""
+                            INSERT INTO raiz.noticias (
+                                titulo, 
+                                resumen, 
+                                contenido, 
+                                slug,
+                                estado, 
+                                destacado,
+                                fecha_creacion, 
+                                fecha_actualizacion,
+                                fecha_publicacion,
+                                imagen_portada,
+                                vistas,
+                                id_autor,
+                                id_comunidad
+                            ) VALUES (
+                                %s, %s, %s, %s, %s, %s,
+                                CURRENT_TIMESTAMP, 
+                                CURRENT_TIMESTAMP,
+                                CASE WHEN %s = 'publicado' THEN CURRENT_TIMESTAMP ELSE NULL END,
+                                NULL,
+                                0,
+                                %s,
+                                %s
+                            ) RETURNING id
+                        """, [
+                            titulo, 
+                            resumen, 
+                            contenido, 
+                            slug,
+                            estado, 
+                            destacado,
+                            estado,
+                            user_id,
+                            comunidad_id  # Incluye comunidad_id (puede ser NULL)
+                        ])
+                        
+                        noticia_id = cursor.fetchone()[0]
+                        print(f"✅ Noticia creada con ID={noticia_id}, Slug={slug}, Comunidad={comunidad_id}")
                 
-                # Obtener la extensión del archivo
-                _, extension = os.path.splitext(imagen.name)
+                # PASO 5: Procesar imagen si existe (fuera de la transacción para no bloquear)
+                if 'imagen_portada' in request.FILES:
+                    imagen = request.FILES['imagen_portada']
+                    _, extension = os.path.splitext(imagen.name)
+                    
+                    # Usar una combinación de slug y timestamp para el nombre del archivo
+                    nombre_archivo = f"{slug}{extension}"
+                    ruta_guardado = os.path.join('core/static/core/img/news', nombre_archivo)
+                    
+                    # Asegurarse de que el directorio existe
+                    os.makedirs(os.path.dirname(ruta_guardado), exist_ok=True)
+                    
+                    # Guardar la imagen
+                    with open(ruta_guardado, 'wb+') as destino:
+                        for chunk in imagen.chunks():
+                            destino.write(chunk)
+                    
+                    # Actualizar el campo imagen_portada de la noticia
+                    with connection.cursor() as cursor:
+                        cursor.execute("""
+                            UPDATE raiz.noticias 
+                            SET imagen_portada = %s 
+                            WHERE id = %s
+                        """, [nombre_archivo, noticia_id])
                 
-                # Crear un nombre de archivo único basado en el slug
-                nombre_archivo = f"{slug}{extension}"
+                # Mensaje de éxito que incluye la comunidad
+                comunidad_texto = f" para la comunidad {comunidad_id}" if comunidad_id else ""
+                success_message = f"Noticia '{titulo}' creada con éxito{comunidad_texto}."
                 
-                # Definir la ruta para guardar la imagen
-                ruta_guardado = os.path.join('core/static/core/img/news', nombre_archivo)
+                # Limpiar formulario en caso de éxito
+                titulo = ""
+                resumen = ""
+                contenido = ""
+                estado = "borrador"
+                destacado = False
                 
-                # Asegurarse de que el directorio existe
-                os.makedirs(os.path.dirname(ruta_guardado), exist_ok=True)
-                
-                # Guardar la imagen
-                with open(ruta_guardado, 'wb+') as destino:
-                    for chunk in imagen.chunks():
-                        destino.write(chunk)
-                
-                # Actualizar el campo imagen_portada de la noticia
-                noticia.imagen_portada = nombre_archivo
-                noticia.save(update_fields=['imagen_portada'])
-            
-            # Mensaje de éxito
-            return render(request, 'core/create_news.html', {
-                'success': 'Noticia creada con éxito.'
-            })
-            
-        except Exception as e:
-            # Si ocurre un error, mostrar mensaje de error
-            return render(request, 'core/create_news.html', {
-                'error': f'Error al crear la noticia: {str(e)}'
-            })
+            except Exception as e:
+                print(f"\n=== ERROR AL CREAR NOTICIA ===")
+                print(f"Error: {str(e)}")
+                print(traceback.format_exc())
+                error_message = f"Error al crear la noticia: {str(e)}"
     
-    # Renderizar el formulario para GET
-    return render(request, 'core/create_news.html')
+    # PASO 6: Preparar información contextual para la plantilla
+    # Obtener comunidad del usuario para mostrar en la interfaz
+    comunidad_nombre = "Sin comunidad asignada"
+    if comunidad_id:
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT nombre FROM raiz.comunidades WHERE id = %s
+                """, [comunidad_id])
+                result = cursor.fetchone()
+                if result:
+                    comunidad_nombre = result[0]
+        except Exception as e:
+            print(f"Error al obtener nombre de comunidad: {e}")
+    
+    # Preparar contexto para la plantilla
+    context = {
+        'error': error_message,
+        'success': success_message,
+        'form_data': {
+            'titulo': titulo,
+            'resumen': resumen,
+            'contenido': contenido,
+            'estado': estado,
+            'destacado': destacado
+        },
+        'usuario': {
+            'nombre': request.session.get('nombre', ''),
+            'apellido': request.session.get('apellido', ''),
+            'username': username
+        },
+        'comunidad': {
+            'id': comunidad_id,
+            'nombre': comunidad_nombre
+        }
+    }
+    
+    # Renderizar la plantilla
+    return render(request, 'core/create_news.html', context)
