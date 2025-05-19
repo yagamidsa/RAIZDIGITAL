@@ -10,4 +10,5 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('marketplace/', views.marketplace, name='marketplace'),
     path('noticias/', views.noticias, name='noticias'),
+    path('noticias/<slug:slug>/', views.noticia_detalle, name='noticia_detalle'),
 ]
