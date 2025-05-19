@@ -116,21 +116,6 @@ body {
 {% endblock %}
 
 {% block content %}
-<!-- Panel de depuración (solo visible en desarrollo) -->
-{% if debug_info or using_demo_data %}
-<div class="debug-panel">
-    <h4>DEBUG INFO:</h4>
-    {% if debug_info %}
-    <p>Total noticias: {{ debug_info.total_noticias }}</p>
-    <p>Noticias en página: {{ debug_info.noticias_en_pagina }}</p>
-    <p>Página actual: {{ debug_info.pagina_actual }}</p>
-    {% endif %}
-    {% if using_demo_data %}
-    <p style="color: yellow;">USANDO DATOS DE DEMOSTRACIÓN</p>
-    {% endif %}
-</div>
-{% endif %}
-
 <div class="news-container">
     <!-- Elementos de fondo -->
     <div class="news-background">
@@ -154,7 +139,7 @@ body {
         </a>
         
         <nav class="news-nav">
-            <a href="{% url 'core:index' %}" class="nav-link">Inicio</a>
+            <a href="/marketplace/" class="nav-link">Inicio</a>
             <a href="#" class="nav-link active">Noticias</a>
             <a href="#" class="nav-link">Eventos</a>
             <a href="#" class="nav-link">Productos</a>
