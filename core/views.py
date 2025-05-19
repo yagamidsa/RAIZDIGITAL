@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.hashers import check_password
-from django.contrib.auth import login as auth_login
+from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
@@ -21,42 +21,65 @@ def index(request):
 
 def login_view(request):
     """
-    Vista de login segura que solo permite acceso a usuarios reales 
-    que existen en la base de datos.
+    Vista de login segura con registro de debugging para diagnóstico.
     """
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         
-        # Mensaje de depuración (opcional, remover en producción)
+        # Mensaje de depuración
         print(f"Intento de login: username={username}")
         
         try:
             # Consulta SQL directa para verificar si el usuario existe
             from django.db import connection
             with connection.cursor() as cursor:
-                # Consultar la tabla de usuarios directamente
-                # Ajusta el nombre de la tabla según sea necesario
-                cursor.execute("SELECT id, username, password, nombre, apellido FROM raiz.usuarios WHERE username = %s", [username])
+                # Consulta mejorada para obtener también información de la comunidad
+                cursor.execute("""
+                    SELECT u.id, u.username, u.password, u.nombre, u.apellido, 
+                           c.id as comunidad_id, c.nombre as comunidad_nombre
+                    FROM raiz.usuarios u
+                    LEFT JOIN raiz.comunidades c ON u.id_comunidad = c.id
+                    WHERE u.username = %s
+                """, [username])
                 user_data = cursor.fetchone()
             
+            # Imprimir datos para diagnóstico
+            print(f"Datos obtenidos de la BD: {user_data}")
+            
             if user_data:
-                user_id, db_username, db_password, nombre, apellido = user_data
-                
-                # En desarrollo, permitir cualquier contraseña (remover en producción)
-                # print("⚠️ MODO DESARROLLO: No se verifica contraseña")
-                # password_valid = True
+                user_id, db_username, db_password, nombre, apellido, comunidad_id, comunidad_nombre = user_data
                 
                 # Verificación real de contraseña
                 from django.contrib.auth.hashers import check_password
                 password_valid = check_password(password, db_password)
                 
+                # Para desarrollo, podemos permitir cualquier contraseña para facilitar las pruebas
+                # Comentar esta línea en producción
+                # password_valid = True
+                
+                print(f"Contraseña válida: {password_valid}")
+                
                 if password_valid:
-                    # Iniciar sesión
+                    # Iniciar sesión y guardar también datos de comunidad
                     request.session['user_id'] = str(user_id)
                     request.session['username'] = db_username
                     request.session['nombre'] = nombre
                     request.session['apellido'] = apellido
+                    
+                    # Debugging - verificar datos guardados en sesión
+                    print(f"Datos en la sesión:")
+                    print(f"- user_id: {request.session.get('user_id')}")
+                    print(f"- username: {request.session.get('username')}")
+                    print(f"- nombre: {request.session.get('nombre')}")
+                    print(f"- apellido: {request.session.get('apellido')}")
+                    
+                    # Guardar información de la comunidad
+                    if comunidad_id:
+                        request.session['comunidad_id'] = comunidad_id
+                        request.session['comunidad_nombre'] = comunidad_nombre
+                        print(f"- comunidad_id: {request.session.get('comunidad_id')}")
+                        print(f"- comunidad_nombre: {request.session.get('comunidad_nombre')}")
                     
                     # Actualizar último login
                     import datetime
@@ -82,7 +105,7 @@ def login_view(request):
         except Exception as e:
             print(f"Error en autenticación: {e}")
             return render(request, 'core/login.html', {
-                'error': 'Error en el sistema de autenticación',
+                'error': f'Error en el sistema de autenticación: {e}',
                 'username': username
             })
     
@@ -155,6 +178,10 @@ def password_recovery(request):
 #    return render(request, 'core/marketplace.html')
 
 def marketplace(request):
+    """
+    Vista del marketplace principal que muestra información personalizada del usuario
+    y su comunidad.
+    """
     # Verificar si el usuario está logueado (mediante la sesión)
     if 'user_id' not in request.session:
         # Si no está logueado, redirigir al login
@@ -163,21 +190,28 @@ def marketplace(request):
     # Obtener datos del usuario desde la sesión
     user_id = request.session.get('user_id')
     username = request.session.get('username')
-    nombre = request.session.get('nombre')
+    nombre = request.session.get('nombre', '')
+    apellido = request.session.get('apellido', '')
     
-    # Intentar obtener datos de la comunidad del usuario si existe
-    community_name = None
-    try:
-        user = Usuario.objects.get(id=user_id)
-        if user.id_comunidad:
-            community_name = user.id_comunidad.nombre
-    except:
-        # Si hay algún error al obtener la comunidad, no es crítico
-        pass
+    # Obtener nombre de la comunidad directamente de la sesión
+    community_name = request.session.get('comunidad_nombre')
+    
+    # Crear nombre completo para mostrar en la interfaz
+    nombre_completo = f"{nombre} {apellido}".strip()
+    
+    # Para diagnóstico - imprimir los valores
+    print(f"ID de usuario: {user_id}")
+    print(f"Username: {username}")
+    print(f"Nombre: {nombre}")
+    print(f"Apellido: {apellido}")
+    print(f"Nombre completo: {nombre_completo}")
+    print(f"Comunidad: {community_name}")
     
     context = {
         'username': username,
         'nombre': nombre,
+        'apellido': apellido,
+        'nombre_completo': nombre_completo,
         'community_name': community_name
     }
     
@@ -188,57 +222,149 @@ def marketplace(request):
 def noticias(request):
     """
     Vista para mostrar el listado de noticias.
-    
-    Obtiene todas las noticias publicadas y las muestra paginadas,
-    con la posibilidad de filtrar por búsqueda.
+    Versión optimizada para solucionar problemas con el filtrado de comunidad.
     """
     # Obtener parámetros de la URL
     query = request.GET.get('q', '')
-    page = request.GET.get('page', 1)
+    page = request.GET.get('page', '1')  # Aseguramos que sea string inicialmente
     
-    # Obtener todas las noticias publicadas ordenadas por fecha (más recientes primero)
-    noticias_list = Noticia.objects.filter(estado='publicado').order_by('-fecha_publicacion')
+    # Convertir página a entero de forma segura
+    try:
+        page_number = int(page)
+    except (ValueError, TypeError):
+        page_number = 1
     
-    # Aplicar filtro de búsqueda si existe
+    # Verificar si el usuario está logueado
+    is_logged_in = 'user_id' in request.session
+    
+    # Variables para tracking de comunidad
+    user_comunidad_id = None
+    user_comunidad_nombre = None
+    filter_by_community = False
+    
+    # DEBUG: Imprimir información de la sesión
+    print("Variables de sesión:")
+    for key, value in request.session.items():
+        print(f"- {key}: {value}")
+    
+    # Obtener información de la comunidad del usuario si está logueado
+    if is_logged_in:
+        # Obtener ID de comunidad y asegurar que sea entero (algunos sistemas lo guardan como string)
+        user_comunidad_id_raw = request.session.get('comunidad_id')
+        if user_comunidad_id_raw is not None:
+            try:
+                # Intentar convertir a entero si es string
+                user_comunidad_id = int(user_comunidad_id_raw)
+            except (ValueError, TypeError):
+                # Si falla, mantener el valor original
+                user_comunidad_id = user_comunidad_id_raw
+        
+        user_comunidad_nombre = request.session.get('comunidad_nombre')
+        filter_by_community = user_comunidad_id is not None
+        
+        print(f"Usuario logueado: {request.session.get('nombre')} {request.session.get('apellido')}")
+        print(f"Comunidad: ID={user_comunidad_id} (tipo: {type(user_comunidad_id)}), Nombre={user_comunidad_nombre}")
+    
+    # SOLUCIÓN DIRECTA: Obtener todas las noticias manualmente usando SQL
+    from django.db import connection
+    
+    print("\n=== CONSULTA DIRECTA SQL PARA VERIFICAR NOTICIAS ===")
+    all_news = []
+    
+    # 1. Primero obtenemos todas las noticias publicadas
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT n.id, n.titulo, n.resumen, n.contenido, n.slug, n.fecha_publicacion, 
+                   n.estado, n.imagen_portada, n.destacado, n.id_comunidad, c.nombre as comunidad_nombre,
+                   u.id as autor_id, u.nombre as autor_nombre, u.apellido as autor_apellido
+            FROM raiz.noticias n
+            LEFT JOIN raiz.comunidades c ON n.id_comunidad = c.id
+            LEFT JOIN raiz.usuarios u ON n.id_autor = u.id
+            WHERE n.estado = 'publicado'
+            ORDER BY n.fecha_publicacion DESC
+        """)
+        all_news_raw = cursor.fetchall()
+        
+        print(f"Total noticias encontradas: {len(all_news_raw)}")
+        for i, news in enumerate(all_news_raw):
+            print(f"Noticia {i+1}: ID={news[0]}, Título='{news[1]}', Comunidad ID={news[9]}, Comunidad Nombre={news[10]}")
+            
+            # Convertir resultados SQL a objetos Python para la plantilla
+            news_obj = {
+                'id': news[0], 
+                'titulo': news[1],
+                'resumen': news[2],
+                'contenido': news[3],
+                'slug': news[4],
+                'fecha_publicacion': news[5],
+                'estado': news[6],
+                'imagen_portada': news[7] or 'default.jpg',
+                'destacado': news[8],
+                'id_comunidad_id': news[9],  # Este es el ID de la comunidad
+                'id_comunidad': {'id': news[9], 'nombre': news[10]},  # Objeto comunidad simulado
+                'id_autor': news[11],
+                'autor_nombre': news[12] or 'Usuario',
+                'autor_apellido': news[13] or 'Desconocido'
+            }
+            all_news.append(news_obj)
+    
+    print("\n=== APLICANDO FILTROS DE COMUNIDAD ===")
+    # 2. Si el usuario está logueado y tiene comunidad, filtrar noticias
+    filtered_news = []
+    
+    if filter_by_community:
+        print(f"Filtrando por comunidad ID={user_comunidad_id}")
+        
+        for news in all_news:
+            # Verificar si la noticia pertenece a la comunidad del usuario o es global
+            if news['id_comunidad_id'] == user_comunidad_id or news['id_comunidad_id'] is None:
+                filtered_news.append(news)
+                print(f"- Añadiendo noticia '{news['titulo']}' - ID Comunidad: {news['id_comunidad_id']}")
+        
+        print(f"Total noticias después de filtrar: {len(filtered_news)}")
+    else:
+        # Si no hay filtro de comunidad, usar todas las noticias
+        filtered_news = all_news
+        print("No se aplica filtro de comunidad, usando todas las noticias")
+    
+    # 3. Aplicar filtro de búsqueda si existe
     if query:
-        noticias_list = noticias_list.filter(
-            Q(titulo__icontains=query) | 
-            Q(resumen__icontains=query) | 
-            Q(contenido__icontains=query)
-        )
+        search_results = []
+        for news in filtered_news:
+            if (query.lower() in news['titulo'].lower() or 
+                query.lower() in news['resumen'].lower() or 
+                query.lower() in news['contenido'].lower()):
+                search_results.append(news)
+        filtered_news = search_results
     
-    # Configurar paginación - 9 artículos por página
-    paginator = Paginator(noticias_list, 9)
+    # 4. Configurar paginación manual
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    paginator = Paginator(filtered_news, 9)  # 9 noticias por página
     
     try:
-        noticias = paginator.page(page)
+        noticias = paginator.page(page_number)
     except PageNotAnInteger:
-        # Si la página no es un entero, mostrar la primera página
         noticias = paginator.page(1)
     except EmptyPage:
-        # Si la página está fuera de rango, mostrar la última página
         noticias = paginator.page(paginator.num_pages)
     
-    # Enriquecer los datos con información de los autores
-    noticias_with_authors = []
-    for noticia in noticias:
-        try:
-            autor = Usuario.objects.get(id=noticia.id_autor)
-            autor_nombre = autor.nombre
-            autor_apellido = autor.apellido
-        except Usuario.DoesNotExist:
-            autor_nombre = "Usuario"
-            autor_apellido = "Desconocido"
-        
-        noticia.autor_nombre = autor_nombre
-        noticia.autor_apellido = autor_apellido
-    
-    # Preparar datos para la plantilla
+    # 5. Preparar contexto
     context = {
         'noticias': noticias,
         'query': query,
-        'current_page': int(page),
+        'current_page': page_number,
         'total_pages': paginator.num_pages,
+        'user_comunidad': user_comunidad_nombre,
+        'debug_info': {
+            'total_noticias': len(filtered_news),
+            'noticias_en_pagina': len(noticias),
+            'comunidad_id': user_comunidad_id,
+            'comunidad_nombre': user_comunidad_nombre,
+            'esta_logueado': is_logged_in,
+            'filtro_comunidad_aplicado': filter_by_community,
+            'tipo_comunidad_id_sesion': str(type(user_comunidad_id)),
+            'tipo_id_comunidad_filtro': 'int (forzado)'
+        }
     }
     
     return render(request, 'core/news.html', context)
