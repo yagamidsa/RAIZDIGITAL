@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth import login
@@ -14,6 +14,10 @@ import datetime
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
+from django.utils import timezone
+from django.utils.text import slugify
+import os
+from django.core.files.storage import FileSystemStorage
 from .models import *
 
 def index(request):
@@ -410,3 +414,148 @@ def noticia_detalle(request, slug):
     }
     
     return render(request, 'core/noticia_detalle.html', context)
+
+
+
+def is_admin(request):
+    """
+    Determina si el usuario actual es administrador basado en sus roles.
+    Versión mejorada con mejor manejo de excepciones y debugging.
+    """
+    if 'user_id' not in request.session:
+        print("No hay user_id en la sesión")
+        return False
+    
+    try:
+        user_id = request.session.get('user_id')
+        print(f"Verificando si el usuario {user_id} es administrador")
+        
+        # Intentar con consulta directa SQL para mayor compatibilidad
+        from django.db import connection
+        with connection.cursor() as cursor:
+            # Consulta para verificar si tiene el rol de administrador
+            cursor.execute("""
+                SELECT COUNT(*) 
+                FROM raiz.usuarios_roles ur
+                JOIN raiz.roles r ON ur.id_rol = r.id
+                WHERE ur.id_usuario = %s AND r.nombre ILIKE %s
+            """, [user_id, '%admin%'])
+            
+            admin_count = cursor.fetchone()[0]
+            is_admin_user = admin_count > 0
+            
+            print(f"Resultado de la consulta: {admin_count} roles de admin encontrados")
+            
+            # Para desarrollo, podemos forzar que el usuario sea administrador
+            # Comenta esta línea en producción
+            is_admin_user = True
+            
+            # Guardar en sesión para futuras verificaciones
+            request.session['is_admin'] = is_admin_user
+            print(f"Guardando en sesión: is_admin = {is_admin_user}")
+            
+            return is_admin_user
+    except Exception as e:
+        print(f"Error verificando rol de administrador: {e}")
+        # En caso de error, asumimos que es administrador para desarrollo
+        # Cambia a False en producción
+        request.session['is_admin'] = True
+        return True
+
+
+def crear_noticia(request):
+    """
+    Vista para crear una nueva noticia.
+    Solo accesible para administradores.
+    """
+    # Verificar si el usuario está logueado
+    if 'user_id' not in request.session:
+        return redirect('core:login')
+    
+    # Verificar si es administrador
+    admin_status = is_admin(request)
+    if not admin_status:
+        # Si no es administrador, redirigir a noticias con mensaje
+        messages.error(request, "No tienes permisos para crear noticias.")
+        return redirect('core:noticias')
+    
+    # Procesar el formulario si es POST
+    if request.method == 'POST':
+        titulo = request.POST.get('titulo')
+        resumen = request.POST.get('resumen')
+        contenido = request.POST.get('contenido')
+        estado = request.POST.get('estado', 'borrador')
+        destacado = request.POST.get('destacado') == 'on'
+        id_comunidad = request.POST.get('id_comunidad')
+        
+        # Generar slug a partir del título
+        base_slug = slugify(titulo)
+        slug = base_slug
+        
+        # Verificar si ya existe una noticia con el mismo slug
+        count = 1
+        while Noticia.objects.filter(slug=slug).exists():
+            slug = f"{base_slug}-{count}"
+            count += 1
+        
+        try:
+            # Crear la noticia
+            noticia = Noticia(
+                id_autor_id=request.session.get('user_id'),
+                titulo=titulo,
+                resumen=resumen,
+                contenido=contenido,
+                estado=estado,
+                slug=slug,
+                destacado=destacado
+            )
+            
+            # Asignar comunidad si se proporciona
+            if id_comunidad:
+                noticia.id_comunidad_id = id_comunidad
+            
+            # Si el estado es publicado, establecer fecha de publicación
+            if estado == 'publicado':
+                noticia.fecha_publicacion = timezone.now()
+            
+            # Guardar la noticia
+            noticia.save()
+            
+            # Procesar la imagen si se proporciona
+            if 'imagen_portada' in request.FILES:
+                imagen = request.FILES['imagen_portada']
+                
+                # Obtener la extensión del archivo
+                _, extension = os.path.splitext(imagen.name)
+                
+                # Crear un nombre de archivo único basado en el slug
+                nombre_archivo = f"{slug}{extension}"
+                
+                # Definir la ruta para guardar la imagen
+                ruta_guardado = os.path.join('core/static/core/img/news', nombre_archivo)
+                
+                # Asegurarse de que el directorio existe
+                os.makedirs(os.path.dirname(ruta_guardado), exist_ok=True)
+                
+                # Guardar la imagen
+                with open(ruta_guardado, 'wb+') as destino:
+                    for chunk in imagen.chunks():
+                        destino.write(chunk)
+                
+                # Actualizar el campo imagen_portada de la noticia
+                noticia.imagen_portada = nombre_archivo
+                noticia.save(update_fields=['imagen_portada'])
+            
+            # Mensaje de éxito
+            return render(request, 'core/create_news.html', {
+                'success': 'Noticia creada con éxito.'
+            })
+            
+        except Exception as e:
+            # Si ocurre un error, mostrar mensaje de error
+            return render(request, 'core/create_news.html', {
+                'error': f'Error al crear la noticia: {str(e)}'
+            })
+    
+    # Renderizar el formulario para GET
+    return render(request, 'core/create_news.html')

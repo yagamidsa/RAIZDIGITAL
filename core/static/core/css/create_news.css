@@ -1,0 +1,683 @@
+/* Estilos para el botón de crear noticias */
+.admin-action-container {
+    display: flex;
+    justify-content: center;
+    margin: 30px 0;
+}
+
+.btn-create-news {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 255, 157, 0.1);
+    color: var(--neon-green);
+    border: 2px solid var(--neon-green);
+    border-radius: 30px;
+    padding: 10px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.btn-create-news svg {
+    fill: var(--neon-green);
+    transition: all 0.3s ease;
+}
+
+.btn-create-news:hover {
+    background: var(--neon-green);
+    color: var(--dark-matter);
+    box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+    transform: translateY(-3px);
+}
+
+.btn-create-news:hover svg {
+    fill: var(--dark-matter);
+}
+
+.btn-create-news::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(0, 255, 157, 0.3),
+        transparent
+    );
+    transition: 0.5s;
+}
+
+.btn-create-news:hover::before {
+    left: 100%;
+}
+
+/* Estilos para el formulario de creación de noticias */
+.create-news-container {
+    background: rgba(10, 25, 47, 0.7);
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 900px;
+    margin: 40px auto;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 157, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.create-news-border {
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    padding: 2px;
+    background: linear-gradient(
+        45deg,
+        var(--neon-green),
+        var(--cyber-blue),
+        var(--neon-green)
+    );
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    opacity: 0.7;
+    animation: borderRotate 4s linear infinite;
+    pointer-events: none;
+}
+
+.form-title {
+    color: var(--neon-green);
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
+}
+
+.form-group {
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.form-label {
+    display: block;
+    color: var(--neon-green);
+    margin-bottom: 8px;
+    font-size: 1rem;
+    letter-spacing: 1px;
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+    width: 100%;
+    background: rgba(10, 25, 47, 0.6);
+    border: 1px solid var(--neon-green);
+    border-radius: 8px;
+    color: #fff;
+    padding: 12px 15px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+    outline: none;
+    box-shadow: 0 0 15px rgba(0, 255, 157, 0.3);
+    background: rgba(10, 25, 47, 0.8);
+}
+
+.form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%2300ff9d'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+/* Estilos para el campo de carga de imagen */
+.image-upload-container {
+    border: 2px dashed var(--neon-green);
+    border-radius: 8px;
+    padding: 25px;
+    text-align: center;
+    position: relative;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: rgba(0, 255, 157, 0.05);
+}
+
+.image-upload-container:hover {
+    background: rgba(0, 255, 157, 0.1);
+    transform: translateY(-3px);
+}
+
+.image-upload-icon {
+    display: block;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 15px;
+    fill: var(--neon-green);
+    opacity: 0.8;
+}
+
+.image-upload-text {
+    color: #fff;
+    margin-bottom: 15px;
+}
+
+.image-upload-help {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.image-preview {
+    margin-top: 15px;
+    text-align: center;
+    display: none;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 8px;
+    border: 2px solid var(--neon-green);
+}
+
+.file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Estilos para botones de acción */
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 40px;
+}
+
+.btn-submit-news,
+.btn-cancel {
+    padding: 12px 30px;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-submit-news {
+    background: var(--neon-green);
+    color: var(--dark-matter);
+}
+
+.btn-submit-news:hover {
+    box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+    transform: translateY(-3px);
+}
+
+.btn-cancel {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .create-news-container {
+        padding: 25px;
+        margin: 20px 15px;
+    }
+    
+    .form-title {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn-submit-news,
+    .btn-cancel {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .image-upload-container {
+        padding: 15px;
+    }
+    
+    .image-upload-icon {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* Animación para el borde */
+@keyframes borderRotate {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+}
+
+/* Estilos para el formulario de creación de noticias */
+.create-news-container {
+    background: rgba(10, 25, 47, 0.7);
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 900px;
+    margin: 40px auto;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 157, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.create-news-border {
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    padding: 2px;
+    background: linear-gradient(
+        45deg,
+        var(--neon-green),
+        var(--cyber-blue),
+        var(--neon-green)
+    );
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    opacity: 0.7;
+    animation: borderRotate 4s linear infinite;
+    pointer-events: none;
+}
+
+.form-title {
+    color: var(--neon-green);
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
+}
+
+.form-group {
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.form-label {
+    display: block;
+    color: var(--neon-green);
+    margin-bottom: 8px;
+    font-size: 1rem;
+    letter-spacing: 1px;
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+    width: 100%;
+    background: rgba(10, 25, 47, 0.6);
+    border: 1px solid var(--neon-green);
+    border-radius: 8px;
+    color: #fff;
+    padding: 12px 15px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+    outline: none;
+    box-shadow: 0 0 15px rgba(0, 255, 157, 0.3);
+    background: rgba(10, 25, 47, 0.8);
+}
+
+.form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%2300ff9d'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+/* Estilos para el toggle de destacado */
+.toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toggle-input {
+    height: 0;
+    width: 0;
+    visibility: hidden;
+    position: absolute;
+}
+
+.toggle-label {
+    cursor: pointer;
+    width: 60px;
+    height: 30px;
+    background: rgba(10, 25, 47, 0.8);
+    display: block;
+    border-radius: 100px;
+    position: relative;
+    border: 1px solid var(--neon-green);
+}
+
+.toggle-label:after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    background: var(--neon-green);
+    border-radius: 90px;
+    transition: 0.3s;
+}
+
+.toggle-input:checked + .toggle-label {
+    background: rgba(0, 255, 157, 0.3);
+}
+
+.toggle-input:checked + .toggle-label:after {
+    left: calc(100% - 3px);
+    transform: translateX(-100%);
+}
+
+.toggle-label:active:after {
+    width: 30px;
+}
+
+.toggle-text {
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+/* Estilos para el campo de carga de imagen */
+.image-upload-container {
+    border: 2px dashed var(--neon-green);
+    border-radius: 8px;
+    padding: 25px;
+    text-align: center;
+    position: relative;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: rgba(0, 255, 157, 0.05);
+}
+
+.image-upload-container.highlight {
+    background: rgba(0, 255, 157, 0.15);
+    border-color: var(--cyber-blue);
+    transform: translateY(-3px);
+}
+
+.image-upload-container:hover {
+    background: rgba(0, 255, 157, 0.1);
+    transform: translateY(-3px);
+}
+
+.image-upload-icon {
+    display: block;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 15px;
+    fill: var(--neon-green);
+    opacity: 0.8;
+}
+
+.image-upload-text {
+    color: #fff;
+    margin-bottom: 15px;
+}
+
+.image-upload-help {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.image-preview {
+    margin-top: 15px;
+    text-align: center;
+    display: none;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 8px;
+    border: 2px solid var(--neon-green);
+}
+
+.file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Estilos para mensajes de error y éxito */
+.error-message,
+.success-message {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.error-message {
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid rgba(255, 80, 80, 0.3);
+}
+
+.success-message {
+    background: rgba(0, 255, 157, 0.1);
+    border: 1px solid rgba(0, 255, 157, 0.3);
+    color: var(--neon-green);
+}
+
+.error-icon,
+.success-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.error-icon {
+    fill: #ff5050;
+}
+
+.success-icon {
+    fill: var(--neon-green);
+}
+
+.btn-view-news {
+    display: inline-block;
+    background: var(--neon-green);
+    color: var(--dark-matter);
+    padding: 8px 16px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-left: auto;
+    transition: all 0.3s ease;
+}
+
+.btn-view-news:hover {
+    box-shadow: 0 0 15px rgba(0, 255, 157, 0.5);
+    transform: translateY(-2px);
+}
+
+/* Estilos para botones de acción */
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 40px;
+}
+
+.btn-submit-news,
+.btn-cancel {
+    padding: 12px 30px;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    display: inline-block;
+}
+
+.btn-submit-news {
+    background: var(--neon-green);
+    color: var(--dark-matter);
+    border: none;
+}
+
+.btn-submit-news:hover {
+    box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+    transform: translateY(-3px);
+}
+
+.btn-cancel {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    text-decoration: none;
+}
+
+.btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Estilos para el botón de crear noticia en la página de listado */
+.admin-action-container {
+    display: flex;
+    justify-content: center;
+    margin: 30px 0;
+}
+
+.btn-create-news {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 255, 157, 0.1);
+    color: var(--neon-green);
+    border: 2px solid var(--neon-green);
+    border-radius: 30px;
+    padding: 10px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-create-news svg {
+    fill: var(--neon-green);
+    transition: all 0.3s ease;
+}
+
+.btn-create-news:hover {
+    background: var(--neon-green);
+    color: var(--dark-matter);
+    box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+    transform: translateY(-3px);
+}
+
+.btn-create-news:hover svg {
+    fill: var(--dark-matter);
+}
+
+.btn-create-news::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(0, 255, 157, 0.3),
+        transparent
+    );
+    transition: 0.5s;
+}
+
+.btn-create-news:hover::before {
+    left: 100%;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .create-news-container {
+        padding: 25px;
+        margin: 20px 15px;
+    }
+    
+    .form-title {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn-submit-news,
+    .btn-cancel {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .image-upload-container {
+        padding: 15px;
+    }
+    
+    .image-upload-icon {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* Animación para el borde */
+@keyframes borderRotate {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+}

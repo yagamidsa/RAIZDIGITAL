@@ -786,3 +786,215 @@ body {
         text-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
     }
 }
+
+
+
+/* Estilos adicionales para mejorar el formulario */
+.field-error {
+    border-color: #ff5050 !important;
+    box-shadow: 0 0 10px rgba(255, 80, 80, 0.3) !important;
+}
+
+.field-error-message {
+    color: #ff5050;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.char-counter {
+    display: block;
+    text-align: right;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+    margin-top: 5px;
+    transition: all 0.3s ease;
+}
+
+.counter-exceeded {
+    color: #ff5050;
+    font-weight: bold;
+}
+
+/* Spinner para el botón de envío */
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--dark-matter);
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mejoras al modal de éxito */
+.success-message {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border-radius: 10px;
+    background: rgba(0, 255, 157, 0.1);
+    border: 1px solid rgba(0, 255, 157, 0.3);
+    margin-bottom: 30px;
+    animation: successPulse 2s infinite;
+}
+
+.success-icon {
+    width: 30px;
+    height: 30px;
+    margin-right: 15px;
+    fill: var(--neon-green);
+}
+
+.btn-view-news {
+    background: var(--neon-green);
+    color: var(--dark-matter);
+    padding: 10px 20px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: auto;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.btn-view-news:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 255, 157, 0.2);
+}
+
+@keyframes successPulse {
+    0% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(0, 255, 157, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0); }
+}
+
+/* Mejora en los inputs al estar enfocados */
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+    outline: none;
+    box-shadow: 0 0 20px rgba(0, 255, 157, 0.3);
+    background: rgba(10, 25, 47, 0.8);
+    transform: translateY(-2px);
+}
+
+/* Estilo para el overlay de imagen al hacer hover */
+.image-upload-container:hover::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0, 255, 157, 0.2) 0%, rgba(10, 25, 47, 0) 70%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Mejoras en los iconos de la interfaz */
+.image-upload-icon {
+    transition: all 0.5s ease;
+}
+
+.image-upload-container:hover .image-upload-icon {
+    transform: scale(1.1) rotate(5deg);
+    filter: drop-shadow(0 0 5px var(--neon-green));
+}
+
+/* Mejora en el efecto de carga al subir imágenes */
+.image-preview {
+    position: relative;
+}
+
+.image-preview::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, var(--neon-green), var(--cyber-blue), var(--neon-green));
+    background-size: 200% 100%;
+    animation: loadingBar 2s linear infinite;
+    border-radius: 5px 5px 0 0;
+    z-index: 10;
+}
+
+@keyframes loadingBar {
+    0% { background-position: 100% 0; }
+    100% { background-position: 0 0; }
+}
+
+/* Efecto sutil de pulso para los botones */
+.btn-submit-news:not(:disabled) {
+    animation: buttonPulse 3s infinite;
+}
+
+@keyframes buttonPulse {
+    0% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(0, 255, 157, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0); }
+}
+
+/* Scroll personalizado para la página */
+::-webkit-scrollbar {
+    width: 10px;
+    background: rgba(10, 25, 47, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 157, 0.5);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 157, 0.7);
+}
+
+/* Mejoras para móviles */
+@media (max-width: 768px) {
+    .form-actions {
+        gap: 10px;
+    }
+    
+    .btn-submit-news,
+    .btn-cancel {
+        padding: 10px;
+    }
+    
+    .image-upload-text,
+    .image-upload-help {
+        font-size: 0.9rem;
+    }
+    
+    .success-message {
+        flex-direction: column;
+        text-align: center;
+        padding: 15px;
+    }
+    
+    .success-icon {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    
+    .btn-view-news {
+        margin-left: 0;
+        margin-top: 15px;
+        width: 100%;
+        text-align: center;
+    }
+}

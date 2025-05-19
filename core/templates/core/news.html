@@ -8,110 +8,111 @@
 <link rel="stylesheet" href="{% static 'core/css/news.css' %}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
 <style>
-/* Correcciones para resolver errores CSS */
-html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow-x: hidden;
-}
-
-body {
-    background: linear-gradient(125deg, var(--dark-matter) 0%, #071a2c 40%, #061c1e 80%, #052016 100%);
-    color: #ffffff;
-    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
-    overflow-y: auto !important;
-    line-height: 1.6;
-}
-
-/* Contenedor principal con scroll habilitado */
-.welcome-container {
-    min-height: 100vh;
-    max-height: none !important;
-    overflow-y: auto !important;
-}
-
-/* Estilo para cuando se muestran las tarjetas */
-.cards-container.show-cards {
-    display: flex !important;
-    opacity: 1 !important;
-    transform: translateY(0) !important;
-    flex-wrap: wrap;
-    padding-bottom: 50px;
-    margin-bottom: 50px;
-}
-
-/* Media queries con sintaxis corregida */
-@media (max-width: 768px) {
-    .cards-container.show-cards {
-        flex-direction: column;
-        align-items: center;
+    /* Correcciones para resolver errores CSS */
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow-x: hidden;
     }
-    
+
+    body {
+        background: linear-gradient(125deg, var(--dark-matter) 0%, #071a2c 40%, #061c1e 80%, #052016 100%);
+        color: #ffffff;
+        font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+        overflow-y: auto !important;
+        line-height: 1.6;
+    }
+
+    /* Contenedor principal con scroll habilitado */
     .welcome-container {
-        height: auto !important;
+        min-height: 100vh;
+        max-height: none !important;
         overflow-y: auto !important;
     }
-    
-    .main-content {
-        padding-top: 20px;
+
+    /* Estilo para cuando se muestran las tarjetas */
+    .cards-container.show-cards {
+        display: flex !important;
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+        flex-wrap: wrap;
         padding-bottom: 50px;
+        margin-bottom: 50px;
     }
-    
-    .card-link {
-        max-width: 100%;
-        margin-bottom: 30px;
-    }
-    
-    .neon-card {
-        min-height: 350px;
-        margin-bottom: 20px;
-    }
-}
 
-@media (max-height: 700px) {
-    .welcome-container {
-        padding-top: 20px;
-    }
-    
-    .welcome-title {
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
-    }
-    
-    .community-name {
-        font-size: 1.5rem;
-        margin-bottom: 0.5rem;
-    }
-    
-    .welcome-subtitle {
-        font-size: 0.9rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    .btn-start {
-        padding: 0.7rem 2rem;
-        margin-bottom: 2rem;
-    }
-}
+    /* Media queries con sintaxis corregida */
+    @media (max-width: 768px) {
+        .cards-container.show-cards {
+            flex-direction: column;
+            align-items: center;
+        }
 
-/* Parche para modo depuración */
-.debug-panel {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    background: rgba(0, 0, 0, 0.8);
-    color: lime;
-    padding: 10px;
-    border-radius: 5px;
-    font-family: monospace;
-    font-size: 12px;
-    z-index: 9999;
-    max-width: 300px;
-    max-height: 200px;
-    overflow: auto;
-}
+        .welcome-container {
+            height: auto !important;
+            overflow-y: auto !important;
+        }
+
+        .main-content {
+            padding-top: 20px;
+            padding-bottom: 50px;
+        }
+
+        .card-link {
+            max-width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .neon-card {
+            min-height: 350px;
+            margin-bottom: 20px;
+        }
+    }
+
+    @media (max-height: 700px) {
+        .welcome-container {
+            padding-top: 20px;
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .community-name {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-subtitle {
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-start {
+            padding: 0.7rem 2rem;
+            margin-bottom: 2rem;
+        }
+    }
+
+    /* Parche para modo depuración */
+    .debug-panel {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: lime;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: monospace;
+        font-size: 12px;
+        z-index: 9999;
+        max-width: 300px;
+        max-height: 200px;
+        overflow: auto;
+    }
 </style>
 {% endblock %}
 
@@ -125,19 +126,22 @@ body {
             <div class="organic-shape shape2"></div>
         </div>
     </div>
-    
+
     <!-- Barra de navegación superior -->
     <header class="news-header">
         <a href="{% url 'core:index' %}" class="news-logo">
             <svg viewBox="0 0 24 24">
-                <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/>
-                <path d="M12 4.5c-4.136 0-7.5 3.364-7.5 7.5s3.364 7.5 7.5 7.5 7.5-3.364 7.5-7.5-3.364-7.5-7.5-7.5zm0 14c-3.584 0-6.5-2.916-6.5-6.5s2.916-6.5 6.5-6.5 6.5 2.916 6.5 6.5-2.916 6.5-6.5 6.5z"/>
-                <path d="M12 7c-2.757 0-5 2.243-5 5s2.243 5 5 5 5-2.243 5-5-2.243-5-5-5zm0 9c-2.206 0-4-1.794-4-4s1.794-4 4-4 4 1.794 4 4-1.794 4-4 4z"/>
-                <circle cx="12" cy="12" r="2.5"/>
+                <path
+                    d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z" />
+                <path
+                    d="M12 4.5c-4.136 0-7.5 3.364-7.5 7.5s3.364 7.5 7.5 7.5 7.5-3.364 7.5-7.5-3.364-7.5-7.5-7.5zm0 14c-3.584 0-6.5-2.916-6.5-6.5s2.916-6.5 6.5-6.5 6.5 2.916 6.5 6.5-2.916 6.5-6.5 6.5z" />
+                <path
+                    d="M12 7c-2.757 0-5 2.243-5 5s2.243 5 5 5 5-2.243 5-5-2.243-5-5-5zm0 9c-2.206 0-4-1.794-4-4s1.794-4 4-4 4 1.794 4 4-1.794 4-4 4z" />
+                <circle cx="12" cy="12" r="2.5" />
             </svg>
             <span class="news-logo-text">Raíz Digital</span>
         </a>
-        
+
         <nav class="news-nav">
             <a href="/marketplace/" class="nav-link">Inicio</a>
             <a href="#" class="nav-link active">Noticias</a>
@@ -146,114 +150,133 @@ body {
             <a href="#" class="nav-link">Comunidades</a>
         </nav>
     </header>
-    
+
     <!-- Contenido principal -->
     <main class="news-content">
         <!-- Botón para volver -->
         <a href="{% url 'core:index' %}" class="back-button">
             <svg viewBox="0 0 24 24">
-                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
             </svg>
             <span>Volver al inicio</span>
         </a>
-        
+
         <!-- Encabezado de la sección -->
         <div class="news-section-header" data-aos="fade-up">
             <h1 class="news-title">Noticias y Actualizaciones</h1>
-            <p class="news-subtitle">Mantente informado sobre las últimas novedades, eventos y avances en las comunidades artesanales.</p>
+            <p class="news-subtitle">Mantente informado sobre las últimas novedades, eventos y avances en las
+                comunidades artesanales.</p>
         </div>
-        
+
+
+        {% if request.session.is_admin %}
+        <div class="admin-action-container" data-aos="fade-up">
+            <a href="{% url 'core:crear_noticia' %}" class="btn-create-news">
+                <svg viewBox="0 0 24 24" width="18" height="18">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                </svg>
+                <span>Crear nueva noticia</span>
+            </a>
+        </div>
+        {% endif %}
+
+
         <!-- Debug: Mostrar cuántas noticias hay -->
         <div style="text-align: center; margin-bottom: 20px; color: #00ff9d;">
             {% if noticias %}
-                <p>Mostrando {{ noticias|length }} noticias</p>
+            <p>Mostrando {{ noticias|length }} noticias</p>
             {% else %}
-                <p>No hay noticias para mostrar</p>
+            <p>No hay noticias para mostrar</p>
             {% endif %}
         </div>
-        
+
         <!-- Grid de noticias -->
         {% if noticias %}
         <div class="news-grid">
             <!-- Artículo destacado -->
             {% for noticia in noticias %}
-                {% if forloop.first %}
-                <article class="featured-article" data-aos="fade-up">
-                    <div class="featured-image" data-bg-url="{% if noticia.imagen_portada %}{% static 'core/img/news/'|add:noticia.imagen_portada %}{% else %}{% static 'core/img/news/default.jpg' %}{% endif %}">
-                        <div class="card-corner corner-top-left"></div>
-                        <div class="card-corner corner-top-right"></div>
-                        <div class="card-corner corner-bottom-left"></div>
-                        <div class="card-corner corner-bottom-right"></div>
-                    </div>
-                    <div class="featured-content">
-                        <span class="article-tag">Destacado</span>
-                        <h2 class="article-title">{{ noticia.titulo }}</h2>
-                        <p class="article-excerpt">{{ noticia.resumen }}</p>
-                        <div class="article-meta">
-                            <div class="article-author">
-                                <div class="author-avatar" style="background-color: #052016;"></div>
-                                <span>{{ noticia.autor_nombre }} {{ noticia.autor_apellido }}</span>
-                            </div>
-                            <div class="article-date">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/>
-                                    <path d="M13 7h-2v5.414l3.293 3.293 1.414-1.414L13 11.586z"/>
-                                </svg>
-                                <span>{{ noticia.fecha_publicacion|date:"d M, Y" }}</span>
-                            </div>
-                        </div>
-                        <a href="{% url 'core:noticia_detalle' noticia.slug %}" class="read-more">Leer artículo completo</a>
-                    </div>
-                </article>
-                {% else %}
-                <!-- Tarjetas de noticias regulares -->
-                <article class="news-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:"0" }}">
-                    <div class="card-image" data-bg-url="{% if noticia.imagen_portada %}{% static 'core/img/news/'|add:noticia.imagen_portada %}{% else %}{% static 'core/img/news/default.jpg' %}{% endif %}">
-                        <div class="card-corner corner-top-left"></div>
-                        <div class="card-corner corner-top-right"></div>
-                        <div class="card-corner corner-bottom-left"></div>
-                        <div class="card-corner corner-bottom-right"></div>
-                    </div>
-                    <div class="card-content">
-                        <h3 class="card-title">{{ noticia.titulo }}</h3>
-                        <p class="card-excerpt">{{ noticia.resumen }}</p>
-                        <div class="card-meta">
+            {% if forloop.first %}
+            <article class="featured-article" data-aos="fade-up">
+                <div class="featured-image"
+                    data-bg-url="{% if noticia.imagen_portada %}{% static 'core/img/news/'|add:noticia.imagen_portada %}{% else %}{% static 'core/img/news/default.jpg' %}{% endif %}">
+                    <div class="card-corner corner-top-left"></div>
+                    <div class="card-corner corner-top-right"></div>
+                    <div class="card-corner corner-bottom-left"></div>
+                    <div class="card-corner corner-bottom-right"></div>
+                </div>
+                <div class="featured-content">
+                    <span class="article-tag">Destacado</span>
+                    <h2 class="article-title">{{ noticia.titulo }}</h2>
+                    <p class="article-excerpt">{{ noticia.resumen }}</p>
+                    <div class="article-meta">
+                        <div class="article-author">
+                            <div class="author-avatar" style="background-color: #052016;"></div>
                             <span>{{ noticia.autor_nombre }} {{ noticia.autor_apellido }}</span>
+                        </div>
+                        <div class="article-date">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z" />
+                                <path d="M13 7h-2v5.414l3.293 3.293 1.414-1.414L13 11.586z" />
+                            </svg>
                             <span>{{ noticia.fecha_publicacion|date:"d M, Y" }}</span>
                         </div>
-                        <a href="{% url 'core:noticia_detalle' noticia.slug %}" class="read-more">Leer más</a>
                     </div>
-                </article>
-                {% endif %}
+                    <a href="{% url 'core:noticia_detalle' noticia.slug %}" class="read-more">Leer artículo completo</a>
+                </div>
+            </article>
+            {% else %}
+            <!-- Tarjetas de noticias regulares -->
+            <article class="news-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:" 0" }}">
+                <div class="card-image"
+                    data-bg-url="{% if noticia.imagen_portada %}{% static 'core/img/news/'|add:noticia.imagen_portada %}{% else %}{% static 'core/img/news/default.jpg' %}{% endif %}">
+                    <div class="card-corner corner-top-left"></div>
+                    <div class="card-corner corner-top-right"></div>
+                    <div class="card-corner corner-bottom-left"></div>
+                    <div class="card-corner corner-bottom-right"></div>
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title">{{ noticia.titulo }}</h3>
+                    <p class="card-excerpt">{{ noticia.resumen }}</p>
+                    <div class="card-meta">
+                        <span>{{ noticia.autor_nombre }} {{ noticia.autor_apellido }}</span>
+                        <span>{{ noticia.fecha_publicacion|date:"d M, Y" }}</span>
+                    </div>
+                    <a href="{% url 'core:noticia_detalle' noticia.slug %}" class="read-more">Leer más</a>
+                </div>
+            </article>
+            {% endif %}
             {% endfor %}
         </div>
-        
+
         <!-- Paginación -->
         <div class="news-pagination" data-aos="fade-up">
             <div class="pagination-container">
                 {% if noticias.has_previous %}
-                <a href="?page={{ noticias.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="page-link" aria-label="Previous">
+                <a href="?page={{ noticias.previous_page_number }}{% if query %}&q={{ query }}{% endif %}"
+                    class="page-link" aria-label="Previous">
                     <svg viewBox="0 0 24 24" width="16" height="16">
-                        <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/>
+                        <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z" />
                     </svg>
                 </a>
                 {% endif %}
-                
+
                 {% for i in noticias.paginator.page_range %}
-                    {% if i == noticias.number %}
-                    <a href="?page={{ i }}{% if query %}&q={{ query }}{% endif %}" class="page-link active">{{ i }}</a>
-                    {% elif i > noticias.number|add:"-3" and i < noticias.number|add:"3" %}
-                    <a href="?page={{ i }}{% if query %}&q={{ query }}{% endif %}" class="page-link">{{ i }}</a>
+                {% if i == noticias.number %}
+                <a href="?page={{ i }}{% if query %}&q={{ query }}{% endif %}" class="page-link active">{{ i }}</a>
+                {% elif i > noticias.number|add:"-3" and i < noticias.number|add:"3" %} <a
+                    href="?page={{ i }}{% if query %}&q={{ query }}{% endif %}" class="page-link">{{ i }}</a>
                     {% endif %}
-                {% endfor %}
-                
-                {% if noticias.has_next %}
-                <a href="?page={{ noticias.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="page-link" aria-label="Next">
-                    <svg viewBox="0 0 24 24" width="16" height="16">
-                        <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
-                    </svg>
-                </a>
-                {% endif %}
+                    {% endfor %}
+
+                    {% if noticias.has_next %}
+                    <a href="?page={{ noticias.next_page_number }}{% if query %}&q={{ query }}{% endif %}"
+                        class="page-link" aria-label="Next">
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+                        </svg>
+                    </a>
+                    {% endif %}
             </div>
         </div>
         {% else %}
@@ -261,32 +284,36 @@ body {
         <div class="no-news" data-aos="fade-up">
             <div class="no-news-icon">
                 <svg viewBox="0 0 24 24" width="80" height="80">
-                    <path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
-                    <path d="M14 17H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                    <path
+                        d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" />
+                    <path d="M14 17H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
                 </svg>
             </div>
             <p class="no-news-text">No hay noticias disponibles en este momento.</p>
             <a href="{% url 'core:index' %}" class="read-more">Volver al inicio</a>
         </div>
         {% endif %}
-        
+
         <!-- Mensaje de datos de demostración -->
         {% if using_demo_data %}
-        <div class="demo-data-message" style="text-align: center; margin-top: 30px; padding: 15px; background: rgba(0, 255, 157, 0.1); border-radius: 10px; border: 1px solid var(--news-accent);">
+        <div class="demo-data-message"
+            style="text-align: center; margin-top: 30px; padding: 15px; background: rgba(0, 255, 157, 0.1); border-radius: 10px; border: 1px solid var(--news-accent);">
             <p style="margin: 0; color: var(--news-accent);">
-                <svg viewBox="0 0 24 24" width="20" height="20" style="vertical-align: middle; margin-right: 8px; fill: var(--news-accent);">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                <svg viewBox="0 0 24 24" width="20" height="20"
+                    style="vertical-align: middle; margin-right: 8px; fill: var(--news-accent);">
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
                 </svg>
                 Visualizando datos de demostración. Los modelos de base de datos no están disponibles.
             </p>
         </div>
         {% endif %}
     </main>
-    
+
     <!-- Botón para volver arriba -->
     <div class="back-to-top" id="backToTop">
         <svg viewBox="0 0 24 24">
-            <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/>
+            <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z" />
         </svg>
     </div>
 </div>
@@ -294,62 +321,71 @@ body {
 
 {% block extra_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-<script src="{% static 'core/js/news.js' %}"></script>
+<script src="{% static 'core/js/create_news.js' %}"></script>
 <script>
-// Script para establecer las imágenes de fondo después de que el DOM cargue
-document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar AOS para animaciones de scroll
-    AOS.init({
-        duration: 800,
-        easing: 'ease-out-cubic',
-        once: false,
-        mirror: false,
-        offset: 50
-    });
-    
-    // Establecer imágenes de fondo para elementos con data-bg-url
-    document.querySelectorAll('[data-bg-url]').forEach(function(element) {
-        const bgUrl = element.getAttribute('data-bg-url');
-        if (bgUrl) {
-            element.style.backgroundImage = `url('${bgUrl}')`;
-            console.log(`Configurando imagen de fondo: ${bgUrl}`);
-        } else {
-            console.warn('Elemento sin URL de fondo');
-            // Usar una imagen predeterminada
-            element.style.backgroundImage = `url('{% static 'core/img/news/default.jpg' %}')`;
-        }
-    });
-    
-    // Configurar el botón para volver arriba
-    const backToTopButton = document.getElementById('backToTop');
-    if (backToTopButton) {
-        // Mostrar/ocultar botón basado en la posición de scroll
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) {
-                backToTopButton.classList.add('visible');
+    // Script para establecer las imágenes de fondo después de que el DOM cargue
+    document.addEventListener('DOMContentLoaded', function () {
+        // Inicializar AOS para animaciones de scroll
+        AOS.init({
+            duration: 800,
+            easing: 'ease-out-cubic',
+            once: false,
+            mirror: false,
+            offset: 50
+        });
+
+        // Establecer imágenes de fondo para elementos con data-bg-url
+        document.querySelectorAll('[data-bg-url]').forEach(function (element) {
+            const bgUrl = element.getAttribute('data-bg-url');
+            if (bgUrl) {
+                element.style.backgroundImage = `url('${bgUrl}')`;
+                console.log(`Configurando imagen de fondo: ${bgUrl}`);
             } else {
-                backToTopButton.classList.remove('visible');
+                console.warn('Elemento sin URL de fondo');
+                // Usar una imagen predeterminada
+                element.style.backgroundImage = `url('{% static 'core/img/news/default.jpg' %}')`;
             }
         });
-        
-        // Añadir funcionalidad de scroll suave al hacer clic
-        backToTopButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
+
+        // Configurar el botón para volver arriba
+        const backToTopButton = document.getElementById('backToTop');
+        if (backToTopButton) {
+            // Mostrar/ocultar botón basado en la posición de scroll
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    backToTopButton.classList.add('visible');
+                } else {
+                    backToTopButton.classList.remove('visible');
+                }
             });
+
+            // Añadir funcionalidad de scroll suave al hacer clic
+            backToTopButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        }
+
+        // Asignar retrasos personalizados a las tarjetas para animación escalonada
+        document.querySelectorAll('.news-card').forEach(function (card, index) {
+            // Aumentar el retraso para cada tarjeta
+            const delay = 100 * (index + 1);
+            card.setAttribute('data-aos-delay', delay);
         });
-    }
-    
-    // Asignar retrasos personalizados a las tarjetas para animación escalonada
-    document.querySelectorAll('.news-card').forEach(function(card, index) {
-        // Aumentar el retraso para cada tarjeta
-        const delay = 100 * (index + 1);
-        card.setAttribute('data-aos-delay', delay);
+
+        console.log('DOM cargado, inicializados efectos de la página de noticias');
     });
-    
-    console.log('DOM cargado, inicializados efectos de la página de noticias');
-});
+</script>
+<script>
+    // Solo mostrará esta información en la consola del navegador
+    document.addEventListener('DOMContentLoaded', function() {
+        const adminInfo = document.getElementById('admin-debug-info');
+        if (adminInfo) {
+            console.log('Información de administrador:', adminInfo.innerText);
+        }
+    });
 </script>
 {% endblock %}
