@@ -380,78 +380,146 @@ def noticias(request):
 
 def noticia_detalle(request, slug):
     """
-    Vista para mostrar el detalle de una noticia.
-    
-    Obtiene la noticia correspondiente al slug proporcionado
-    y aumenta su contador de vistas.
+    Vista mejorada para mostrar el detalle de una noticia.
     """
-    # Obtener la noticia por su slug o devolver 404 si no existe
-    noticia = get_object_or_404(Noticia, slug=slug, estado='publicado')
+    # Verificar que el slug sea válido
+    if not slug:
+        return redirect('core:noticias')
     
-    # Incrementar el contador de vistas
-    noticia.vistas += 1
-    noticia.save(update_fields=['vistas'])
-    
-    # Obtener autor de la noticia
+    # Obtener la noticia por su slug
     try:
-        autor = Usuario.objects.get(id=noticia.id_autor)
-        nombre_autor = f"{autor.nombre} {autor.apellido}"
-        foto_autor = autor.foto_perfil
-    except Usuario.DoesNotExist:
-        nombre_autor = "Autor desconocido"
-        foto_autor = None
-    
-    # Obtener noticias relacionadas (misma comunidad o mismo autor)
-    noticias_relacionadas = Noticia.objects.filter(
-        Q(id_comunidad=noticia.id_comunidad) | Q(id_autor=noticia.id_autor),
-        estado='publicado'
-    ).exclude(id=noticia.id).order_by('-fecha_publicacion')[:3]
-    
-    # Preparar datos para la plantilla
-    context = {
-        'noticia': noticia,
-        'autor': {
-            'nombre': nombre_autor,
-            'foto': foto_autor,
-            'id': noticia.id_autor
-        },
-        'noticias_relacionadas': noticias_relacionadas,
-    }
-    
-    return render(request, 'core/noticia_detalle.html', context)
-
+        # Verificar si el usuario es admin para mostrar noticias en estado borrador
+        is_admin = request.session.get('is_admin', False)
+        
+        if is_admin:
+            noticia = get_object_or_404(Noticia, slug=slug)
+        else:
+            noticia = get_object_or_404(Noticia, slug=slug, estado='publicado')
+        
+        # Incrementar contador de vistas
+        noticia.vistas += 1
+        noticia.save(update_fields=['vistas'])
+        
+        # Obtener autor
+        try:
+            autor = Usuario.objects.get(id=noticia.id_autor)
+            nombre_autor = f"{autor.nombre} {autor.apellido}"
+            foto_autor = autor.foto_perfil
+        except Usuario.DoesNotExist:
+            nombre_autor = "Autor desconocido"
+            foto_autor = None
+        
+        # Obtener noticias relacionadas (misma comunidad o mismo autor)
+        # Limitamos a 3 noticias relacionadas para no sobrecargar la página
+        noticias_relacionadas = Noticia.objects.filter(
+            Q(id_comunidad=noticia.id_comunidad) | Q(id_autor=noticia.id_autor),
+            estado='publicado'
+        ).exclude(id=noticia.id).order_by('-fecha_publicacion')[:3]
+        
+        # Preparar datos para la plantilla
+        context = {
+            'noticia': noticia,
+            'autor': {
+                'nombre': nombre_autor,
+                'foto': foto_autor,
+                'id': noticia.id_autor
+            },
+            'noticias_relacionadas': noticias_relacionadas,
+            'is_admin': is_admin,
+            'meta_description': noticia.resumen[:160] if noticia.resumen else '',
+        }
+        
+        return render(request, 'core/detail_news.html', context)
+        
+    except Exception as e:
+        # Log del error y redirección al listado
+        print(f"Error al mostrar noticia {slug}: {e}")
+        messages.error(request, "No se pudo cargar la noticia solicitada.")
+        return redirect('core:noticias')
 
 
 def is_admin(request):
     """
     Determina si el usuario actual es administrador basado en sus roles.
     """
+    print("\n=== VERIFICACIÓN DE ADMIN INICIADA ===")
+    print(f"Sesión actual: {dict(request.session)}")
+    
     if 'user_id' not in request.session:
-        print("No hay user_id en la sesión")
+        print("❌ No hay user_id en la sesión")
         return False
     
     try:
         user_id = request.session.get('user_id')
-        print(f"Verificando si el usuario {user_id} es administrador")
+        print(f"🔍 Verificando si el usuario {user_id} es administrador")
         
-        # Código para verificar si es admin...
+        # Para desarrollo, verifiquemos primero qué usuarios existen
+        from django.db import connection
+        with connection.cursor() as cursor:
+            # Imprimir todas las tablas de usuarios y roles para depuración
+            print("Verificando tablas y roles...")
             
-        # Para desarrollo, podemos forzar que el usuario sea administrador
-        # Comenta esta línea en producción
-        is_admin_user = True
-        
-        # Guardar en sesión para futuras verificaciones
-        request.session['is_admin'] = is_admin_user
-        # Importante: Guardar la sesión explícitamente
-        request.session.modified = True
-        
-        return is_admin_user
+            # 1. Verificar si la tabla usuarios_roles existe
+            cursor.execute("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_schema = 'raiz' 
+                    AND table_name = 'usuarios_roles'
+                )
+            """)
+            table_exists = cursor.fetchone()[0]
+            print(f"¿Existe la tabla usuarios_roles? {table_exists}")
+            
+            # 2. Si existe, verificar roles disponibles
+            if table_exists:
+                cursor.execute("SELECT id, nombre FROM raiz.roles")
+                roles = cursor.fetchall()
+                print(f"Roles disponibles: {roles}")
+                
+                # 3. Verificar asignaciones de roles
+                cursor.execute("""
+                    SELECT ur.id_usuario, r.nombre 
+                    FROM raiz.usuarios_roles ur
+                    JOIN raiz.roles r ON ur.id_rol = r.id
+                """)
+                role_assignments = cursor.fetchall()
+                print(f"Asignaciones de roles: {role_assignments}")
+                
+                # 4. Verificar si el usuario actual tiene rol de admin
+                cursor.execute("""
+                    SELECT COUNT(*) FROM raiz.usuarios_roles ur
+                    JOIN raiz.roles r ON ur.id_rol = r.id
+                    WHERE ur.id_usuario = %s 
+                    AND r.nombre ILIKE %s
+                """, [user_id, '%admin%'])  # Búsqueda más flexible
+                
+                count = cursor.fetchone()[0]
+                is_admin_user = count > 0
+                print(f"✅ Usuario {user_id} es admin: {is_admin_user} (conteo: {count})")
+                
+                # 5. Actualizar sesión
+                request.session['is_admin'] = is_admin_user
+                request.session.modified = True
+                
+                return is_admin_user
+            else:
+                print("⚠️ La tabla usuarios_roles no existe, usando método alternativo")
+                # Si las tablas no existen, usa una solución alternativa
+                is_admin_user = True  # Para desarrollo
+                request.session['is_admin'] = is_admin_user
+                request.session.modified = True
+                return is_admin_user
+                
     except Exception as e:
-        print(f"Error verificando rol de administrador: {e}")
-        # En caso de error, asumimos que es administrador para desarrollo
-        request.session['is_admin'] = True
+        print(f"❌ Error verificando rol de administrador: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        # Si hay un error, establecer un valor de fallback
+        is_admin_user = True  # Para desarrollo
+        request.session['is_admin'] = is_admin_user
         request.session.modified = True
-        return True
+        return is_admin_user
 
 
 def crear_noticia(request):
@@ -698,3 +766,177 @@ def crear_noticia(request):
     
     # Renderizar la plantilla
     return render(request, 'core/create_news.html', context)
+
+
+def editar_noticia(request, slug):
+    """
+    Vista para editar una noticia existente.
+    """
+    # Verificar si el usuario es admin
+    if not is_admin(request):
+        messages.error(request, "No tienes permisos para editar noticias.")
+        return redirect('core:noticias')
+    
+    # Obtener la noticia a editar
+    try:
+        # Usar SQL para obtener la noticia
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT n.id, n.titulo, n.resumen, n.contenido, n.estado, n.destacado,
+                       n.imagen_portada, n.id_comunidad, c.nombre as comunidad_nombre,
+                       n.id_autor, u.nombre as autor_nombre, u.apellido as autor_apellido
+                FROM raiz.noticias n
+                LEFT JOIN raiz.comunidades c ON n.id_comunidad = c.id
+                LEFT JOIN raiz.usuarios u ON n.id_autor = u.id
+                WHERE n.slug = %s
+            """, [slug])
+            
+            noticia_data = cursor.fetchone()
+            
+            if not noticia_data:
+                messages.error(request, f"No se encontró la noticia con slug '{slug}'.")
+                return redirect('core:noticias')
+            
+            # Mapeo de datos
+            noticia = {
+                'id': noticia_data[0],
+                'titulo': noticia_data[1],
+                'resumen': noticia_data[2],
+                'contenido': noticia_data[3],
+                'estado': noticia_data[4],
+                'destacado': noticia_data[5],
+                'imagen_portada': noticia_data[6],
+                'id_comunidad': noticia_data[7],
+                'comunidad_nombre': noticia_data[8],
+                'id_autor': noticia_data[9],
+                'autor_nombre': noticia_data[10],
+                'autor_apellido': noticia_data[11],
+                'slug': slug
+            }
+            
+    except Exception as e:
+        print(f"Error al obtener noticia: {e}")
+        messages.error(request, f"Error al obtener la noticia: {e}")
+        return redirect('core:noticias')
+    
+    # Procesar formulario si es POST
+    error_message = None
+    success_message = None
+    
+    if request.method == 'POST':
+        # Obtener datos del formulario
+        titulo = request.POST.get('titulo', '').strip()
+        resumen = request.POST.get('resumen', '').strip()
+        contenido = request.POST.get('contenido', '').strip()
+        estado = request.POST.get('estado', 'borrador')
+        destacado = request.POST.get('destacado') == 'on'
+        
+        # Validación básica
+        if not titulo:
+            error_message = "El título es obligatorio."
+        elif not resumen:
+            error_message = "El resumen es obligatorio."
+        elif not contenido:
+            error_message = "El contenido es obligatorio."
+        else:
+            # Actualizar la noticia
+            try:
+                # Generar nuevo slug si cambió el título
+                new_slug = slug
+                if titulo != noticia['titulo']:
+                    import datetime
+                    base_slug = slugify(titulo)
+                    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+                    random_suffix = str(uuid.uuid4())[:8]
+                    new_slug = f"{base_slug}-{timestamp}-{random_suffix}"
+                
+                # Actualizar en la base de datos
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        UPDATE raiz.noticias
+                        SET titulo = %s, 
+                            resumen = %s, 
+                            contenido = %s, 
+                            estado = %s, 
+                            destacado = %s,
+                            slug = %s,
+                            fecha_actualizacion = CURRENT_TIMESTAMP,
+                            fecha_publicacion = CASE 
+                                WHEN estado = 'publicado' AND fecha_publicacion IS NULL 
+                                THEN CURRENT_TIMESTAMP 
+                                ELSE fecha_publicacion 
+                            END
+                        WHERE id = %s
+                    """, [
+                        titulo, 
+                        resumen, 
+                        contenido, 
+                        estado, 
+                        destacado,
+                        new_slug,
+                        noticia['id']
+                    ])
+                
+                # Procesar imagen si existe
+                if 'imagen_portada' in request.FILES:
+                    imagen = request.FILES['imagen_portada']
+                    _, extension = os.path.splitext(imagen.name)
+                    
+                    # Generar nombre de archivo único
+                    nombre_archivo = f"{new_slug}{extension}"
+                    ruta_guardado = os.path.join('core/static/core/img/news', nombre_archivo)
+                    
+                    # Asegurarse de que el directorio existe
+                    os.makedirs(os.path.dirname(ruta_guardado), exist_ok=True)
+                    
+                    # Guardar la imagen
+                    with open(ruta_guardado, 'wb+') as destino:
+                        for chunk in imagen.chunks():
+                            destino.write(chunk)
+                    
+                    # Actualizar el campo imagen_portada
+                    with connection.cursor() as cursor:
+                        cursor.execute("""
+                            UPDATE raiz.noticias 
+                            SET imagen_portada = %s 
+                            WHERE id = %s
+                        """, [nombre_archivo, noticia['id']])
+                
+                # Mensaje de éxito
+                success_message = f"Noticia '{titulo}' actualizada con éxito."
+                
+                # Redireccionar a la página de noticias en caso de éxito
+                if new_slug != slug:
+                    # Si cambió el slug, redirigir a la nueva URL
+                    return redirect('core:editar_noticia', slug=new_slug)
+                
+            except Exception as e:
+                print(f"Error al actualizar noticia: {e}")
+                error_message = f"Error al actualizar la noticia: {e}"
+    
+    # Preparar contexto para la plantilla
+    context = {
+        'error': error_message,
+        'success': success_message,
+        'noticia': noticia,
+        'form_data': {
+            'titulo': noticia['titulo'],
+            'resumen': noticia['resumen'],
+            'contenido': noticia['contenido'],
+            'estado': noticia['estado'],
+            'destacado': noticia['destacado']
+        } if request.method != 'POST' else None,
+        'usuario': {
+            'nombre': request.session.get('nombre', ''),
+            'apellido': request.session.get('apellido', ''),
+            'username': request.session.get('username', '')
+        },
+        'comunidad': {
+            'id': noticia['id_comunidad'],
+            'nombre': noticia['comunidad_nombre']
+        }
+    }
+    
+    # Renderizar plantilla
+    return render(request, 'core/edit_news.html', context)
