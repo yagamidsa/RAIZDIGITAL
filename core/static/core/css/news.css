@@ -1,7 +1,8 @@
 /* 
- * news.css
+ * news.css - VERSIÓN CORREGIDA
  * Estilos para la página de noticias con diseño inspirado en Apple y Linux
  * Raíz Digital - 2025
+ * Optimizado para todos los dispositivos
  */
 
 /* Estilos base */
@@ -17,8 +18,10 @@ body {
     background: linear-gradient(125deg, var(--dark-matter) 0%, #071a2c 40%, #061c1e 80%, #052016 100%);
     color: #ffffff;
     font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
-    overflow-y: auto !important;
     line-height: 1.6;
+    min-height: 100vh;
+    height: auto !important;
+    overflow-y: auto !important;
 }
 
 :root {
@@ -39,8 +42,11 @@ body {
     position: relative;
     width: 100%;
     min-height: 100vh;
-    padding: 80px 0;
-    overflow-y: auto;
+    height: auto !important;
+    padding: 80px 0 100px 0;
+    overflow-y: visible !important;
+    overflow-x: hidden;
+    z-index: 1;
 }
 
 /* Elementos de fondo */
@@ -51,6 +57,7 @@ body {
     width: 100%;
     height: 100%;
     z-index: 0;
+    pointer-events: none;
 }
 
 .cyber-grid {
@@ -67,6 +74,7 @@ body {
     transform: perspective(500px) rotateX(60deg);
     z-index: 0;
     animation: gridMove 20s linear infinite;
+    pointer-events: none;
 }
 
 .organic-shapes {
@@ -190,11 +198,15 @@ body {
 /* Contenido principal */
 .news-content {
     position: relative;
-    z-index: 1;
+    z-index: 5;
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 24px;
-    padding-top: 70px; /* Para compensar la barra de navegación fija */
+    padding-top: 90px; /* Para compensar la barra de navegación fija */
+    min-height: 50vh;
+    height: auto !important;
+    display: block;
+    overflow: visible !important;
 }
 
 /* Encabezado de la sección */
@@ -202,6 +214,8 @@ body {
     text-align: center;
     margin-bottom: 60px;
     padding-top: 30px;
+    position: relative;
+    z-index: 5;
 }
 
 .news-title {
@@ -229,6 +243,11 @@ body {
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: var(--grid-gap);
     padding-bottom: 60px;
+    position: relative;
+    z-index: 5;
+    min-height: 100px;
+    height: auto !important;
+    overflow: visible !important;
 }
 
 /* Artículo destacado - Ocupa dos columnas */
@@ -246,6 +265,10 @@ body {
     border: 1px solid rgba(0, 255, 157, 0.2);
     margin-bottom: 30px;
     transition: var(--transition-smooth);
+    min-height: 350px;
+    height: auto !important;
+    position: relative;
+    z-index: 5;
 }
 
 .featured-article:hover {
@@ -362,8 +385,11 @@ body {
     transition: var(--transition-smooth);
     border: 1px solid rgba(0, 255, 157, 0.1);
     height: 100%;
+    min-height: 450px;
     display: flex;
     flex-direction: column;
+    position: relative;
+    z-index: 5;
 }
 
 .news-card:hover {
@@ -476,6 +502,8 @@ body {
     justify-content: center;
     margin-top: 60px;
     margin-bottom: 40px;
+    position: relative;
+    z-index: 5;
 }
 
 .pagination-container {
@@ -644,6 +672,136 @@ body {
     margin-bottom: 30px;
 }
 
+/* Botón para crear nueva noticia */
+.admin-action-container {
+    display: flex;
+    justify-content: center;
+    margin: 30px 0;
+    position: relative;
+    z-index: 5;
+}
+
+.btn-create-news {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 255, 157, 0.1);
+    color: var(--neon-green);
+    border: 2px solid var(--neon-green);
+    border-radius: 30px;
+    padding: 10px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.btn-create-news svg {
+    fill: var(--neon-green);
+    transition: all 0.3s ease;
+}
+
+.btn-create-news:hover {
+    background: var(--neon-green);
+    color: var(--dark-matter);
+    box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+    transform: translateY(-3px);
+}
+
+.btn-create-news:hover svg {
+    fill: var(--dark-matter);
+}
+
+.btn-create-news::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(0, 255, 157, 0.3),
+        transparent
+    );
+    transition: 0.5s;
+}
+
+.btn-create-news:hover::before {
+    left: 100%;
+}
+
+/* Estilos para el botón de edición */
+.edit-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    background: rgba(0, 255, 157, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border: 1px solid rgba(0, 255, 157, 0.3);
+    backdrop-filter: blur(5px);
+    z-index: 10;
+}
+
+.edit-button svg {
+    width: 18px;
+    height: 18px;
+    fill: var(--neon-green);
+    transition: all 0.3s ease;
+}
+
+.edit-button:hover {
+    background: var(--neon-green);
+    transform: translateY(-3px) scale(1.1);
+    box-shadow: 0 5px 15px rgba(0, 255, 157, 0.4);
+}
+
+.edit-button:hover svg {
+    fill: var(--dark-matter);
+    transform: rotate(15deg);
+}
+
+.edit-button::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    opacity: 0;
+}
+
+.edit-button:hover::after {
+    border-color: var(--neon-green);
+    opacity: 0.5;
+    box-shadow: 0 0 10px var(--neon-green);
+}
+
+.featured-article .edit-button {
+    top: 20px;
+    right: 20px;
+}
+
+.news-card .edit-button {
+    top: 15px;
+    right: 15px;
+}
+
 /* Animaciones */
 @keyframes gridMove {
     0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
@@ -692,14 +850,55 @@ body {
 }
 
 @media (max-width: 768px) {
+    /* Configuración general para móviles */
+    html, body {
+        overflow-y: auto !important;
+        height: auto !important;
+    }
+    
+    .news-container {
+        overflow-y: visible !important;
+        height: auto !important;
+        padding-bottom: 80px;
+    }
+    
     .news-content {
         padding: 0 16px;
+        padding-top: 80px;
+        overflow: visible !important;
     }
     
+    /* Convertir grid a columna */
     .news-grid {
-        grid-template-columns: 1fr;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 30px !important;
+        height: auto !important;
     }
     
+    .news-card {
+        width: 100% !important;
+        margin-bottom: 30px !important;
+        min-height: auto !important;
+        height: auto !important;
+    }
+    
+    /* Ajustes de navegación */
+    .news-nav {
+        display: none;
+    }
+    
+    .news-header {
+        padding: 0 16px;
+        height: 60px;
+    }
+    
+    .back-button {
+        top: 80px;
+        left: 16px;
+    }
+    
+    /* Ajustes de texto y elementos */
     .news-title {
         font-size: 2rem;
     }
@@ -708,29 +907,55 @@ body {
         font-size: 1rem;
     }
     
-    .news-header {
-        padding: 0 16px;
+    .news-section-header {
+        margin-bottom: 40px;
     }
     
-    .news-nav {
-        display: none;
-    }
-    
-    .back-button {
-        top: 90px;
-        left: 16px;
+    .card-excerpt {
+        -webkit-line-clamp: 3;
     }
     
     .article-title {
         font-size: 1.5rem;
     }
     
-    .news-container {
-        padding: 60px 0;
+    /* Ajustes de imágenes */
+    .featured-image {
+        height: 200px !important;
+        min-height: 0 !important;
     }
     
-    .card-excerpt {
-        -webkit-line-clamp: 2;
+    .card-image {
+        height: 180px;
+    }
+    
+    /* Paginación */
+    .pagination-container {
+        padding: 6px 10px;
+    }
+    
+    .page-link {
+        width: 32px;
+        height: 32px;
+    }
+    
+    /* Botón crear noticia */
+    .btn-create-news {
+        font-size: 0.9rem;
+        padding: 8px 20px;
+    }
+    
+    /* Botón editar */
+    .edit-button {
+        top: 10px;
+        right: 10px;
+        width: 36px;
+        height: 36px;
+    }
+    
+    .edit-button svg {
+        width: 16px;
+        height: 16px;
     }
 }
 
@@ -745,22 +970,38 @@ body {
         gap: 8px;
     }
     
-    .news-section-header {
-        margin-bottom: 40px;
+    .card-content {
+        padding: 16px;
     }
     
-    .news-card {
-        margin-bottom: 20px;
+    .back-to-top {
+        bottom: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
     }
     
-    .pagination-container {
-        padding: 6px 8px;
+    .back-to-top svg {
+        width: 16px;
+        height: 16px;
     }
     
-    .page-link {
-        width: 32px;
-        height: 32px;
-        font-size: 0.8rem;
+    .news-title {
+        font-size: 1.7rem;
+    }
+    
+    .news-subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .card-title {
+        font-size: 1.2rem;
+    }
+    
+    .read-more {
+        width: 100%;
+        padding: 10px 0;
+        text-align: center;
     }
 }
 
@@ -776,20 +1017,7 @@ body {
     }
 }
 
-/* Dark mode improvements */
-@media (prefers-color-scheme: dark) {
-    .news-card, .featured-article {
-        border-color: rgba(0, 255, 157, 0.15);
-    }
-    
-    .news-title {
-        text-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
-    }
-}
-
-
-
-/* Estilos adicionales para mejorar el formulario */
+/* Fixes para campos de formulario */
 .field-error {
     border-color: #ff5050 !important;
     box-shadow: 0 0 10px rgba(255, 80, 80, 0.3) !important;
@@ -800,7 +1028,6 @@ body {
     font-size: 0.8rem;
     margin-top: 5px;
     display: block;
-    animation: fadeIn 0.3s ease;
 }
 
 .char-counter {
@@ -843,6 +1070,7 @@ body {
 .success-message {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     padding: 20px;
     border-radius: 10px;
     background: rgba(0, 255, 157, 0.1);
@@ -881,6 +1109,25 @@ body {
     100% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0); }
 }
 
+/* Error message styling */
+.error-message {
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid rgba(255, 80, 80, 0.3);
+    color: #ff4444;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.error-icon {
+    width: 24px;
+    height: 24px;
+    fill: #ff4444;
+}
+
 /* Mejora en los inputs al estar enfocados */
 .form-input:focus,
 .form-textarea:focus,
@@ -889,64 +1136,6 @@ body {
     box-shadow: 0 0 20px rgba(0, 255, 157, 0.3);
     background: rgba(10, 25, 47, 0.8);
     transform: translateY(-2px);
-}
-
-/* Estilo para el overlay de imagen al hacer hover */
-.image-upload-container:hover::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(0, 255, 157, 0.2) 0%, rgba(10, 25, 47, 0) 70%);
-    pointer-events: none;
-    z-index: 1;
-}
-
-/* Mejoras en los iconos de la interfaz */
-.image-upload-icon {
-    transition: all 0.5s ease;
-}
-
-.image-upload-container:hover .image-upload-icon {
-    transform: scale(1.1) rotate(5deg);
-    filter: drop-shadow(0 0 5px var(--neon-green));
-}
-
-/* Mejora en el efecto de carga al subir imágenes */
-.image-preview {
-    position: relative;
-}
-
-.image-preview::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 5px;
-    background: linear-gradient(90deg, var(--neon-green), var(--cyber-blue), var(--neon-green));
-    background-size: 200% 100%;
-    animation: loadingBar 2s linear infinite;
-    border-radius: 5px 5px 0 0;
-    z-index: 10;
-}
-
-@keyframes loadingBar {
-    0% { background-position: 100% 0; }
-    100% { background-position: 0 0; }
-}
-
-/* Efecto sutil de pulso para los botones */
-.btn-submit-news:not(:disabled) {
-    animation: buttonPulse 3s infinite;
-}
-
-@keyframes buttonPulse {
-    0% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(0, 255, 157, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0); }
 }
 
 /* Scroll personalizado para la página */
@@ -964,129 +1153,154 @@ body {
     background: rgba(0, 255, 157, 0.7);
 }
 
-/* Mejoras para móviles */
+/* Correcciones forzadas para problemas móviles */
 @media (max-width: 768px) {
-    .form-actions {
-        gap: 10px;
+    /* Forzar visibilidad y desactivar animaciones en móviles */
+    .news-card, 
+    .featured-article {
+        opacity: 1 !important;
+        transform: none !important;
+        visibility: visible !important;
+        animation: none !important;
+        transition: box-shadow 0.3s ease !important;
     }
     
-    .btn-submit-news,
-    .btn-cancel {
-        padding: 10px;
+    /* Forzar mostrar el grid */
+    .news-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        overflow: visible !important;
+        height: auto !important;
+        opacity: 1 !important;
+        visibility: visible !important;
     }
     
-    .image-upload-text,
-    .image-upload-help {
-        font-size: 0.9rem;
+    /* Arreglar problemas con article y footer */
+    article {
+        display: block !important;
+        width: 100% !important;
+        margin-bottom: 30px !important;
     }
-    
-    .success-message {
-        flex-direction: column;
-        text-align: center;
-        padding: 15px;
-    }
-    
-    .success-icon {
-        margin-right: 0;
-        margin-bottom: 10px;
-    }
-    
-    .btn-view-news {
-        margin-left: 0;
-        margin-top: 15px;
+
+    /* Corrección para news-pagination en móviles */
+    .news-pagination {
+        margin-top: 30px;
         width: 100%;
-        text-align: center;
-    }
-}
-
-
-.btn-create-news {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: rgba(0, 255, 157, 0.1);
-    color: var(--neon-green);
-    border: 2px solid var(--neon-green);
-    border-radius: 30px;
-    padding: 10px 24px;
-    font-size: 1rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.btn-create-news svg {
-    fill: var(--neon-green);
-    transition: all 0.3s ease;
-}
-
-.btn-create-news:hover {
-    background: var(--neon-green);
-    color: var(--dark-matter);
-    box-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
-    transform: translateY(-3px);
-}
-
-.btn-create-news:hover svg {
-    fill: var(--dark-matter);
-}
-
-.btn-create-news::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(0, 255, 157, 0.3),
-        transparent
-    );
-    transition: 0.5s;
-}
-
-.btn-create-news:hover::before {
-    left: 100%;
-}
-
-/* Estilos responsivos */
-@media (max-width: 768px) {
-    .create-news-container {
-        padding: 25px;
-        margin: 20px 15px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 10px;
     }
     
-    .form-title {
-        font-size: 1.5rem;
+    .pagination-container {
+        min-width: max-content;
+    }
+    
+    /* Corregir forzadamente dimensiones */
+    .featured-image,
+    .card-image {
+        height: 200px !important;
+        min-height: 200px !important;
+        max-height: 200px !important;
+        display: block !important;
+    }
+    
+    /* Asegurar margen bajo contenedor de acción admin */
+    .admin-action-container {
         margin-bottom: 20px;
     }
     
-    .form-actions {
+    /* Solucionar problemas con mensajes de éxito/error en móviles */
+    .success-message,
+    .error-message {
         flex-direction: column;
-    }
-    
-    .btn-submit-news,
-    .btn-cancel {
-        width: 100%;
+        padding: 15px;
+        margin-bottom: 20px;
         text-align: center;
     }
     
-    .image-upload-container {
-        padding: 15px;
+    .success-icon,
+    .error-icon {
+        margin: 0 0 10px 0;
     }
     
-    .image-upload-icon {
-        width: 40px;
-        height: 40px;
+    .btn-view-news {
+        margin: 15px auto 0;
+        width: 100%;
+    }
+    
+    /* Ajuste para texto grande */
+    .article-title {
+        font-size: 1.4rem !important;
+        line-height: 1.3 !important;
+    }
+    
+    /* Ajuste adicional para el texto del autor */
+    .article-author {
+        font-size: 0.8rem;
     }
 }
 
-/* Animación para el borde */
-@keyframes borderRotate {
-    0% { background-position: 0% center; }
-    100% { background-position: 200% center; }
+/* Arreglar problema de visibilidad de noticias */
+@media (max-width: 480px) {
+    .news-card:nth-child(n+2) {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+}
+
+/* Fix para hover issues en móviles */
+@media (hover: none) {
+    .news-card:hover,
+    .featured-article:hover,
+    .edit-button:hover,
+    .btn-create-news:hover,
+    .read-more:hover {
+        transform: none !important;
+    }
+}
+
+
+@media (min-width: 769px) {
+    /* Restaurar grid para escritorio */
+    .news-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)) !important;
+        gap: var(--grid-gap) !important;
+    }
+    
+    /* Corregir artículo destacado */
+    .featured-article {
+        grid-column: 1 / -1 !important;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 30px !important;
+    }
+    
+    /* Asegurar que el contenido sea visible */
+    .featured-content, 
+    .card-content {
+        display: flex !important;
+        flex-direction: column !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* Tarjetas regulares */
+    .news-card {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    /* Asegurar altura apropiada de las imágenes */
+    .featured-image {
+        height: 100% !important;
+        min-height: 350px !important;
+    }
+    
+    .card-image {
+        height: 200px !important;
+    }
 }

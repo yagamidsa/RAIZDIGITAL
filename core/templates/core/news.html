@@ -5,7 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'core/css/variables.css' %}?v=2">
-<link rel="stylesheet" href="{% static 'core/css/news.css' %}?v=3">
+<link rel="stylesheet" href="{% static 'core/css/news.css' %}?v=6">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
 <style>
     /* Correcciones para resolver errores CSS */
@@ -114,6 +114,51 @@
         overflow: auto;
     }
 </style>
+<!-- Corrección específica para vista de escritorio -->
+<style>
+    /* Correcciones específicas para escritorio */
+    @media (min-width: 769px) {
+        /* Estructura correcta para grid en desktop */
+        .news-grid {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)) !important;
+            gap: 24px !important;
+        }
+        
+        /* Asegurar que el artículo destacado ocupe dos columnas */
+        .featured-article {
+            grid-column: 1 / -1 !important;
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 30px !important;
+        }
+        
+        /* Asegurar que las tarjetas normales tengan estructura correcta */
+        .news-card {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+        
+        /* Forzar visibilidad del contenido */
+        .featured-content,
+        .card-content {
+            display: flex !important;
+            flex-direction: column !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        
+        /* Asegurar altura correcta de imágenes */
+        .featured-image {
+            height: 100% !important;
+            min-height: 350px !important;
+        }
+        
+        .card-image {
+            height: 200px !important;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -197,6 +242,14 @@
             {% for noticia in noticias %}
             {% if forloop.first %}
             <article class="featured-article" data-aos="fade-up">
+                {% if request.session.is_admin or is_admin %}
+                <a href="{% url 'core:editar_noticia' noticia.slug %}" class="edit-button" title="Editar noticia">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                    </svg>
+                </a>
+                {% endif %}
                 <div class="featured-image"
                     data-bg-url="{% if noticia.imagen_portada %}{% static 'core/img/news/'|add:noticia.imagen_portada %}{% else %}{% static 'core/img/news/default.jpg' %}{% endif %}">
                     <div class="card-corner corner-top-left"></div>
@@ -228,6 +281,14 @@
             {% else %}
             <!-- Tarjetas de noticias regulares -->
             <article class="news-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:" 0" }}">
+                {% if request.session.is_admin or is_admin %}
+                <a href="{% url 'core:editar_noticia' noticia.slug %}" class="edit-button" title="Editar noticia">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                    </svg>
+                </a>
+                {% endif %}
                 <div class="card-image"
                     data-bg-url="{% if noticia.imagen_portada %}{% static 'core/img/news/'|add:noticia.imagen_portada %}{% else %}{% static 'core/img/news/default.jpg' %}{% endif %}">
                     <div class="card-corner corner-top-left"></div>
@@ -321,25 +382,41 @@
 
 {% block extra_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-<script src="{% static 'core/js/create_news.js' %}"></script>
 <script>
-    // Script para establecer las imágenes de fondo después de que el DOM cargue
+    // Script optimizado para arreglar problemas de visualización en móviles
     document.addEventListener('DOMContentLoaded', function () {
-        // Inicializar AOS para animaciones de scroll
+        console.log('DOM cargado - Inicializando optimizaciones para noticias');
+
+        // Función para detectar dispositivos móviles
+        const isMobile = window.innerWidth <= 768;
+
+        // Inicializar AOS con configuración específica para móviles
         AOS.init({
-            duration: 800,
+            duration: isMobile ? 500 : 800,
             easing: 'ease-out-cubic',
-            once: false,
+            once: true,
             mirror: false,
-            offset: 50
+            offset: 50,
+            disable: isMobile // Desactivar AOS en móviles
         });
 
         // Establecer imágenes de fondo para elementos con data-bg-url
         document.querySelectorAll('[data-bg-url]').forEach(function (element) {
             const bgUrl = element.getAttribute('data-bg-url');
             if (bgUrl) {
-                element.style.backgroundImage = `url('${bgUrl}')`;
-                console.log(`Configurando imagen de fondo: ${bgUrl}`);
+                // Usar preload para imágenes críticas
+                if (isMobile) {
+                    // En móviles, establecer la imagen directamente sin animaciones
+                    element.style.backgroundImage = `url('${bgUrl}')`;
+                    console.log(`Imagen de fondo establecida: ${bgUrl}`);
+                } else {
+                    // En escritorio, precargar imagen para mejor rendimiento
+                    const img = new Image();
+                    img.onload = function () {
+                        element.style.backgroundImage = `url('${bgUrl}')`;
+                    };
+                    img.src = bgUrl;
+                }
             } else {
                 console.warn('Elemento sin URL de fondo');
                 // Usar una imagen predeterminada
@@ -369,23 +446,82 @@
             });
         }
 
-        // Asignar retrasos personalizados a las tarjetas para animación escalonada
-        document.querySelectorAll('.news-card').forEach(function (card, index) {
-            // Aumentar el retraso para cada tarjeta
-            const delay = 100 * (index + 1);
-            card.setAttribute('data-aos-delay', delay);
+        // CORRECCIÓN PARA DISPOSITIVOS MÓVILES
+        if (isMobile) {
+            console.log('Dispositivo móvil detectado - aplicando correcciones');
+
+            // 1. Forzar visibilidad de todos los elementos importantes
+            function forceVisibility() {
+                // Forzar visibilidad de las tarjetas
+                document.querySelectorAll('.news-card, .featured-article').forEach(card => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'none';
+                    card.style.display = 'block';
+                    card.style.visibility = 'visible';
+
+                    // Eliminar cualquier clase que pueda causar problemas
+                    card.classList.remove('aos-animate', 'aos-init');
+                    card.removeAttribute('data-aos');
+                    card.removeAttribute('data-aos-delay');
+                });
+
+                // Forzar visibilidad del grid
+                const grid = document.querySelector('.news-grid');
+                if (grid) {
+                    grid.style.display = 'flex';
+                    grid.style.flexDirection = 'column';
+                    grid.style.opacity = '1';
+                    grid.style.visibility = 'visible';
+                }
+
+                console.log('Visibilidad forzada en elementos clave');
+            }
+
+            // Ejecutar inmediatamente
+            forceVisibility();
+
+            // Ejecutar de nuevo después de un breve retraso
+            setTimeout(forceVisibility, 500);
+            setTimeout(forceVisibility, 1000);
+
+            // 2. Corregir altura y scroll
+            document.documentElement.style.height = 'auto';
+            document.documentElement.style.overflowY = 'auto';
+            document.body.style.height = 'auto';
+            document.body.style.overflowY = 'auto';
+
+            // 3. Forzar redibujado del DOM
+            document.body.style.display = 'none';
+            document.body.offsetHeight; // Forzar reflow
+            document.body.style.display = '';
+        }
+
+        // Evento de cambio de orientación (especialmente importante para móviles)
+        window.addEventListener('orientationchange', function () {
+            console.log('Orientación cambiada - aplicando correcciones');
+
+            // Dar tiempo para que termine la transición de orientación
+            setTimeout(function () {
+                if (window.innerWidth <= 768) {
+                    // Aplicar correcciones para móviles
+                    document.querySelectorAll('.news-card, .featured-article').forEach(card => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'none';
+                        card.style.visibility = 'visible';
+                        card.style.display = 'block';
+                    });
+
+                    const grid = document.querySelector('.news-grid');
+                    if (grid) {
+                        grid.style.display = 'flex';
+                        grid.style.flexDirection = 'column';
+                        grid.style.visibility = 'visible';
+                    }
+                }
+            }, 300); // Esperar un poco después del cambio de orientación
         });
 
-        console.log('DOM cargado, inicializados efectos de la página de noticias');
-    });
-</script>
-<script>
-    // Solo mostrará esta información en la consola del navegador
-    document.addEventListener('DOMContentLoaded', function () {
-        const adminInfo = document.getElementById('admin-debug-info');
-        if (adminInfo) {
-            console.log('Información de administrador:', adminInfo.innerText);
-        }
+        console.log('Inicialización completa de la página de noticias');
     });
 </script>
 {% endblock %}
