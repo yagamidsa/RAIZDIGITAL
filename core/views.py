@@ -380,63 +380,206 @@ def noticias(request):
 
 def noticia_detalle(request, slug):
     """
-    Vista mejorada para mostrar el detalle de una noticia.
+    Vista mejorada para mostrar el detalle de una noticia con contador de vistas único.
     """
+    print(f"\n=== DETALLE DE NOTICIA SOLICITADO ===")
+    print(f"Slug recibido: {slug}")
+    
     # Verificar que el slug sea válido
     if not slug:
+        print("Error: Slug vacío")
         return redirect('core:noticias')
     
-    # Obtener la noticia por su slug
     try:
-        # Verificar si el usuario es admin para mostrar noticias en estado borrador
-        is_admin = request.session.get('is_admin', False)
+        # Identificar al usuario (desde la sesión o por IP si no está logueado)
+        user_id = request.session.get('user_id')
+        if not user_id:
+            # Si no está logueado, usar la IP como identificador
+            user_id = request.META.get('REMOTE_ADDR', 'anonymous')
         
-        if is_admin:
-            noticia = get_object_or_404(Noticia, slug=slug)
-        else:
-            noticia = get_object_or_404(Noticia, slug=slug, estado='publicado')
+        print(f"Usuario que ve la noticia: {user_id}")
         
-        # Incrementar contador de vistas
-        noticia.vistas += 1
-        noticia.save(update_fields=['vistas'])
+        # Variables para controlar el estado de visualización y me gusta
+        vista_contabilizada = False
+        usuario_dio_like = False
         
-        # Obtener autor
-        try:
-            autor = Usuario.objects.get(id=noticia.id_autor)
-            nombre_autor = f"{autor.nombre} {autor.apellido}"
-            foto_autor = autor.foto_perfil
-        except Usuario.DoesNotExist:
-            nombre_autor = "Autor desconocido"
-            foto_autor = None
+        # Obtener la noticia usando SQL directo para mayor control
+        from django.db import connection
+        with connection.cursor() as cursor:
+            # Consulta SQL básica para obtener la noticia
+            sql_query = """
+                SELECT n.id, n.titulo, n.resumen, n.contenido, n.slug, n.fecha_publicacion, 
+                       n.estado, n.imagen_portada, n.destacado, n.id_comunidad, c.nombre as comunidad_nombre,
+                       u.id as autor_id, u.nombre as autor_nombre, u.apellido as autor_apellido,
+                       n.vistas
+                FROM raiz.noticias n
+                LEFT JOIN raiz.comunidades c ON n.id_comunidad = c.id
+                LEFT JOIN raiz.usuarios u ON n.id_autor = u.id
+                WHERE n.slug = %s
+            """
+            
+            # Añadir filtro de estado solo para no-admins
+            is_admin = request.session.get('is_admin', False)
+            if not is_admin:
+                sql_query += " AND n.estado = 'publicado'"
+                
+            print(f"Ejecutando consulta SQL: {sql_query}")
+            cursor.execute(sql_query, [slug])
+            noticia_data = cursor.fetchone()
+            
+            if not noticia_data:
+                print(f"Error: No se encontró noticia con slug '{slug}'")
+                return redirect('core:noticias')
+            
+            # Obtener el ID de la noticia para registrar la vista
+            noticia_id = noticia_data[0]
+            
+            # Mapeo de datos de la consulta a un diccionario
+            noticia = {
+                'id': noticia_id,
+                'titulo': noticia_data[1],
+                'resumen': noticia_data[2],
+                'contenido': noticia_data[3],
+                'slug': noticia_data[4],
+                'fecha_publicacion': noticia_data[5],
+                'estado': noticia_data[6],
+                'imagen_portada': noticia_data[7] or 'default.jpg',
+                'destacado': noticia_data[8],
+                'id_comunidad': noticia_data[9],
+                'comunidad_nombre': noticia_data[10],
+                'autor_id': noticia_data[11],
+                'autor_nombre': noticia_data[12] or 'Usuario',
+                'autor_apellido': noticia_data[13] or 'Desconocido',
+                'vistas': noticia_data[14] or 0
+            }
+            
+            print(f"Noticia encontrada: {noticia['titulo']} (ID: {noticia['id']})")
+            
+            # Comprobar si el usuario ya vio esta noticia
+            cursor.execute("""
+                SELECT id FROM raiz.noticia_vistas 
+                WHERE id_noticia = %s AND id_usuario = %s
+            """, [str(noticia_id), str(user_id)])
+            
+            vista_existente = cursor.fetchone()
+            
+            # Si no existe una vista previa, registrar la nueva vista
+            if not vista_existente:
+                try:
+                    print(f"Registrando nueva vista para noticia {noticia_id} por usuario {user_id}")
+                    cursor.execute("""
+                        INSERT INTO raiz.noticia_vistas (id_noticia, id_usuario)
+                        VALUES (%s, %s)
+                    """, [str(noticia_id), str(user_id)])
+                    
+                    # Incrementar contador de vistas en la tabla de noticias
+                    cursor.execute("""
+                        UPDATE raiz.noticias 
+                        SET vistas = vistas + 1 
+                        WHERE id = %s
+                    """, [noticia_id])
+                    
+                    # Actualizar el contador en el objeto noticia que pasamos a la plantilla
+                    noticia['vistas'] += 1
+                    vista_contabilizada = True
+                    
+                    print(f"Vista registrada y contador incrementado a {noticia['vistas']}")
+                except Exception as e:
+                    print(f"Error al registrar vista: {e}")
+            else:
+                print(f"El usuario ya había visto esta noticia anteriormente")
+            
+            # Verificar si el usuario ya dio like a esta noticia
+            cursor.execute("""
+                SELECT id FROM raiz.noticia_likes 
+                WHERE id_noticia = %s AND id_usuario = %s
+            """, [str(noticia_id), str(user_id)])
+            
+            like_existente = cursor.fetchone()
+            usuario_dio_like = like_existente is not None
+            
+            # Obtener la cantidad de likes
+            cursor.execute("""
+                SELECT COUNT(*) FROM raiz.noticia_likes 
+                WHERE id_noticia = %s
+            """, [str(noticia_id)])
+            
+            cantidad_likes = cursor.fetchone()[0]
         
-        # Obtener noticias relacionadas (misma comunidad o mismo autor)
-        # Limitamos a 3 noticias relacionadas para no sobrecargar la página
-        noticias_relacionadas = Noticia.objects.filter(
-            Q(id_comunidad=noticia.id_comunidad) | Q(id_autor=noticia.id_autor),
-            estado='publicado'
-        ).exclude(id=noticia.id).order_by('-fecha_publicacion')[:3]
+        # Obtener noticias relacionadas (solo de la comunidad del usuario)
+        user_comunidad_id = request.session.get('comunidad_id')
+        
+        # Asegurar que el ID de comunidad sea entero
+        if user_comunidad_id:
+            try:
+                user_comunidad_id = int(user_comunidad_id)
+            except (ValueError, TypeError):
+                print(f"Error al convertir ID de comunidad: {user_comunidad_id}")
+        
+        noticias_relacionadas = []
+        with connection.cursor() as cursor:
+            # Definir consulta base para noticias relacionadas
+            related_sql = """
+                SELECT n.id, n.titulo, n.resumen, n.slug, n.fecha_publicacion, n.imagen_portada
+                FROM raiz.noticias n
+                WHERE n.id != %s
+                AND n.estado = 'publicado'
+            """
+            
+            # Filtrar por comunidad - solo usar la comunidad del usuario logueado
+            if user_comunidad_id:
+                related_sql += " AND n.id_comunidad = %s"
+                params = [noticia['id'], user_comunidad_id]
+                print(f"Filtrando noticias relacionadas por comunidad: {user_comunidad_id}")
+            else:
+                # Si no hay comunidad, mostrar noticias globales (sin comunidad)
+                related_sql += " AND n.id_comunidad IS NULL"
+                params = [noticia['id']]
+                print("Filtrando noticias relacionadas globales (sin comunidad)")
+            
+            related_sql += " ORDER BY n.fecha_publicacion DESC LIMIT 3"
+            
+            cursor.execute(related_sql, params)
+            
+            for row in cursor.fetchall():
+                noticias_relacionadas.append({
+                    'id': row[0],
+                    'titulo': row[1],
+                    'resumen': row[2],
+                    'slug': row[3],
+                    'fecha_publicacion': row[4],
+                    'imagen_portada': row[5] or 'default.jpg'
+                })
         
         # Preparar datos para la plantilla
         context = {
             'noticia': noticia,
             'autor': {
-                'nombre': nombre_autor,
-                'foto': foto_autor,
-                'id': noticia.id_autor
+                'nombre': f"{noticia['autor_nombre']} {noticia['autor_apellido']}",
+                'id': noticia['autor_id']
             },
             'noticias_relacionadas': noticias_relacionadas,
             'is_admin': is_admin,
-            'meta_description': noticia.resumen[:160] if noticia.resumen else '',
+            'user_comunidad_id': user_comunidad_id,
+            'user_comunidad_nombre': request.session.get('comunidad_nombre', 'Sin comunidad'),
+            'vista_contabilizada': vista_contabilizada,
+            'usuario_dio_like': usuario_dio_like,
+            'cantidad_likes': cantidad_likes,
+            'user_id': user_id
         }
         
+        print("Renderizando plantilla detail_news.html con éxito")
         return render(request, 'core/detail_news.html', context)
         
     except Exception as e:
         # Log del error y redirección al listado
         print(f"Error al mostrar noticia {slug}: {e}")
-        messages.error(request, "No se pudo cargar la noticia solicitada.")
+        import traceback
+        traceback.print_exc()
         return redirect('core:noticias')
+    
 
+    
 
 def is_admin(request):
     """
