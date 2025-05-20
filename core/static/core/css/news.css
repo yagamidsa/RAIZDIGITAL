@@ -1304,3 +1304,149 @@ body {
         height: 200px !important;
     }
 }
+
+
+
+
+/* Estilos para las estadísticas del artículo */
+.article-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin: 20px 0 30px;
+}
+
+.article-views, .article-likes {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 15px;
+    background: rgba(10, 25, 47, 0.5);
+    border-radius: 30px;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.article-views:hover {
+    border-color: rgba(0, 246, 255, 0.3);
+    box-shadow: 0 0 15px rgba(0, 246, 255, 0.2);
+}
+
+.article-views svg {
+    width: 22px;
+    height: 22px;
+    fill: var(--cyber-blue);
+}
+
+/* Estilos para el botón de like */
+.like-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: white;
+    font-size: 1rem;
+    padding: 0;
+    transition: all 0.3s ease;
+}
+
+.heart-icon {
+    width: 24px;
+    height: 24px;
+    fill: rgba(0, 255, 157, 0.5);
+    stroke: var(--neon-green);
+    stroke-width: 1px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.like-button:hover .heart-icon {
+    transform: scale(1.2);
+    fill: rgba(0, 255, 157, 0.7);
+}
+
+.like-button.liked .heart-icon {
+    fill: var(--neon-green);
+    filter: drop-shadow(0 0 5px var(--neon-green));
+    animation: heartBeat 0.3s ease-in-out;
+}
+
+/* Mensaje de vista contabilizada */
+.view-counted-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(0, 255, 157, 0.1);
+    color: var(--neon-green);
+    padding: 10px 20px;
+    border-radius: 30px;
+    margin: 0 auto 30px;
+    width: fit-content;
+    font-size: 0.9rem;
+    border: 1px solid rgba(0, 255, 157, 0.3);
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.view-counted-message svg {
+    width: 18px;
+    height: 18px;
+    fill: var(--neon-green);
+}
+
+/* Animaciones */
+@keyframes heartBeat {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.3); }
+    50% { transform: scale(1); }
+    75% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+@keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Estilos adicionales para el feedback al dar like */
+.like-feedback {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--neon-green);
+    color: var(--dark-matter);
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    animation: fadeUpAndOut 1s forwards;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+@keyframes fadeUpAndOut {
+    0% { opacity: 0; transform: translate(-50%, 10px); }
+    20% { opacity: 1; transform: translate(-50%, 0); }
+    80% { opacity: 1; transform: translate(-50%, -5px); }
+    100% { opacity: 0; transform: translate(-50%, -15px); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
