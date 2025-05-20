@@ -5,7 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'core/css/variables.css' %}?v=2">
-<link rel="stylesheet" href="{% static 'core/css/news.css' %}?v=12">
+<link rel="stylesheet" href="{% static 'core/css/news.css' %}?v=20">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
 <style>
     /* Correcciones para resolver errores CSS */
@@ -184,7 +184,7 @@
         </a>
 
         <!-- Botón de menú móvil -->
-        <button id="mobileMenuToggle" class="mobile-menu-toggle">
+        <button id="mobileMenuToggle" class="mobile-menu-toggle" aria-label="Menú">
             <span></span>
             <span></span>
             <span></span>
@@ -422,278 +422,112 @@
 {% block extra_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 <script>
-    // Script optimizado para arreglar problemas de visualización en móviles
-    document.addEventListener('DOMContentLoaded', function () {
-        console.log('DOM cargado - Inicializando optimizaciones para noticias');
-
-        // Función para detectar dispositivos móviles
-        const isMobile = window.innerWidth <= 768;
-
-        // Inicializar AOS con configuración específica para móviles
-        AOS.init({
-            duration: isMobile ? 500 : 800,
-            easing: 'ease-out-cubic',
-            once: true,
-            mirror: false,
-            offset: 50,
-            disable: isMobile // Desactivar AOS en móviles
-        });
-
-        // Establecer imágenes de fondo para elementos con data-bg-url
-        document.querySelectorAll('[data-bg-url]').forEach(function (element) {
-            const bgUrl = element.getAttribute('data-bg-url');
-            if (bgUrl) {
-                // Usar preload para imágenes críticas
-                if (isMobile) {
-                    // En móviles, establecer la imagen directamente sin animaciones
-                    element.style.backgroundImage = `url('${bgUrl}')`;
-                    console.log(`Imagen de fondo establecida: ${bgUrl}`);
-                } else {
-                    // En escritorio, precargar imagen para mejor rendimiento
-                    const img = new Image();
-                    img.onload = function () {
-                        element.style.backgroundImage = `url('${bgUrl}')`;
-                    };
-                    img.src = bgUrl;
-                }
-            } else {
-                console.warn('Elemento sin URL de fondo');
-                // Usar una imagen predeterminada
-                element.style.backgroundImage = `url('{% static 'core/img/news/default.jpg' %}')`;
-            }
-        });
-
-        // Configurar el botón para volver arriba
-        const backToTopButton = document.getElementById('backToTop');
-        if (backToTopButton) {
-            // Mostrar/ocultar botón basado en la posición de scroll
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 300) {
-                    backToTopButton.classList.add('visible');
-                } else {
-                    backToTopButton.classList.remove('visible');
-                }
-            });
-
-            // Añadir funcionalidad de scroll suave al hacer clic
-            backToTopButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
-            });
-        }
-
-        // CORRECCIÓN PARA DISPOSITIVOS MÓVILES
-        if (isMobile) {
-            console.log('Dispositivo móvil detectado - aplicando correcciones');
-
-            // 1. Forzar visibilidad de todos los elementos importantes
-            function forceVisibility() {
-                // Forzar visibilidad de las tarjetas
-                document.querySelectorAll('.news-card, .featured-article').forEach(card => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'none';
-                    card.style.display = 'block';
-                    card.style.visibility = 'visible';
-
-                    // Eliminar cualquier clase que pueda causar problemas
-                    card.classList.remove('aos-animate', 'aos-init');
-                    card.removeAttribute('data-aos');
-                    card.removeAttribute('data-aos-delay');
-                });
-
-                // Forzar visibilidad del grid
-                const grid = document.querySelector('.news-grid');
-                if (grid) {
-                    grid.style.display = 'flex';
-                    grid.style.flexDirection = 'column';
-                    grid.style.opacity = '1';
-                    grid.style.visibility = 'visible';
-                }
-
-                console.log('Visibilidad forzada en elementos clave');
-            }
-
-            // Ejecutar inmediatamente
-            forceVisibility();
-
-            // Ejecutar de nuevo después de un breve retraso
-            setTimeout(forceVisibility, 500);
-            setTimeout(forceVisibility, 1000);
-
-            // 2. Corregir altura y scroll
-            document.documentElement.style.height = 'auto';
-            document.documentElement.style.overflowY = 'auto';
-            document.body.style.height = 'auto';
-            document.body.style.overflowY = 'auto';
-
-            // 3. Forzar redibujado del DOM
-            document.body.style.display = 'none';
-            document.body.offsetHeight; // Forzar reflow
-            document.body.style.display = '';
-        }
-
-        // Evento de cambio de orientación (especialmente importante para móviles)
-        window.addEventListener('orientationchange', function () {
-            console.log('Orientación cambiada - aplicando correcciones');
-
-            // Dar tiempo para que termine la transición de orientación
-            setTimeout(function () {
-                if (window.innerWidth <= 768) {
-                    // Aplicar correcciones para móviles
-                    document.querySelectorAll('.news-card, .featured-article').forEach(card => {
-                        card.style.opacity = '1';
-                        card.style.transform = 'none';
-                        card.style.visibility = 'visible';
-                        card.style.display = 'block';
-                    });
-
-                    const grid = document.querySelector('.news-grid');
-                    if (grid) {
-                        grid.style.display = 'flex';
-                        grid.style.flexDirection = 'column';
-                        grid.style.visibility = 'visible';
-                    }
-                }
-            }, 300); // Esperar un poco después del cambio de orientación
-        });
-
-        console.log('Inicialización completa de la página de noticias');
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Inicializando página de noticias - versión limpia');
+    
+    // 1. Inicializar AOS para animaciones (solo en desktop)
+    AOS.init({
+        duration: 800,
+        easing: 'ease-out-cubic',
+        once: true,
+        mirror: false,
+        disable: window.innerWidth <= 768
     });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        console.log('Inicializando menú móvil con efectos wow');
-
-        const menuToggle = document.getElementById('mobileMenuToggle');
-        const mobileMenu = document.getElementById('mobileMenu');
-
-        if (!menuToggle || !mobileMenu) {
-            console.error('Elementos del menú móvil no encontrados');
-            return;
+    
+    // 2. Configurar imágenes de fondo
+    document.querySelectorAll('[data-bg-url]').forEach(function(element) {
+        const bgUrl = element.getAttribute('data-bg-url');
+        if (bgUrl) {
+            element.style.backgroundImage = `url('${bgUrl}')`;
         }
-
-        // Añadir evento de clic al botón de menú
-        menuToggle.addEventListener('click', function () {
-            console.log('Botón de menú clickeado');
+    });
+    
+    // 3. MENÚ MÓVIL - Versión simplificada y focalizada
+    const menuToggle = document.getElementById('mobileMenuToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+    
+    if (menuToggle && mobileMenu) {
+        console.log('✅ Elementos del menú móvil encontrados');
+        
+        // Añadir estilos inline para solucionar problemas urgentes
+        mobileMenu.style.display = 'block';
+        
+        // Escuchar eventos de clic
+        menuToggle.addEventListener('click', function() {
+            console.log('🔄 Botón de menú clickeado');
+            
+            // Toggle de clases para activar/desactivar
             menuToggle.classList.toggle('active');
             mobileMenu.classList.toggle('active');
-
-            // Efecto de vibración para el botón
-            if (menuToggle.classList.contains('active')) {
-                navigator.vibrate && navigator.vibrate(50);
-
-                // Añadir efecto de "portal" al abrir
-                const portalEffect = document.createElement('div');
-                portalEffect.className = 'portal-effect';
-                portalEffect.style.cssText = `
-                    position: fixed;
-                    top: ${menuToggle.getBoundingClientRect().top + menuToggle.clientHeight / 2}px;
-                    left: ${menuToggle.getBoundingClientRect().left + menuToggle.clientWidth / 2}px;
-                    width: 0;
-                    height: 0;
-                    background: radial-gradient(circle, var(--neon-green) 0%, transparent 70%);
-                    border-radius: 50%;
-                    opacity: 0.5;
-                    z-index: 998;
-                    pointer-events: none;
-                `;
-                document.body.appendChild(portalEffect);
-
-                // Animar el portal
-                setTimeout(() => {
-                    portalEffect.style.transition = 'all 0.5s cubic-bezier(0.17, 0.67, 0.44, 1.35)';
-                    portalEffect.style.width = '300vw';
-                    portalEffect.style.height = '300vw';
-                    portalEffect.style.top = '50%';
-                    portalEffect.style.left = '50%';
-                    portalEffect.style.transform = 'translate(-50%, -50%)';
-                    portalEffect.style.opacity = '0';
-                }, 50);
-
-                // Eliminar el efecto después de la animación
-                setTimeout(() => {
-                    portalEffect.remove();
-                }, 1000);
+            
+            // Verificar si se aplicó correctamente
+            console.log(`Estado del menú mobile: ${mobileMenu.classList.contains('active') ? 'ACTIVO' : 'INACTIVO'}`);
+            
+            // Forzar visibilidad si está activo
+            if (mobileMenu.classList.contains('active')) {
+                mobileMenu.style.opacity = '1';
+                mobileMenu.style.visibility = 'visible';
+                mobileMenu.style.pointerEvents = 'auto';
+                
+                // Forzar visibilidad del contenido
+                const content = mobileMenu.querySelector('.mobile-menu-content');
+                if (content) {
+                    content.style.opacity = '1';
+                    content.style.transform = 'translate(-50%, -50%) scale(1)';
+                }
+                
+                // Forzar visibilidad del backdrop
+                const backdrop = mobileMenu.querySelector('.mobile-menu-backdrop');
+                if (backdrop) {
+                    backdrop.style.opacity = '1';
+                }
+            } else {
+                // Restaurar estado normal
+                mobileMenu.style.opacity = '0';
+                mobileMenu.style.visibility = 'hidden';
+                mobileMenu.style.pointerEvents = 'none';
             }
         });
-
-        // Cerrar menú al hacer clic en enlaces
-        const mobileLinks = document.querySelectorAll('.mobile-nav-link');
+        
+        // Cerrar menú al hacer clic en el backdrop o enlaces
+        const backdrop = mobileMenu.querySelector('.mobile-menu-backdrop');
+        if (backdrop) {
+            backdrop.addEventListener('click', closeMenu);
+        }
+        
+        const mobileLinks = mobileMenu.querySelectorAll('.mobile-nav-link');
         mobileLinks.forEach(link => {
-            link.addEventListener('click', function () {
-                menuToggle.classList.remove('active');
-                mobileMenu.classList.remove('active');
-
-                // Efecto de clic
-                this.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    this.style.transform = '';
-                }, 200);
+            link.addEventListener('click', closeMenu);
+        });
+        
+        function closeMenu() {
+            menuToggle.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            mobileMenu.style.opacity = '0';
+            mobileMenu.style.visibility = 'hidden';
+        }
+    } else {
+        console.error('❌ No se encontraron los elementos del menú móvil');
+    }
+    
+    // 4. Botón para volver arriba
+    const backToTopButton = document.getElementById('backToTop');
+    if (backToTopButton) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopButton.classList.add('visible');
+            } else {
+                backToTopButton.classList.remove('visible');
+            }
+        });
+        
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
             });
         });
-
-        // Cerrar menú al hacer clic en el backdrop
-        const backdrop = document.querySelector('.mobile-menu-backdrop');
-        if (backdrop) {
-            backdrop.addEventListener('click', function () {
-                menuToggle.classList.remove('active');
-                mobileMenu.classList.remove('active');
-            });
-        }
-
-        // Añadir efecto de partículas para hacer el menú más asombroso
-        function createParticles() {
-            if (!mobileMenu.classList.contains('active')) return;
-
-            const content = document.querySelector('.mobile-menu-content');
-            if (!content) return;
-
-            const particle = document.createElement('div');
-            particle.className = 'menu-particle';
-
-            // Posición aleatoria
-            const x = Math.random() * content.offsetWidth;
-            const y = Math.random() * content.offsetHeight;
-            const size = Math.random() * 4 + 1;
-
-            particle.style.cssText = `
-                position: absolute;
-                top: ${y}px;
-                left: ${x}px;
-                width: ${size}px;
-                height: ${size}px;
-                background-color: var(--neon-green);
-                border-radius: 50%;
-                opacity: 0.6;
-                pointer-events: none;
-                z-index: -1;
-            `;
-
-            content.appendChild(particle);
-
-            // Animación de la partícula
-            const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 50 + 20;
-            const tx = Math.cos(angle) * speed;
-            const ty = Math.sin(angle) * speed;
-
-            particle.animate([
-                { transform: 'translate(0, 0)', opacity: 0.6 },
-                { transform: `translate(${tx}px, ${ty}px)`, opacity: 0 }
-            ], {
-                duration: Math.random() * 1000 + 500,
-                easing: 'cubic-bezier(0, 0.55, 0.45, 1)',
-                fill: 'forwards'
-            }).onfinish = () => {
-                particle.remove();
-            };
-        }
-
-        // Crear partículas a intervalos
-        setInterval(createParticles, 200);
-    });
+    }
+});
 </script>
 {% endblock %}
