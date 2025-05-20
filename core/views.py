@@ -490,6 +490,34 @@ def noticia_detalle(request, slug):
                 print(f"El usuario ya había visto esta noticia anteriormente")
             
             # Verificar si el usuario ya dio like a esta noticia
+            # Primero verificar si la tabla existe
+            cursor.execute("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_schema = 'raiz' 
+                    AND table_name = 'noticia_likes'
+                )
+            """)
+            
+            likes_table_exists = cursor.fetchone()[0]
+            
+            # Si la tabla no existe, crearla
+            if not likes_table_exists:
+                try:
+                    cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS raiz.noticia_likes (
+                            id SERIAL PRIMARY KEY,
+                            id_noticia UUID NOT NULL,
+                            id_usuario VARCHAR(255) NOT NULL,
+                            fecha_creacion TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                            CONSTRAINT unique_noticia_usuario UNIQUE(id_noticia, id_usuario)
+                        )
+                    """)
+                    print("Tabla de likes creada")
+                except Exception as e:
+                    print(f"Error al crear tabla de likes: {e}")
+            
+            # Verificar si el usuario dio like
             cursor.execute("""
                 SELECT id FROM raiz.noticia_likes 
                 WHERE id_noticia = %s AND id_usuario = %s
@@ -1083,3 +1111,92 @@ def editar_noticia(request, slug):
     
     # Renderizar plantilla
     return render(request, 'core/edit_news.html', context)
+
+
+
+
+def like_noticia(request, noticia_id):
+    """
+    Vista para manejar el dar/quitar like a una noticia
+    """
+    from django.http import JsonResponse
+    
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+    
+    # Identificar al usuario (desde la sesión o por IP si no está logueado)
+    user_id = request.session.get('user_id')
+    if not user_id:
+        # Si no está logueado, usar la IP como identificador
+        user_id = request.META.get('REMOTE_ADDR', 'anonymous')
+    
+    try:
+        # Verificar si el usuario ya dio like a esta noticia
+        from django.db import connection
+        with connection.cursor() as cursor:
+            # Verificar si existe la tabla de likes
+            cursor.execute("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_schema = 'raiz' 
+                    AND table_name = 'noticia_likes'
+                )
+            """)
+            
+            likes_table_exists = cursor.fetchone()[0]
+            
+            # Si la tabla no existe, crearla
+            if not likes_table_exists:
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS raiz.noticia_likes (
+                        id SERIAL PRIMARY KEY,
+                        id_noticia UUID NOT NULL,
+                        id_usuario VARCHAR(255) NOT NULL,
+                        fecha_creacion TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                        CONSTRAINT unique_noticia_usuario UNIQUE(id_noticia, id_usuario)
+                    )
+                """)
+            
+            # Verificar si ya existe el like
+            cursor.execute("""
+                SELECT id FROM raiz.noticia_likes 
+                WHERE id_noticia = %s AND id_usuario = %s
+            """, [str(noticia_id), str(user_id)])
+            
+            like_existente = cursor.fetchone()
+            
+            if like_existente:
+                # El usuario ya había dado like, entonces lo quitamos
+                cursor.execute("""
+                    DELETE FROM raiz.noticia_likes 
+                    WHERE id_noticia = %s AND id_usuario = %s
+                """, [str(noticia_id), str(user_id)])
+                
+                # Devolver el resultado
+                return JsonResponse({
+                    'status': 'success',
+                    'action': 'unliked',
+                    'message': 'Like removido con éxito'
+                })
+            else:
+                # El usuario no había dado like, así que lo agregamos
+                cursor.execute("""
+                    INSERT INTO raiz.noticia_likes (id_noticia, id_usuario)
+                    VALUES (%s, %s)
+                """, [str(noticia_id), str(user_id)])
+                
+                # Devolver el resultado
+                return JsonResponse({
+                    'status': 'success',
+                    'action': 'liked',
+                    'message': 'Like agregado con éxito'
+                })
+                
+    except Exception as e:
+        print(f"Error en like_noticia: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Error al procesar el like: {str(e)}'
+        }, status=500)

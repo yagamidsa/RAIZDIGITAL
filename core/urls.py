@@ -13,4 +13,5 @@ urlpatterns = [
     path('noticias/crear/', views.crear_noticia, name='crear_noticia'),
     path('noticias/editar/<slug:slug>/', views.editar_noticia, name='editar_noticia'),
     path('noticias/<slug:slug>/', views.noticia_detalle, name='noticia_detalle'),
+    path('noticias/like/<str:noticia_id>/', views.like_noticia, name='like_noticia'),
 ]
