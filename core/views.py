@@ -341,12 +341,13 @@ def noticias(request):
                 search_results.append(news)
         filtered_news = search_results
     
-    # 4. Configurar paginación manual
+    # Configurar paginación manual
     from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-    paginator = Paginator(filtered_news, 9)  # 9 noticias por página
+    paginator = Paginator(filtered_news, 4)  # 4 noticias por página
+    page = request.GET.get('page', 1)
     
     try:
-        noticias = paginator.page(page_number)
+        noticias = paginator.page(page)
     except PageNotAnInteger:
         noticias = paginator.page(1)
     except EmptyPage:

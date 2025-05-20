@@ -482,3 +482,5 @@ document.addEventListener('DOMContentLoaded', function () {
     initBackgroundColorDetector();
     initSystemPreferences();
 });
+
+
