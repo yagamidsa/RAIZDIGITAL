@@ -344,7 +344,21 @@ class PedidoItem(models.Model):
         verbose_name = 'Item de pedido'
         verbose_name_plural = 'Items de pedidos'
 
+class NoticiaLike(models.Model):
+    id = models.AutoField(primary_key=True)
+    id_noticia = models.ForeignKey(Noticia, on_delete=models.CASCADE, db_column='id_noticia')
+    id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, db_column='id_usuario')
+    fecha = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        db_table = 'raiz.noticia_likes'
+        verbose_name = 'Like de noticia'
+        verbose_name_plural = 'Likes de noticias'
+        unique_together = (('id_noticia', 'id_usuario'),)
+
+    def __str__(self):
+        return f"Like de {self.id_usuario.nombre} en noticia {self.id_noticia.titulo}"
+    
 class Resena(models.Model):
     id = models.AutoField(primary_key=True)
     id_producto = models.ForeignKey(Producto, on_delete=models.CASCADE, db_column='id_producto')
