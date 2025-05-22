@@ -1,7 +1,6 @@
-# Actualizar raizdigital/settings/production.py
-
 from .base import *
 import os
+import sys
 
 DEBUG = False
 
@@ -12,17 +11,41 @@ ALLOWED_HOSTS = [
     '.up.railway.app',
 ]
 
-# Database - Railway PostgreSQL con configuración robusta
+# Debug completo de variables de entorno
+print("=" * 50)
+print("DEBUG: Variables de entorno de Railway")
+print("=" * 50)
+
+db_vars = ['DATABASE_URL', 'PGDATABASE', 'PGHOST', 'PGUSER', 'PGPASSWORD', 'PGPORT']
+for var in db_vars:
+    value = os.environ.get(var)
+    if value:
+        # No mostrar la contraseña completa por seguridad
+        if 'PASSWORD' in var:
+            print(f"{var}: {'*' * len(value)}")
+        else:
+            print(f"{var}: {value}")
+    else:
+        print(f"{var}: NO CONFIGURADA")
+
+print("=" * 50)
+
+# Configuración de base de datos
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL:
-    # Si Railway proporciona DATABASE_URL (más común)
-    import dj_database_url
-    DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL)
-    }
-else:
-    # Configuración manual con variables individuales
+    print("✅ Usando DATABASE_URL")
+    try:
+        import dj_database_url
+        DATABASES = {
+            'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+        }
+    except ImportError:
+        print("❌ dj_database_url no está instalado")
+        sys.exit(1)
+elif all([os.environ.get('PGHOST'), os.environ.get('PGDATABASE'), 
+          os.environ.get('PGUSER'), os.environ.get('PGPASSWORD')]):
+    print("✅ Usando variables PostgreSQL individuales")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -38,13 +61,17 @@ else:
             'ATOMIC_REQUESTS': True,
         }
     }
+else:
+    print("❌ FALTA CONFIGURACIÓN DE BASE DE DATOS")
+    print("Variables faltantes:")
+    for var in ['PGHOST', 'PGDATABASE', 'PGUSER', 'PGPASSWORD']:
+        if not os.environ.get(var):
+            print(f"  - {var}")
+    print("🔧 Ve a Railway y agrega PostgreSQL al proyecto")
+    # No hacer sys.exit() para poder ver los logs
 
-# Debug de conexión de base de datos
-print("=== DEBUG DATABASE CONFIG ===")
-print(f"PGHOST: {os.environ.get('PGHOST')}")
-print(f"PGDATABASE: {os.environ.get('PGDATABASE')}")
-print(f"PGUSER: {os.environ.get('PGUSER')}")
-print(f"DATABASE_URL present: {bool(os.environ.get('DATABASE_URL'))}")
+# Test de conexión
+print("🔍 Intentando conectar a la base de datos...")
 
 MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
