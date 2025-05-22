@@ -1,10 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Raíz Digital{% endblock %}</title>
     {% load static %}
+
+    <!-- Estilos base -->
+    <link rel="stylesheet" href="{% static 'core/css/variables.css' %}">
+
+    <!-- Estilos del menú de navegación modular (cargamos siempre para accesibilidad) -->
+    <link rel="stylesheet" href="{% static 'core/css/menu_nav.css' %}">
+
     <style>
         :root {
             --neon-green: #00ff9d;
@@ -24,7 +32,7 @@
             font-family: 'Arial', sans-serif;
             min-height: 100vh;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
             color: white;
         }
 
@@ -37,19 +45,39 @@
             z-index: 1;
         }
 
-        .content-wrapper {
-            position: relative;
-            z-index: 2;
+        /* Clase para cuando el menú está presente */
+        .has-menu .content-wrapper {
+            padding-top: 70px;
+            /* Espacio para el menú */
+        }
+
+        /* Clase para cuando NO hay menú */
+        .no-menu .content-wrapper {
+            padding-top: 0;
+            /* Sin espacio extra */
+        }
+
+        @media (max-width: 768px) {
+            .has-menu .content-wrapper {
+                padding-top: 60px;
+                /* Menú móvil más pequeño */
+            }
         }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+
+<body class="{% if request.resolver_match.url_name == 'index' %}no-menu{% else %}has-menu{% endif %}">
+    <!-- Incluir el menú de navegación solo para páginas que no sean las seleccionadas-->
+    {% if request.resolver_match.url_name not in 'index,login,password_recovery,register,marketplace' %}
+    {% include 'core/includes/menu_nav.html' %}
+    {% endif %}
+
     <canvas id="backgroundCanvas"></canvas>
     <div class="content-wrapper">
         {% block content %}{% endblock %}
     </div>
-    
+
     <script>
         // Clase base para efectos de canvas
         class CanvasEffect {
@@ -72,4 +100,5 @@
     </script>
     {% block extra_js %}{% endblock %}
 </body>
+
 </html>

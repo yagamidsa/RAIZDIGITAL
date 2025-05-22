@@ -1,6 +1,14 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
+{% block title %}Inicio - Raíz Digital{% endblock %}
+
+{# Sobreescribimos el bloque de navegación con contenido vacío #}
+{% block navigation %}{% endblock %}
+
+{# Quitamos la clase de espaciado para el menú #}
+{% block content_class %}{% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'core/css/landing.css' %}">
 {% endblock %}

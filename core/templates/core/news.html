@@ -71,33 +71,7 @@
         }
     }
 
-    @media (max-height: 700px) {
-        .welcome-container {
-            padding-top: 20px;
-        }
-
-        .welcome-title {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .community-name {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .welcome-subtitle {
-            font-size: 0.9rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .btn-start {
-            padding: 0.7rem 2rem;
-            margin-bottom: 2rem;
-        }
-    }
-
-    /* Parche para modo depuración */
+    /* Panel de depuración */
     .debug-panel {
         position: fixed;
         top: 10px;
@@ -173,67 +147,8 @@
         </div>
     </div>
 
-    <!-- Barra de navegación superior -->
-    <header class="news-header">
-        <a href="{% url 'core:index' %}" class="news-logo">
-            <svg viewBox="0 0 24 24">
-                <path
-                    d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z" />
-            </svg>
-            <span class="news-logo-text">Raíz Digital</span>
-        </a>
+    <!-- El menú de navegación ha sido movido a includes/menu_nav.html y ya lo incluimos en la plantilla base -->
 
-        <!-- Botón de menú móvil -->
-        <button id="mobileMenuToggle" class="mobile-menu-toggle" aria-label="Menú">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
-
-        <!-- Navegación normal (para escritorio) -->
-        <nav class="desktop-nav">
-            <a href="/marketplace/" class="nav-link">Inicio</a>
-            <a href="{% url 'core:noticias' %}" class="nav-link active">Noticias</a>
-            <a href="#" class="nav-link">Eventos</a>
-            <a href="#" class="nav-link">Productos</a>
-        </nav>
-    </header>
-
-    <!-- Menú móvil único (eliminar el duplicado) -->
-    <div id="mobileMenu" class="mobile-nav">
-        <div class="mobile-menu-backdrop"></div>
-        <div class="mobile-menu-content">
-            <a href="/marketplace/" class="mobile-nav-link">
-                <svg class="mobile-nav-icon" viewBox="0 0 24 24">
-                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-                </svg>
-                <span class="mobile-nav-text">Inicio</span>
-            </a>
-            <a href="{% url 'core:noticias' %}" class="mobile-nav-link active">
-                <svg class="mobile-nav-icon" viewBox="0 0 24 24">
-                    <path
-                        d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-1 14H5c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h14c.55 0 1 .45 1 1v10c0 .55-.45 1-1 1z" />
-                    <path d="M8.5 15h2v2h-2zm0-8h2v6h-2zm3.5 0h2v2h-2zm0 3h2v5h-2zm3.5 0h2v2h-2zm0 3h2v2h-2z" />
-                </svg>
-                <span class="mobile-nav-text">Noticias</span>
-            </a>
-            <a href="#" class="mobile-nav-link">
-                <svg class="mobile-nav-icon" viewBox="0 0 24 24">
-                    <path
-                        d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V9h14v10zM5 7V5h14v2H5z" />
-                    <path d="M7 11h10v2H7zm0 4h7v2H7z" />
-                </svg>
-                <span class="mobile-nav-text">Eventos</span>
-            </a>
-            <a href="#" class="mobile-nav-link">
-                <svg class="mobile-nav-icon" viewBox="0 0 24 24">
-                    <path
-                        d="M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6-2c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2zm6 16H6V8h2v2c0 .55.45 1 1 1s1-.45 1-1V8h4v2c0 .55.45 1 1 1s1-.45 1-1V8h2v12z" />
-                </svg>
-                <span class="mobile-nav-text">Productos</span>
-            </a>
-        </div>
-    </div>
     <!-- Contenido principal -->
     <main class="news-content">
         <!-- Botón para volver -->
@@ -250,7 +165,6 @@
             <p class="news-subtitle">Mantente informado sobre las últimas novedades, eventos y avances en las
                 comunidades artesanales.</p>
         </div>
-
 
         {% if request.session.is_admin or is_admin %}
         <div class="admin-action-container" data-aos="fade-up">
@@ -418,116 +332,49 @@
 </div>
 {% endblock %}
 
-
 {% block extra_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Inicializando página de noticias - versión limpia');
-    
-    // 1. Inicializar AOS para animaciones (solo en desktop)
-    AOS.init({
-        duration: 800,
-        easing: 'ease-out-cubic',
-        once: true,
-        mirror: false,
-        disable: window.innerWidth <= 768
-    });
-    
-    // 2. Configurar imágenes de fondo
-    document.querySelectorAll('[data-bg-url]').forEach(function(element) {
-        const bgUrl = element.getAttribute('data-bg-url');
-        if (bgUrl) {
-            element.style.backgroundImage = `url('${bgUrl}')`;
-        }
-    });
-    
-    // 3. MENÚ MÓVIL - Versión simplificada y focalizada
-    const menuToggle = document.getElementById('mobileMenuToggle');
-    const mobileMenu = document.getElementById('mobileMenu');
-    
-    if (menuToggle && mobileMenu) {
-        console.log('✅ Elementos del menú móvil encontrados');
-        
-        // Añadir estilos inline para solucionar problemas urgentes
-        mobileMenu.style.display = 'block';
-        
-        // Escuchar eventos de clic
-        menuToggle.addEventListener('click', function() {
-            console.log('🔄 Botón de menú clickeado');
-            
-            // Toggle de clases para activar/desactivar
-            menuToggle.classList.toggle('active');
-            mobileMenu.classList.toggle('active');
-            
-            // Verificar si se aplicó correctamente
-            console.log(`Estado del menú mobile: ${mobileMenu.classList.contains('active') ? 'ACTIVO' : 'INACTIVO'}`);
-            
-            // Forzar visibilidad si está activo
-            if (mobileMenu.classList.contains('active')) {
-                mobileMenu.style.opacity = '1';
-                mobileMenu.style.visibility = 'visible';
-                mobileMenu.style.pointerEvents = 'auto';
-                
-                // Forzar visibilidad del contenido
-                const content = mobileMenu.querySelector('.mobile-menu-content');
-                if (content) {
-                    content.style.opacity = '1';
-                    content.style.transform = 'translate(-50%, -50%) scale(1)';
-                }
-                
-                // Forzar visibilidad del backdrop
-                const backdrop = mobileMenu.querySelector('.mobile-menu-backdrop');
-                if (backdrop) {
-                    backdrop.style.opacity = '1';
-                }
-            } else {
-                // Restaurar estado normal
-                mobileMenu.style.opacity = '0';
-                mobileMenu.style.visibility = 'hidden';
-                mobileMenu.style.pointerEvents = 'none';
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('Inicializando página de noticias - versión limpia');
+
+        // 1. Inicializar AOS para animaciones (solo en desktop)
+        AOS.init({
+            duration: 800,
+            easing: 'ease-out-cubic',
+            once: true,
+            mirror: false,
+            disable: window.innerWidth <= 768
+        });
+
+        // 2. Configurar imágenes de fondo
+        document.querySelectorAll('[data-bg-url]').forEach(function (element) {
+            const bgUrl = element.getAttribute('data-bg-url');
+            if (bgUrl) {
+                element.style.backgroundImage = `url('${bgUrl}')`;
             }
         });
-        
-        // Cerrar menú al hacer clic en el backdrop o enlaces
-        const backdrop = mobileMenu.querySelector('.mobile-menu-backdrop');
-        if (backdrop) {
-            backdrop.addEventListener('click', closeMenu);
-        }
-        
-        const mobileLinks = mobileMenu.querySelectorAll('.mobile-nav-link');
-        mobileLinks.forEach(link => {
-            link.addEventListener('click', closeMenu);
-        });
-        
-        function closeMenu() {
-            menuToggle.classList.remove('active');
-            mobileMenu.classList.remove('active');
-            mobileMenu.style.opacity = '0';
-            mobileMenu.style.visibility = 'hidden';
-        }
-    } else {
-        console.error('❌ No se encontraron los elementos del menú móvil');
-    }
-    
-    // 4. Botón para volver arriba
-    const backToTopButton = document.getElementById('backToTop');
-    if (backToTopButton) {
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) {
-                backToTopButton.classList.add('visible');
-            } else {
-                backToTopButton.classList.remove('visible');
-            }
-        });
-        
-        backToTopButton.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
+
+        // 3. Ya no necesitamos código de menú móvil aquí, está en el archivo include
+
+        // 4. Botón para volver arriba
+        const backToTopButton = document.getElementById('backToTop');
+        if (backToTopButton) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    backToTopButton.classList.add('visible');
+                } else {
+                    backToTopButton.classList.remove('visible');
+                }
             });
-        });
-    }
-});
+
+            backToTopButton.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        }
+    });
 </script>
 {% endblock %}
