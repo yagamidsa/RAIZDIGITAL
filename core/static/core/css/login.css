@@ -8,13 +8,11 @@
 }
 
 body {
-    background: linear-gradient(
-        125deg, 
-        var(--dark-matter) 0%,
-        #071a2c 40%,
-        #061c1e 80%,
-        #052016 100%
-    );
+    background: linear-gradient(125deg,
+            var(--dark-matter) 0%,
+            #071a2c 40%,
+            #061c1e 80%,
+            #052016 100%);
     font-family: 'Arial', sans-serif;
     min-height: 100vh;
     position: relative;
@@ -38,7 +36,7 @@ canvas {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: 
+    background-image:
         linear-gradient(var(--glow-green) 1px, transparent 1px),
         linear-gradient(90deg, var(--glow-green) 1px, transparent 1px);
     background-size: 50px 50px;
@@ -141,12 +139,10 @@ canvas {
     inset: 0;
     border-radius: 20px;
     padding: 2px;
-    background: linear-gradient(
-        45deg,
-        var(--neon-green),
-        var(--cyber-blue),
-        var(--neon-green)
-    );
+    background: linear-gradient(45deg,
+            var(--neon-green),
+            var(--cyber-blue),
+            var(--neon-green));
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask-composite: exclude;
     opacity: 0.7;
@@ -202,21 +198,98 @@ canvas {
     z-index: 16;
 }
 
+.form-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
 .form-input:focus {
     outline: none;
     background: rgba(0, 255, 157, 0.1);
     box-shadow: 0 0 15px rgba(0, 255, 157, 0.3);
 }
 
-.input-icon {
+/* SOLUCIÓN DEFINITIVA: Ocultar íconos nativos del navegador */
+.password-input::-webkit-textfield-decoration-container {
+    visibility: hidden;
+}
+
+.password-input::-webkit-credentials-auto-fill-button {
+    visibility: hidden;
+}
+
+.password-input::-webkit-strong-password-auto-fill-button {
+    visibility: hidden;
+}
+
+.password-input::-ms-reveal {
+    display: none;
+}
+
+/* Padding especial para el campo de contraseña */
+.password-wrapper .form-input {
+    padding-right: 3rem;
+}
+
+/* Ícono del usuario - VISIBLE */
+.user-icon {
+    position: absolute !important;
+    right: 1rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 20px !important;
+    height: 20px !important;
+    fill: var(--neon-green) !important;
+    opacity: 0.7 !important;
+    pointer-events: none !important;
+    display: block !important;
+    visibility: visible !important;
+    z-index: 10 !important;
+}
+
+/* Botón del toggle de contraseña */
+.password-toggle-btn {
     position: absolute;
-    right: 1rem;
+    right: 0.75rem;
     top: 50%;
     transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
-    fill: var(--neon-green);
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 20;
+    opacity: 0.6;
+    visibility: visible;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    outline: none;
+}
+
+.password-toggle-btn.visible {
     opacity: 0.7;
+    visibility: visible;
+}
+
+.password-toggle-btn:hover {
+    opacity: 1;
+    background: rgba(0, 255, 157, 0.1);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.password-icon {
+    width: 22px;
+    height: 22px;
+    fill: var(--neon-green);
+    filter: drop-shadow(0 0 5px var(--neon-green));
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.password-toggle-btn:hover .password-icon {
+    filter: drop-shadow(0 0 8px var(--neon-green));
 }
 
 /* Botón submit */
@@ -241,7 +314,7 @@ canvas {
 .btn-submit:hover {
     background: var(--neon-green);
     color: var(--dark-matter);
-    box-shadow: 
+    box-shadow:
         0 0 20px var(--neon-green),
         0 0 40px var(--neon-green);
 }
@@ -253,12 +326,10 @@ canvas {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(0, 255, 157, 0.4),
-        transparent
-    );
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(0, 255, 157, 0.4),
+            transparent);
     transition: 0.5s;
 }
 
@@ -286,169 +357,6 @@ canvas {
     height: 20px;
     fill: #ff4444;
 }
-
-/* Animaciones */
-@keyframes borderRotate {
-    0% { background-position: 0% center; }
-    100% { background-position: 200% center; }
-}
-
-@keyframes float {
-    0%, 100% { transform: translate(0, 0); }
-    25% { transform: translate(50px, 50px); }
-    50% { transform: translate(0, 100px); }
-    75% { transform: translate(-50px, 50px); }
-}
-
-@keyframes grid-animation {
-    0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
-    100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
-}
-
-/* Media Queries */
-@media (max-width: 768px) {
-    .page-container {
-        padding: 1rem;
-    }
-    
-    .back-button {
-        top: 1rem;
-        left: 1rem;
-    }
-
-    .organic-shape {
-        width: 200px;
-        height: 200px;
-    }
-}
-
-@media (max-width: 480px) {
-    .login-content {
-        padding: 1.5rem;
-    }
-
-    .organic-shape {
-        width: 150px;
-        height: 150px;
-    }
-
-    .back-button {
-        font-size: 0.8rem;
-    }
-
-    .back-icon {
-        width: 20px;
-        height: 20px;
-    }
-}
-
-/* Accesibilidad */
-@media (prefers-reduced-motion: reduce) {
-    .cyber-grid,
-    .organic-shape,
-    .login-border,
-    .btn-submit::before {
-        animation: none;
-    }
-}
-
-
-
-/* Añadir al login.css */
-
-/* Partículas */
-.particles-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.particle {
-    position: absolute;
-    background: var(--neon-green);
-    border-radius: 50%;
-    pointer-events: none;
-}
-
-/* Líneas neón */
-.neon-line {
-    position: absolute;
-    background: var(--neon-green);
-    height: 2px;
-    transform-origin: left;
-}
-
-/* Efecto Ripple */
-.ripple {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(0, 255, 157, 0.4);
-    transform: scale(0);
-    pointer-events: none;
-}
-
-/* Scanner line */
-.scanner-line {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        var(--neon-green),
-        transparent
-    );
-}
-
-/* Mejorar inputs */
-.form-input {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-
-.form-input:focus {
-    transform: scale(1.02);
-}
-
-/* Mejorar botón */
-.btn-submit {
-    position: relative;
-    overflow: hidden;
-}
-
-.btn-submit::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(
-        45deg,
-        transparent,
-        rgba(0, 255, 157, 0.3),
-        transparent,
-        transparent
-    );
-    transform: rotate(45deg);
-    animation: shine 3s infinite;
-}
-
-@keyframes shine {
-    0% {
-        transform: translateX(-100%) rotate(45deg);
-    }
-    100% {
-        transform: translateX(100%) rotate(45deg);
-    }
-}
-
 
 .form-footer {
     margin-top: 1.5rem;
@@ -484,4 +392,93 @@ canvas {
 .recovery-link:hover::after {
     transform: scaleX(1);
     transform-origin: left;
+}
+
+/* Animaciones */
+@keyframes borderRotate {
+    0% {
+        background-position: 0% center;
+    }
+
+    100% {
+        background-position: 200% center;
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    25% {
+        transform: translate(50px, 50px);
+    }
+
+    50% {
+        transform: translate(0, 100px);
+    }
+
+    75% {
+        transform: translate(-50px, 50px);
+    }
+}
+
+@keyframes grid-animation {
+    0% {
+        transform: perspective(500px) rotateX(60deg) translateY(0);
+    }
+
+    100% {
+        transform: perspective(500px) rotateX(60deg) translateY(50px);
+    }
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+    .page-container {
+        padding: 1rem;
+    }
+
+    .back-button {
+        top: 1rem;
+        left: 1rem;
+    }
+
+    .organic-shape {
+        width: 200px;
+        height: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-content {
+        padding: 1.5rem;
+    }
+
+    .organic-shape {
+        width: 150px;
+        height: 150px;
+    }
+
+    .back-button {
+        font-size: 0.8rem;
+    }
+
+    .back-icon {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+/* Accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+
+    .cyber-grid,
+    .organic-shape,
+    .login-border,
+    .btn-submit::before {
+        animation: none;
+    }
 }
