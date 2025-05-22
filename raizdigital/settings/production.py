@@ -54,14 +54,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'raizdigital.wsgi.application'
 
-# Base de datos
+# Base de datos - CORREGIDO
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL:
     try:
         import dj_database_url
         DATABASES = {'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
+        print(f"🗄️ Usando DATABASE_URL: {DATABASE_URL[:20]}...")
     except ImportError:
+        print("❌ dj_database_url no disponible, usando parser manual")
         import re
         match = re.match(r'postgresql://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)', DATABASE_URL)
         if match:
@@ -78,6 +80,25 @@ if DATABASE_URL:
                     'CONN_MAX_AGE': 600,
                 }
             }
+            print(f"🗄️ BD configurada: {user}@{host}:{port}/{database}")
+        else:
+            print("❌ No se pudo parsear DATABASE_URL")
+            raise ValueError("DATABASE_URL inválida")
+else:
+    # Fallback usando variables individuales de Railway
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('PGDATABASE', 'railway'),
+            'USER': os.environ.get('PGUSER', 'postgres'),
+            'PASSWORD': os.environ.get('PGPASSWORD', ''),
+            'HOST': os.environ.get('PGHOST', 'localhost'),
+            'PORT': os.environ.get('PGPORT', '5432'),
+            'OPTIONS': {'sslmode': 'require'},
+            'CONN_MAX_AGE': 600,
+        }
+    }
+    print(f"🗄️ BD configurada con variables individuales: {DATABASES['default']['USER']}@{DATABASES['default']['HOST']}:{DATABASES['default']['PORT']}/{DATABASES['default']['NAME']}")
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -94,11 +115,18 @@ USE_TZ = True
 # Static files
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-os.makedirs(STATIC_ROOT, exist_ok=True)
+
+# Crear directorio staticfiles si no existe
+try:
+    os.makedirs(STATIC_ROOT, exist_ok=True)
+    print(f"📁 STATIC_ROOT creado: {STATIC_ROOT}")
+except Exception as e:
+    print(f"❌ Error creando STATIC_ROOT: {e}")
 
 static_dir = os.path.join(BASE_DIR, 'static')
 if os.path.exists(static_dir):
     STATICFILES_DIRS = [static_dir]
+    print(f"📁 STATICFILES_DIRS: {static_dir}")
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -118,5 +146,27 @@ USE_TZ = True
 # Session configuration
 SESSION_COOKIE_AGE = 3600
 SESSION_SAVE_EVERY_REQUEST = True
+
+# Logging para debugging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
 
 print('🚀 Railway production settings loaded')
