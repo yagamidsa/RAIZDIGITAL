@@ -178,8 +178,12 @@ if core_static_dir.exists():
 else:
     print(f"❌ Directorio core/static/core/css/ no existe: {core_static_dir}")
 
-# Storage - Usar versión simple sin manifest para evitar errores
+# Storage - Configuración específica para Railway
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
+# Configuración adicional de WhiteNoise
+WHITENOISE_USE_FINDERS = True  # Importante para development/staging
+WHITENOISE_AUTOREFRESH = True  # Solo para debugging
 
 # CSRF Configuration
 CSRF_TRUSTED_ORIGINS = [
