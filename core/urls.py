@@ -6,6 +6,7 @@ app_name = 'core'
 urlpatterns = [
     path('', views.index, name='index'),
     path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),  # Nueva ruta de logout
     path('recovery/', views.password_recovery, name='password_recovery'),
     path('register/', views.register, name='register'),
     path('marketplace/', views.marketplace, name='marketplace'),
@@ -14,4 +15,8 @@ urlpatterns = [
     path('noticias/editar/<slug:slug>/', views.editar_noticia, name='editar_noticia'),
     path('noticias/<slug:slug>/', views.noticia_detalle, name='noticia_detalle'),
     path('noticias/like/<str:noticia_id>/', views.like_noticia, name='like_noticia'),
+    
+    # Rutas AJAX para manejo de sesión
+    path('api/session/extend/', views.session_extend, name='session_extend'),
+    path('api/session/status/', views.check_session_status, name='session_status'),
 ]

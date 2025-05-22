@@ -14,6 +14,7 @@
         </svg>
         <span class="news-logo-text">Raíz Digital</span>
     </a>
+    
     <!-- Botón de menú móvil -->
     <button id="mobileMenuToggle" class="mobile-menu-toggle" aria-label="Menú">
         <span></span>
@@ -30,10 +31,19 @@
         <a href="#" class="nav-link {% if request.resolver_match.url_name == 'eventos' %}active{% endif %}">Eventos</a>
         <a href="#"
             class="nav-link {% if request.resolver_match.url_name == 'productos' %}active{% endif %}">Productos</a>
-        <a href="#"
-            class="nav-link {% if request.resolver_match.url_name == 'comunidades' %}active{% endif %}">Comunidades</a>
+        
+        <!-- Enlace de logout para escritorio -->
+        {% if request.session.user_id %}
+        <a href="#" id="desktopLogoutBtn" class="nav-link logout-link" title="Cerrar sesión">
+            <svg viewBox="0 0 24 24" width="18" height="18" style="margin-right: 5px; vertical-align: middle;">
+                <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+            </svg>
+            Salir
+        </a>
+        {% endif %}
     </nav>
 </header>
+
 <!-- Menú móvil único -->
 <div id="mobileMenu" class="mobile-nav">
     <div class="mobile-menu-backdrop"></div>
@@ -69,15 +79,10 @@
             </svg>
             <span class="mobile-nav-text">Productos</span>
         </a>
-        <a href="#" class="mobile-nav-link {% if request.resolver_match.url_name == 'comunidades' %}active{% endif %}">
-            <svg class="mobile-nav-icon" viewBox="0 0 24 24">
-                <path
-                    d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-            </svg>
-            <span class="mobile-nav-text">Comunidades</span>
-        </a>
+        
+        <!-- Enlace de logout para móvil -->
         {% if request.session.user_id %}
-        <a href="{% url 'core:login' %}" class="mobile-nav-link logout">
+        <a href="#" id="mobileLogoutBtn" class="mobile-nav-link logout">
             <svg class="mobile-nav-icon" viewBox="0 0 24 24">
                 <path
                     d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
@@ -87,64 +92,120 @@
         {% endif %}
     </div>
 </div>
-<!-- Script JavaScript para el menú móvil -->
+
+<!-- Script JavaScript para el menú móvil y logout -->
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Menú móvil
-        const menuToggle = document.getElementById('mobileMenuToggle');
-        const mobileMenu = document.getElementById('mobileMenu');
+document.addEventListener('DOMContentLoaded', function () {
+    // Menú móvil
+    const menuToggle = document.getElementById('mobileMenuToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
 
-        if (menuToggle && mobileMenu) {
-            // Escuchar eventos de clic
-            menuToggle.addEventListener('click', function () {
-                // Toggle de clases para activar/desactivar
-                menuToggle.classList.toggle('active');
-                mobileMenu.classList.toggle('active');
+    if (menuToggle && mobileMenu) {
+        // Escuchar eventos de clic
+        menuToggle.addEventListener('click', function () {
+            // Toggle de clases para activar/desactivar
+            menuToggle.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
 
-                // Forzar visibilidad si está activo
-                if (mobileMenu.classList.contains('active')) {
-                    mobileMenu.style.opacity = '1';
-                    mobileMenu.style.visibility = 'visible';
-                    mobileMenu.style.pointerEvents = 'auto';
+            // Forzar visibilidad si está activo
+            if (mobileMenu.classList.contains('active')) {
+                mobileMenu.style.opacity = '1';
+                mobileMenu.style.visibility = 'visible';
+                mobileMenu.style.pointerEvents = 'auto';
 
-                    // Forzar visibilidad del contenido
-                    const content = mobileMenu.querySelector('.mobile-menu-content');
-                    if (content) {
-                        content.style.opacity = '1';
-                        content.style.transform = 'translate(-50%, -50%) scale(1)';
-                    }
-
-                    // Forzar visibilidad del backdrop
-                    const backdrop = mobileMenu.querySelector('.mobile-menu-backdrop');
-                    if (backdrop) {
-                        backdrop.style.opacity = '1';
-                    }
-                } else {
-                    // Restaurar estado normal
-                    mobileMenu.style.opacity = '0';
-                    mobileMenu.style.visibility = 'hidden';
-                    mobileMenu.style.pointerEvents = 'none';
+                // Forzar visibilidad del contenido
+                const content = mobileMenu.querySelector('.mobile-menu-content');
+                if (content) {
+                    content.style.opacity = '1';
+                    content.style.transform = 'translate(-50%, -50%) scale(1)';
                 }
-            });
 
-            // Cerrar menú al hacer clic en el backdrop o enlaces
-            const backdrop = mobileMenu.querySelector('.mobile-menu-backdrop');
-            if (backdrop) {
-                backdrop.addEventListener('click', closeMenu);
-            }
-
-            const mobileLinks = mobileMenu.querySelectorAll('.mobile-nav-link');
-            mobileLinks.forEach(link => {
-                link.addEventListener('click', closeMenu);
-            });
-
-            function closeMenu() {
-                menuToggle.classList.remove('active');
-                mobileMenu.classList.remove('active');
+                // Forzar visibilidad del backdrop
+                const backdrop = mobileMenu.querySelector('.mobile-menu-backdrop');
+                if (backdrop) {
+                    backdrop.style.opacity = '1';
+                }
+            } else {
+                // Restaurar estado normal
                 mobileMenu.style.opacity = '0';
                 mobileMenu.style.visibility = 'hidden';
                 mobileMenu.style.pointerEvents = 'none';
             }
+        });
+
+        // Cerrar menú al hacer clic en el backdrop o enlaces (excepto logout)
+        const backdrop = mobileMenu.querySelector('.mobile-menu-backdrop');
+        if (backdrop) {
+            backdrop.addEventListener('click', closeMenu);
         }
-    });
+
+        const mobileLinks = mobileMenu.querySelectorAll('.mobile-nav-link:not(.logout)');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', closeMenu);
+        });
+
+        function closeMenu() {
+            menuToggle.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            mobileMenu.style.opacity = '0';
+            mobileMenu.style.visibility = 'hidden';
+            mobileMenu.style.pointerEvents = 'none';
+        }
+    }
+
+    // Funcionalidad de logout
+    function handleLogout(event) {
+        event.preventDefault();
+        
+        // Mostrar confirmación
+        if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+            // Crear formulario para logout
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{% url "core:logout" %}';
+            
+            // Agregar token CSRF
+            const csrfToken = getCookie('csrftoken');
+            if (csrfToken) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrfmiddlewaretoken';
+                csrfInput.value = csrfToken;
+                form.appendChild(csrfInput);
+            }
+            
+            // Enviar formulario
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    // Función para obtener cookie CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Agregar evento de logout para escritorio y móvil
+    const desktopLogoutBtn = document.getElementById('desktopLogoutBtn');
+    const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+    
+    if (desktopLogoutBtn) {
+        desktopLogoutBtn.addEventListener('click', handleLogout);
+    }
+    
+    if (mobileLogoutBtn) {
+        mobileLogoutBtn.addEventListener('click', handleLogout);
+    }
+});
 </script>
