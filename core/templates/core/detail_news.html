@@ -340,38 +340,6 @@
         </div>
     </div>
 
-    <!-- Barra de navegación superior -->
-    <header class="news-header">
-        <a href="{% url 'core:index' %}" class="news-logo">
-            <svg viewBox="0 0 24 24">
-                <path
-                    d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z" />
-                <path
-                    d="M12 4.5c-4.136 0-7.5 3.364-7.5 7.5s3.364 7.5 7.5 7.5 7.5-3.364 7.5-7.5-3.364-7.5-7.5-7.5zm0 14c-3.584 0-6.5-2.916-6.5-6.5s2.916-6.5 6.5-6.5 6.5 2.916 6.5 6.5-2.916 6.5-6.5 6.5z" />
-                <path
-                    d="M12 7c-2.757 0-5 2.243-5 5s2.243 5 5 5 5-2.243 5-5-2.243-5-5-5zm0 9c-2.206 0-4-1.794-4-4s1.794-4 4-4 4 1.794 4 4-1.794 4-4 4z" />
-                <circle cx="12" cy="12" r="2.5" />
-            </svg>
-            <span class="news-logo-text">Raíz Digital</span>
-        </a>
-
-        <!-- Botón hamburguesa para móviles -->
-        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menú">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
-
-        <!-- Menú de navegación -->
-        <nav class="news-nav" id="newsNav">
-            <a href="/marketplace/" class="nav-link">Inicio</a>
-            <a href="{% url 'core:noticias' %}" class="nav-link active">Noticias</a>
-            <a href="#" class="nav-link">Eventos</a>
-            <a href="#" class="nav-link">Productos</a>
-            <a href="#" class="nav-link">Comunidades</a>
-        </nav>
-    </header>
-
     <!-- Contenido principal -->
     <main class="news-content">
         <!-- Botón para volver -->
@@ -520,6 +488,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'core/js/cyber-navigation.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         // Configuración del botón para volver arriba
