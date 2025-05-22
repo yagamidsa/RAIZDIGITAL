@@ -1,12 +1,28 @@
+import os
 from pathlib import Path
-from decouple import config
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SECRET_KEY = config('SECRET_KEY')
-DEBUG = config('DEBUG', default=False, cast=bool)
+# SECURITY WARNING: keep the secret key used in production secret!
+# Para desarrollo: usa tu .env
+# Para producción: Railway proporcionará la variable SECRET_KEY
+SECRET_KEY = os.environ.get('SECRET_KEY')
+
+# Si no hay SECRET_KEY en variables de entorno, lanzar error informativo
+if not SECRET_KEY:
+    raise ValueError(
+        "SECRET_KEY no encontrada. "
+        "Para desarrollo local: asegúrate de tener un archivo .env con SECRET_KEY. "
+        "Para producción: configura SECRET_KEY en las variables de entorno de Railway."
+    )
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+
 ALLOWED_HOSTS = []
 
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -46,22 +62,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'raizdigital.wsgi.application'
 
+# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT'),
-        'ATOMIC_REQUESTS': True,
+        'NAME': os.environ.get('PGDATABASE', 'raiz_digital'),
+        'USER': os.environ.get('PGUSER', 'postgres'),
+        'PASSWORD': os.environ.get('PGPASSWORD', ''),
+        'HOST': os.environ.get('PGHOST', 'localhost'),
+        'PORT': os.environ.get('PGPORT', '5432'),
         'OPTIONS': {
-            'isolation_level': 1,
-            'connect_timeout': 10,
+            'sslmode': 'prefer',
         },
+        'ATOMIC_REQUESTS': True,
     }
 }
 
+# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -69,12 +86,19 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / "static"]
 
+# Verificar si existe la carpeta static antes de agregarla
+static_dir = BASE_DIR / "static"
+if static_dir.exists():
+    STATICFILES_DIRS = [static_dir]
+
+# Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
