@@ -4,10 +4,14 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback')
-
-# DEBUG temporal para ver errores específicos
-DEBUG = True
-ALLOWED_HOSTS = ['*']
+DEBUG = False
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '.railway.app',
+    '.up.railway.app',
+    'raizdigital-production.up.railway.app',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -50,18 +54,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'raizdigital.wsgi.application'
 
-# Base de datos - Railway PostgreSQL
+# Base de datos
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL:
-    print('✅ DATABASE_URL encontrada')
     try:
         import dj_database_url
         DATABASES = {'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
-        print('✅ Base de datos configurada correctamente')
-    except ImportError as e:
-        print(f'❌ Error importando dj_database_url: {e}')
-        # Fallback manual
+    except ImportError:
         import re
         match = re.match(r'postgresql://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)', DATABASE_URL)
         if match:
@@ -78,26 +78,24 @@ if DATABASE_URL:
                     'CONN_MAX_AGE': 600,
                 }
             }
-            print(f'✅ Base de datos parseada manualmente: {user}@{host}')
-else:
-    print('❌ DATABASE_URL no encontrada')
 
-# Password validation simplificada para debug
-AUTH_PASSWORD_VALIDATORS = []
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+]
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files - configuración mejorada
+# Static files
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# Crear directorio si no existe
 os.makedirs(STATIC_ROOT, exist_ok=True)
 
-# Solo agregar STATICFILES_DIRS si la carpeta existe
 static_dir = os.path.join(BASE_DIR, 'static')
 if os.path.exists(static_dir):
     STATICFILES_DIRS = [static_dir]
@@ -105,6 +103,20 @@ if os.path.exists(static_dir):
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-print(f'🔥 DEBUG = {DEBUG}')
-print(f'🔥 ALLOWED_HOSTS = {ALLOWED_HOSTS}')
-print('🚀 Configuración de Railway completada')
+# CSRF Configuration for Railway
+CSRF_TRUSTED_ORIGINS = [
+    'https://raizdigital-production.up.railway.app',
+    'https://raizdigital-production-up.railway.app',
+    'https://*.railway.app',
+    'https://*.up.railway.app',
+]
+
+# Security settings for Railway
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_TZ = True
+
+# Session configuration
+SESSION_COOKIE_AGE = 3600
+SESSION_SAVE_EVERY_REQUEST = True
+
+print('🚀 Railway production settings loaded')
