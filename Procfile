@@ -1,1 +1,0 @@
-"web: gunicorn raizdigital.wsgi" | Out-File -FilePath Procfile -Encoding UTF8
