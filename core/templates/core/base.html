@@ -78,6 +78,7 @@
         {% block content %}{% endblock %}
     </div>
 
+    <!-- Scripts base -->
     <script>
         // Clase base para efectos de canvas
         class CanvasEffect {
@@ -97,7 +98,57 @@
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             }
         }
+
+        // Función para verificar si el usuario está logueado
+        function isUserLoggedIn() {
+            // Verificar indicadores de sesión en la página
+            return !!(
+                document.querySelector('.user-info') || 
+                document.querySelector('.mobile-nav-link.logout') ||
+                document.body.classList.contains('has-menu') ||
+                '{{ request.session.user_id }}' // Variable de sesión de Django
+            );
+        }
+
+        // Variables globales para el sistema de logout
+        window.userSessionData = {
+            isLoggedIn: isUserLoggedIn(),
+            userId: '{{ request.session.user_id|default:"" }}',
+            username: '{{ request.session.username|default:"" }}',
+            startTime: Date.now()
+        };
+
+        console.log('🔐 Estado de sesión:', window.userSessionData);
     </script>
+
+    <!-- Sistema de auto-logout SOLO para usuarios logueados -->
+    {% if request.session.user_id %}
+    <script src="{% static 'core/js/auto-logout.js' %}?v=1"></script>
+    <script>
+        // Configuración específica del auto-logout para Django
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🕐 Iniciando sistema de auto-logout para usuario {{ request.session.username }}');
+            
+            // Verificar que el usuario esté realmente logueado
+            if ('{{ request.session.user_id }}') {
+                // Inicializar con configuración personalizada
+                if (typeof AutoLogoutSystem !== 'undefined') {
+                    window.autoLogoutSystem = new AutoLogoutSystem({
+                        timeout: 3 * 60 * 1000, // 3 minutos
+                        warningTime: 30 * 1000, // Advertir 30 segundos antes
+                        logoutUrl: '{% url "core:login" %}', // URL de Django para logout
+                        checkInterval: 1000 // Verificar cada segundo
+                    });
+                    
+                    console.log('✅ Auto-logout configurado para 3 minutos de inactividad');
+                } else {
+                    console.error('❌ AutoLogoutSystem no está disponible');
+                }
+            }
+        });
+    </script>
+    {% endif %}
+
     {% block extra_js %}{% endblock %}
 </body>
 

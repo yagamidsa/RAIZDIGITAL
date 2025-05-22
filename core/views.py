@@ -345,7 +345,7 @@ def noticias(request):
     from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
     paginator = Paginator(filtered_news, 4)  # 4 noticias por página
     page = request.GET.get('page', 1)
-    
+
     try:
         noticias = paginator.page(page)
     except PageNotAnInteger:
@@ -1200,4 +1200,151 @@ def like_noticia(request, noticia_id):
         return JsonResponse({
             'status': 'error',
             'message': f'Error al procesar el like: {str(e)}'
+        }, status=500)
+    
+
+# Agregar esta función a core/views.py
+
+def logout_view(request):
+    """
+    Vista para manejar el logout del usuario.
+    Limpia la sesión y redirige al login.
+    """
+    from django.shortcuts import redirect
+    from django.contrib import messages
+    import logging
+    
+    # Log del logout para auditoría
+    logger = logging.getLogger(__name__)
+    
+    # Obtener información del usuario antes de limpiar la sesión
+    user_id = request.session.get('user_id')
+    username = request.session.get('username', 'Usuario desconocido')
+    
+    try:
+        # Registrar el logout en los logs
+        if user_id:
+            logger.info(f"Logout realizado - Usuario: {username} (ID: {user_id})")
+            
+            # Opcional: Registrar en la tabla de logs si existe
+            try:
+                from django.db import connection
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO raiz.logs (
+                            id_usuario, 
+                            accion, 
+                            tabla_afectada, 
+                            detalles, 
+                            ip, 
+                            user_agent, 
+                            fecha
+                        ) VALUES (%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+                    """, [
+                        user_id,
+                        'logout',
+                        'usuarios',
+                        'Cierre de sesión',
+                        request.META.get('REMOTE_ADDR', ''),
+                        request.META.get('HTTP_USER_AGENT', '')[:255]
+                    ])
+            except Exception as e:
+                logger.warning(f"No se pudo registrar logout en tabla de logs: {e}")
+        
+        # Limpiar completamente la sesión
+        request.session.flush()
+        
+        # Mensaje de confirmación
+        messages.success(request, 'Sesión cerrada correctamente.')
+        
+        # Redirigir al login
+        return redirect('core:login')
+        
+    except Exception as e:
+        logger.error(f"Error durante logout: {e}")
+        
+        # Asegurar que la sesión se limpie aunque haya errores
+        request.session.flush()
+        
+        # Redirigir al login con mensaje de error
+        messages.error(request, 'Hubo un problema al cerrar la sesión.')
+        return redirect('core:login')
+
+
+def session_extend(request):
+    """
+    Vista AJAX para extender la sesión del usuario.
+    Permite resetear el temporizador de inactividad.
+    """
+    from django.http import JsonResponse
+    from django.views.decorators.csrf import csrf_exempt
+    from django.views.decorators.http import require_POST
+    import json
+    
+    @csrf_exempt
+    @require_POST
+    def extend_session_view(request):
+        try:
+            # Verificar que el usuario esté logueado
+            if 'user_id' not in request.session:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Usuario no logueado'
+                }, status=401)
+            
+            # Renovar la sesión
+            request.session.set_expiry(None)  # Usar el tiempo por defecto
+            request.session.modified = True
+            
+            # Log de la extensión
+            user_id = request.session.get('user_id')
+            username = request.session.get('username', 'Usuario')
+            
+            print(f"Sesión extendida para usuario {username} (ID: {user_id})")
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Sesión extendida correctamente',
+                'timestamp': timezone.now().isoformat() if 'timezone' in globals() else str(datetime.now())
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Error al extender sesión: {str(e)}'
+            }, status=500)
+    
+    return extend_session_view(request)
+
+
+def check_session_status(request):
+    """
+    Vista AJAX para verificar el estado de la sesión.
+    Útil para verificaciones periódicas desde el frontend.
+    """
+    from django.http import JsonResponse
+    from django.utils import timezone
+    
+    try:
+        is_logged_in = 'user_id' in request.session
+        
+        if is_logged_in:
+            return JsonResponse({
+                'status': 'active',
+                'user_id': request.session.get('user_id'),
+                'username': request.session.get('username'),
+                'session_key': request.session.session_key,
+                'timestamp': timezone.now().isoformat()
+            })
+        else:
+            return JsonResponse({
+                'status': 'expired',
+                'message': 'Sesión no válida',
+                'timestamp': timezone.now().isoformat()
+            })
+            
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Error al verificar sesión: {str(e)}'
         }, status=500)
