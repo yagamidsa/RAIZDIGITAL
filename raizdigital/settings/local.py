@@ -1,8 +1,10 @@
 from .base import *
 import os
-from pathlib import Path
 
-# Cargar variables del archivo .env para desarrollo local
+DEBUG = True
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+# Cargar variables del archivo .env si existe
 def load_env_file():
     env_file = BASE_DIR / '.env'
     if env_file.exists():
@@ -11,16 +13,24 @@ def load_env_file():
                 line = line.strip()
                 if line and not line.startswith('#') and '=' in line:
                     key, value = line.split('=', 1)
-                    # Solo establecer si no existe ya en el entorno
                     if key.strip() not in os.environ:
                         os.environ[key.strip()] = value.strip()
 
-# Cargar el archivo .env
 load_env_file()
 
-# Configuración para desarrollo
-DEBUG = True
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# Configuración de PostgreSQL local
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'raiz_digital'),
+        'USER': os.environ.get('DB_USER', 'yagami'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'Ipsos2012*'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
+        'OPTIONS': {
+            'sslmode': 'prefer',
+        },
+    }
+}
 
-# Base de datos local (si tienes configuración local diferente)
-# Mantener la configuración de base.py o sobrescribir aquí si necesitas
+print(f'🐘 Conectando a PostgreSQL local: {DATABASES["default"]["USER"]}@{DATABASES["default"]["HOST"]}:{DATABASES["default"]["PORT"]}/{DATABASES["default"]["NAME"]}')
