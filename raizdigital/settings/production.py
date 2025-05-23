@@ -20,6 +20,7 @@ ALLOWED_HOSTS = [
     '.railway.app',
     '.up.railway.app',
     'raizdigital-production.up.railway.app',
+    '*',
 ]
 
 # También permitir el dominio específico si existe
