@@ -5,7 +5,8 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'core/css/variables.css' %}?v=2">
-<link rel="stylesheet" href="{% static 'core/css/news.css' %}?v=7">
+<link rel="stylesheet" href="{% static 'core/css/news.css' %}?v=9">
+<meta name="csrf-token" content="{{ csrf_token }}">
 <style>
     /* Estilos específicos para la página de detalle de noticia */
     .article-container {
@@ -488,8 +489,44 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Token CSRF para JavaScript -->
+<script>
+    window.csrfToken = '{{ csrf_token }}';
+</script>
+
 <script src="{% static 'core/js/cyber-navigation.js' %}"></script>
 <script>
+    // Función para obtener el token CSRF
+    function getCSRFToken() {
+        // Primero intentar desde window.csrfToken
+        if (window.csrfToken) {
+            return window.csrfToken;
+        }
+        
+        // Luego desde cookies
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, 10) === 'csrftoken=') {
+                    cookieValue = decodeURIComponent(cookie.substring(10));
+                    break;
+                }
+            }
+        }
+        
+        // Si no encontramos en cookies, buscar en meta tags
+        if (!cookieValue) {
+            const csrfMeta = document.querySelector('meta[name=csrf-token]');
+            if (csrfMeta) {
+                cookieValue = csrfMeta.getAttribute('content');
+            }
+        }
+        
+        return cookieValue;
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         // Configuración del botón para volver arriba
         const backToTopButton = document.getElementById('backToTop');
@@ -601,91 +638,228 @@
                 }
             });
         }
-    });
-</script>
-<script>
-    // Añadir al final del script existente
-    // Sistema de likes
-    const likeButton = document.getElementById('likeButton');
-    if (likeButton) {
-        likeButton.addEventListener('click', function () {
-            const noticiaId = this.getAttribute('data-noticia-id');
-            const likeCount = document.getElementById('likeCount');
 
-            // Llamada a la API
-            fetch(`/noticias/like/${noticiaId}/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({})
-            })
-                .then(response => response.json())
+        // ===== SISTEMA DE LIKES CORREGIDO =====
+        const likeButton = document.getElementById('likeButton');
+        if (likeButton) {
+            likeButton.addEventListener('click', function (e) {
+                e.preventDefault(); // Prevenir comportamiento por defecto
+                
+                const noticiaId = this.getAttribute('data-noticia-id');
+                const likeCount = document.getElementById('likeCount');
+
+                // Obtener token CSRF
+                const csrfToken = getCSRFToken();
+                
+                if (!csrfToken) {
+                    console.error('Token CSRF no encontrado');
+                    showLikeFeedback('Error: Token de seguridad no encontrado', 'error');
+                    return;
+                }
+
+                // Deshabilitar botón durante la petición
+                likeButton.disabled = true;
+                likeButton.style.opacity = '0.6';
+
+                // Realizar petición AJAX con configuración mejorada
+                fetch(`/noticias/like/${noticiaId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin', // Incluir cookies de sesión
+                    body: JSON.stringify({})
+                })
+                .then(response => {
+                    // Verificar que la respuesta sea exitosa
+                    if (!response.ok) {
+                        if (response.status === 403) {
+                            throw new Error('Error de permisos. Recarga la página e intenta nuevamente.');
+                        } else if (response.status === 401) {
+                            throw new Error('Sesión expirada. Redirigiendo al login...');
+                        } else {
+                            throw new Error(`Error del servidor: ${response.status}`);
+                        }
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.status === 'success') {
-                        // Crear mensaje de feedback
-                        const feedback = document.createElement('span');
-                        feedback.className = 'like-feedback';
-
                         if (data.action === 'liked') {
-                            // Actualizar apariencia
+                            // Actualizar apariencia - LIKE
                             likeButton.classList.add('liked');
-                            feedback.textContent = '¡Me gusta!';
-                            // Incrementar contador
-                            likeCount.textContent = parseInt(likeCount.textContent) + 1;
+                            showLikeFeedback('¡Me gusta!', 'success');
+                            
+                            // Usar el contador del servidor si está disponible
+                            if (data.new_count !== undefined) {
+                                likeCount.textContent = data.new_count;
+                            } else {
+                                // Fallback: incrementar
+                                const currentCount = parseInt(likeCount.textContent) || 0;
+                                likeCount.textContent = currentCount + 1;
+                            }
+                            
                             // Mostrar animación
                             animateHeart(true);
                         } else {
-                            // Actualizar apariencia
+                            // Actualizar apariencia - UNLIKE
                             likeButton.classList.remove('liked');
-                            feedback.textContent = 'Me gusta retirado';
-                            // Decrementar contador
-                            likeCount.textContent = parseInt(likeCount.textContent) - 1;
+                            showLikeFeedback('Me gusta retirado', 'success');
+                            
+                            // Usar el contador del servidor si está disponible
+                            if (data.new_count !== undefined) {
+                                likeCount.textContent = data.new_count;
+                            } else {
+                                // Fallback: decrementar
+                                const currentCount = parseInt(likeCount.textContent) || 0;
+                                likeCount.textContent = Math.max(0, currentCount - 1);
+                            }
+                            
                             // Mostrar animación
                             animateHeart(false);
                         }
-
-                        // Añadir y luego quitar el feedback
-                        likeButton.appendChild(feedback);
-                        setTimeout(() => {
-                            feedback.remove();
-                        }, 1000);
+                    } else {
+                        throw new Error(data.message || 'Error desconocido');
                     }
                 })
                 .catch(error => {
                     console.error('Error al procesar like:', error);
+                    
+                    // Mostrar mensaje de error específico
+                    showLikeFeedback(error.message || 'Error al procesar like', 'error');
+                    
+                    // Si es error de sesión, redirigir al login después de un momento
+                    if (error.message.includes('Sesión expirada')) {
+                        setTimeout(() => {
+                            window.location.href = '/login/';
+                        }, 2000);
+                    }
+                })
+                .finally(() => {
+                    // Rehabilitar botón
+                    likeButton.disabled = false;
+                    likeButton.style.opacity = '1';
                 });
-        });
+            });
+        }
+    });
+
+    // Función para mostrar feedback mejorado
+    function showLikeFeedback(message, type) {
+        const feedback = document.createElement('span');
+        feedback.className = `like-feedback ${type}`;
+        feedback.textContent = message;
+        
+        // Estilos según el tipo
+        if (type === 'error') {
+            feedback.style.background = '#ff4444';
+            feedback.style.color = 'white';
+        } else {
+            feedback.style.background = 'var(--neon-green)';
+            feedback.style.color = 'var(--dark-matter)';
+        }
+        
+        // Estilos base
+        feedback.style.cssText += `
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            animation: fadeUpAndOut 2s forwards;
+        `;
+        
+        const likeButton = document.getElementById('likeButton');
+        if (likeButton) {
+            // Asegurar que el contenedor tenga position relative
+            likeButton.style.position = 'relative';
+            likeButton.appendChild(feedback);
+            
+            // Remover después de la animación
+            setTimeout(() => {
+                if (feedback.parentNode) {
+                    feedback.remove();
+                }
+            }, 2000);
+        }
     }
 
     // Función para animar el corazón
     function animateHeart(isLiked) {
         const heartIcon = document.querySelector('.heart-icon');
-        if (isLiked) {
-            // Animación de pulso
-            heartIcon.style.animation = 'pulse 0.5s ease-in-out';
-            setTimeout(() => {
-                heartIcon.style.animation = '';
-            }, 500);
+        if (heartIcon) {
+            if (isLiked) {
+                // Animación de pulso para like
+                heartIcon.style.animation = 'heartBeat 0.6s ease-in-out';
+                setTimeout(() => {
+                    heartIcon.style.animation = '';
+                }, 600);
+            } else {
+                // Animación sutil para unlike
+                heartIcon.style.animation = 'pulse 0.3s ease-in-out';
+                setTimeout(() => {
+                    heartIcon.style.animation = '';
+                }, 300);
+            }
         }
     }
 
-    // Función para obtener el valor de una cookie
+    // Función legacy para compatibilidad (mantener por si acaso)
     function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }    
+        return getCSRFToken();
+    }
 </script>
 
+<!-- CSS adicional para el feedback -->
+<style>
+    .like-feedback {
+        animation: fadeUpAndOut 2s forwards;
+    }
+    
+    .like-button:disabled {
+        cursor: not-allowed !important;
+    }
+    
+    @keyframes fadeUpAndOut {
+        0% {
+            opacity: 0;
+            transform: translate(-50%, 10px);
+        }
+        20% {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+        80% {
+            opacity: 1;
+            transform: translate(-50%, -5px);
+        }
+        100% {
+            opacity: 0;
+            transform: translate(-50%, -15px);
+        }
+    }
+    
+    @keyframes heartBeat {
+        0% { transform: scale(1); }
+        25% { transform: scale(1.3); }
+        50% { transform: scale(1); }
+        75% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+</style>
 {% endblock %}

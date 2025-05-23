@@ -1,11 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.urls import reverse
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.http import require_http_methods
+from django.http import JsonResponse
 from django.conf import settings
 from django.template.loader import render_to_string
+from django.db import connection, transaction
 from django.utils.html import strip_tags
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
@@ -19,97 +24,109 @@ from django.utils.text import slugify
 import os
 from django.core.files.storage import FileSystemStorage
 from .models import *
+import datetime
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Importar decoradores personalizados (SI EXISTEN)
+try:
+    from .decorators import login_required_custom, admin_required, ajax_login_required, session_refresh, get_user_info
+    DECORATORS_AVAILABLE = True
+except ImportError:
+    # Si no existen los decoradores, crearlos aquí mismo
+    DECORATORS_AVAILABLE = False
+
+logger = logging.getLogger(__name__)
 
 def index(request):
+    """Página de inicio - pública"""
     return render(request, 'core/index.html')
 
+
+
 def login_view(request):
-    """
-    Vista de login segura con registro de debugging para diagnóstico.
-    """
+    """Vista de login - pública"""
+    # Si ya está logueado, redirigir al marketplace
+    if request.session.get('user_id'):
+        return redirect('core:marketplace')
+    
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         
-        # Mensaje de depuración
-        print(f"Intento de login: username={username}")
+        logger.info(f"Intento de login: {username} desde IP {request.META.get('REMOTE_ADDR')}")
         
         try:
-            # Consulta SQL directa para verificar si el usuario existe
-            from django.db import connection
             with connection.cursor() as cursor:
-                # Consulta mejorada para obtener también información de la comunidad
                 cursor.execute("""
                     SELECT u.id, u.username, u.password, u.nombre, u.apellido, 
-                           c.id as comunidad_id, c.nombre as comunidad_nombre
+                           c.id as comunidad_id, c.nombre as comunidad_nombre, u.activo
                     FROM raiz.usuarios u
                     LEFT JOIN raiz.comunidades c ON u.id_comunidad = c.id
                     WHERE u.username = %s
                 """, [username])
                 user_data = cursor.fetchone()
             
-            # Imprimir datos para diagnóstico
-            print(f"Datos obtenidos de la BD: {user_data}")
-            
             if user_data:
-                user_id, db_username, db_password, nombre, apellido, comunidad_id, comunidad_nombre = user_data
+                user_id, db_username, db_password, nombre, apellido, comunidad_id, comunidad_nombre, activo = user_data
                 
-                # Verificación real de contraseña
-                from django.contrib.auth.hashers import check_password
+                # Verificar que el usuario esté activo
+                if not activo:
+                    logger.warning(f"Intento de login con usuario inactivo: {username}")
+                    return render(request, 'core/login.html', {
+                        'error': 'Tu cuenta está desactivada. Contacta al administrador.',
+                        'username': username
+                    })
+                
+                # Verificar contraseña
                 password_valid = check_password(password, db_password)
                 
-                # Para desarrollo, podemos permitir cualquier contraseña para facilitar las pruebas
-                # Comentar esta línea en producción
-                # password_valid = True
-                
-                print(f"Contraseña válida: {password_valid}")
-                
                 if password_valid:
-                    # Iniciar sesión y guardar también datos de comunidad
+                    # LIMPIAR SESIÓN ANTERIOR
+                    request.session.flush()
+                    
+                    # CREAR NUEVA SESIÓN SEGURA
                     request.session['user_id'] = str(user_id)
                     request.session['username'] = db_username
                     request.session['nombre'] = nombre
                     request.session['apellido'] = apellido
                     
-                    # Debugging - verificar datos guardados en sesión
-                    print(f"Datos en la sesión:")
-                    print(f"- user_id: {request.session.get('user_id')}")
-                    print(f"- username: {request.session.get('username')}")
-                    print(f"- nombre: {request.session.get('nombre')}")
-                    print(f"- apellido: {request.session.get('apellido')}")
-                    
-                    # Guardar información de la comunidad
                     if comunidad_id:
                         request.session['comunidad_id'] = comunidad_id
                         request.session['comunidad_nombre'] = comunidad_nombre
-                        print(f"- comunidad_id: {request.session.get('comunidad_id')}")
-                        print(f"- comunidad_nombre: {request.session.get('comunidad_nombre')}")
                     
-                    # Actualizar último login
-                    import datetime
+                    # Configurar sesión
+                    request.session.set_expiry(3600)  # 1 hora
+                    request.session['last_activity'] = datetime.datetime.now().timestamp()
+                    request.session['login_ip'] = request.META.get('REMOTE_ADDR', '')
+                    
+                    # Actualizar último login en BD
                     with connection.cursor() as cursor:
                         cursor.execute(
                             "UPDATE raiz.usuarios SET ultimo_login = %s WHERE id = %s",
                             [datetime.datetime.now(), user_id]
                         )
                     
-                    # Redirigir al marketplace
+                    logger.info(f"Login exitoso: {username} (ID: {user_id})")
                     return redirect('core:marketplace')
                 else:
+                    logger.warning(f"Contraseña incorrecta para usuario: {username}")
                     return render(request, 'core/login.html', {
                         'error': 'Contraseña incorrecta',
                         'username': username
                     })
             else:
+                logger.warning(f"Usuario no encontrado: {username}")
                 return render(request, 'core/login.html', {
-                    'error': 'Usuario no encontrado en la base de datos',
+                    'error': 'Usuario no encontrado',
                     'username': username
                 })
                 
         except Exception as e:
-            print(f"Error en autenticación: {e}")
+            logger.error(f"Error en login: {e}")
             return render(request, 'core/login.html', {
-                'error': f'Error en el sistema de autenticación: {e}',
+                'error': 'Error en el sistema. Intenta más tarde.',
                 'username': username
             })
     
@@ -117,46 +134,25 @@ def login_view(request):
 
 
 def password_recovery(request):
+    """Vista de recuperación de contraseña - pública"""
     if request.method == 'POST':
         email = request.POST.get('email')
         
-        # Verificar si el email existe en la base de datos
         try:
             user = Usuario.objects.get(email=email)
-            
-            # Generar token de recuperación
             recovery_token = str(uuid.uuid4())
             user.token_recuperacion = recovery_token
             user.fecha_token = datetime.datetime.now()
             user.save(update_fields=['token_recuperacion', 'fecha_token'])
             
-            # Construir URL de recuperación
-            recovery_url = f"{request.scheme}://{request.get_host()}/reset-password/{recovery_token}/"
-            
-            # Enviar email - comentado para entorno de desarrollo
-            """
-            subject = 'Recuperación de contraseña - Raíz Digital'
-            html_message = render_to_string('core/emails/password_recovery.html', {
-                'user': user,
-                'recovery_url': recovery_url
-            })
-            plain_message = strip_tags(html_message)
-            from_email = settings.DEFAULT_FROM_EMAIL
-            to = email
-            
-            send_mail(subject, plain_message, from_email, [to], html_message=html_message)
-            """
-            
-            # Como el envío de email está comentado para desarrollo, mostrar mensaje de éxito
             context = {
-                'success': 'Se han enviado instrucciones para restablecer tu contraseña a tu correo electrónico.'
+                'success': 'Se han enviado instrucciones para restablecer tu contraseña.'
             }
             return render(request, 'core/password_recovery.html', context)
             
         except Usuario.DoesNotExist:
-            # Si el correo no existe, mostramos un mensaje genérico por seguridad
             context = {
-                'success': 'Si el correo está registrado, recibirás instrucciones para restablecer tu contraseña.'
+                'success': 'Si el correo está registrado, recibirás instrucciones.'
             }
             return render(request, 'core/password_recovery.html', context)
     
@@ -181,49 +177,29 @@ def password_recovery(request):
 #def marketplace(request):
 #    return render(request, 'core/marketplace.html')
 
+# VISTAS PROTEGIDAS (requieren autenticación)
+@login_required_custom
+@session_refresh
 def marketplace(request):
-    """
-    Vista del marketplace principal que muestra información personalizada del usuario
-    y su comunidad.
-    """
-    # Verificar si el usuario está logueado (mediante la sesión)
-    if 'user_id' not in request.session:
-        # Si no está logueado, redirigir al login
-        return redirect('core:login')
-        
-    # Obtener datos del usuario desde la sesión
-    user_id = request.session.get('user_id')
-    username = request.session.get('username')
-    nombre = request.session.get('nombre', '')
-    apellido = request.session.get('apellido', '')
-    
-    # Obtener nombre de la comunidad directamente de la sesión
-    community_name = request.session.get('comunidad_nombre')
-    
-    # Crear nombre completo para mostrar en la interfaz
-    nombre_completo = f"{nombre} {apellido}".strip()
-    
-    # Para diagnóstico - imprimir los valores
-    print(f"ID de usuario: {user_id}")
-    print(f"Username: {username}")
-    print(f"Nombre: {nombre}")
-    print(f"Apellido: {apellido}")
-    print(f"Nombre completo: {nombre_completo}")
-    print(f"Comunidad: {community_name}")
+    """Vista del marketplace - PROTEGIDA"""
+    user_info = get_user_info(request)
     
     context = {
-        'username': username,
-        'nombre': nombre,
-        'apellido': apellido,
-        'nombre_completo': nombre_completo,
-        'community_name': community_name
+        'username': user_info['username'],
+        'nombre': user_info['nombre'],
+        'apellido': user_info['apellido'],
+        'nombre_completo': f"{user_info['nombre']} {user_info['apellido']}".strip(),
+        'community_name': user_info['comunidad_nombre']
     }
     
     return render(request, 'core/marketplace_home.html', context)
 
 
-# Vistas para las noticias
+@login_required_custom
+@session_refresh
 def noticias(request):
+    """Vista de noticias - PROTEGIDA"""
+    user_info = get_user_info(request)
     """
     Vista para mostrar el listado de noticias.
     Versión optimizada para solucionar problemas con el filtrado de comunidad.
@@ -379,7 +355,11 @@ def noticias(request):
     
     return render(request, 'core/news.html', context)
 
+@login_required_custom
+@session_refresh
 def noticia_detalle(request, slug):
+    """Vista de detalle de noticia - PROTEGIDA"""
+    user_info = get_user_info(request)
     """
     Vista mejorada para mostrar el detalle de una noticia con contador de vistas único.
     """
@@ -611,6 +591,9 @@ def noticia_detalle(request, slug):
     
 
 def is_admin(request):
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return False
     """
     Determina si el usuario actual es administrador basado en sus roles.
     """
@@ -694,7 +677,11 @@ def is_admin(request):
         return is_admin_user
 
 
+@admin_required
+@session_refresh
 def crear_noticia(request):
+    """Vista para crear noticias - SOLO ADMINS"""
+    user_info = get_user_info(request)
     """
     Vista para crear noticias con control de concurrencia y seguridad.
     Maneja la creación de noticias para administradores de diferentes comunidades.
@@ -940,7 +927,11 @@ def crear_noticia(request):
     return render(request, 'core/create_news.html', context)
 
 
+@admin_required
+@session_refresh
 def editar_noticia(request, slug):
+    """Vista para editar noticias - SOLO ADMINS"""
+    user_info = get_user_info(request)
     """
     Vista para editar una noticia existente.
     """
@@ -1115,12 +1106,17 @@ def editar_noticia(request, slug):
 
 
 
+# Actualizar la función like_noticia en core/views.py
 
+@ajax_login_required
 def like_noticia(request, noticia_id):
     """
     Vista para manejar el dar/quitar like a una noticia
     """
     from django.http import JsonResponse
+    from django.views.decorators.csrf import csrf_protect
+    from django.utils.decorators import method_decorator
+    from django.views.decorators.http import require_POST
     
     if request.method != 'POST':
         return JsonResponse({'error': 'Método no permitido'}, status=405)
@@ -1151,12 +1147,13 @@ def like_noticia(request, noticia_id):
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS raiz.noticia_likes (
                         id SERIAL PRIMARY KEY,
-                        id_noticia UUID NOT NULL,
+                        id_noticia VARCHAR(255) NOT NULL,
                         id_usuario VARCHAR(255) NOT NULL,
                         fecha_creacion TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                         CONSTRAINT unique_noticia_usuario UNIQUE(id_noticia, id_usuario)
                     )
                 """)
+                print("Tabla de likes creada")
             
             # Verificar si ya existe el like
             cursor.execute("""
@@ -1173,24 +1170,39 @@ def like_noticia(request, noticia_id):
                     WHERE id_noticia = %s AND id_usuario = %s
                 """, [str(noticia_id), str(user_id)])
                 
-                # Devolver el resultado
+                # Obtener nuevo conteo
+                cursor.execute("""
+                    SELECT COUNT(*) FROM raiz.noticia_likes 
+                    WHERE id_noticia = %s
+                """, [str(noticia_id)])
+                nuevo_conteo = cursor.fetchone()[0]
+                
                 return JsonResponse({
                     'status': 'success',
                     'action': 'unliked',
-                    'message': 'Like removido con éxito'
+                    'message': 'Like removido con éxito',
+                    'new_count': nuevo_conteo
                 })
             else:
                 # El usuario no había dado like, así que lo agregamos
                 cursor.execute("""
                     INSERT INTO raiz.noticia_likes (id_noticia, id_usuario)
                     VALUES (%s, %s)
+                    ON CONFLICT (id_noticia, id_usuario) DO NOTHING
                 """, [str(noticia_id), str(user_id)])
                 
-                # Devolver el resultado
+                # Obtener nuevo conteo
+                cursor.execute("""
+                    SELECT COUNT(*) FROM raiz.noticia_likes 
+                    WHERE id_noticia = %s
+                """, [str(noticia_id)])
+                nuevo_conteo = cursor.fetchone()[0]
+                
                 return JsonResponse({
                     'status': 'success',
                     'action': 'liked',
-                    'message': 'Like agregado con éxito'
+                    'message': 'Like agregado con éxito',
+                    'new_count': nuevo_conteo
                 })
                 
     except Exception as e:
@@ -1205,28 +1217,20 @@ def like_noticia(request, noticia_id):
 
 # Agregar esta función a core/views.py
 
+@csrf_protect
+@require_http_methods(["GET", "POST"])
 def logout_view(request):
     """
-    Vista para manejar el logout del usuario.
-    Limpia la sesión y redirige al login.
+    Vista de logout mejorada que maneja tanto GET como POST.
     """
-    from django.shortcuts import redirect
-    from django.contrib import messages
-    import logging
-    
-    # Log del logout para auditoría
-    logger = logging.getLogger(__name__)
-    
-    # Obtener información del usuario antes de limpiar la sesión
     user_id = request.session.get('user_id')
     username = request.session.get('username', 'Usuario desconocido')
     
     try:
-        # Registrar el logout en los logs
         if user_id:
-            logger.info(f"Logout realizado - Usuario: {username} (ID: {user_id})")
+            logger.info(f"Logout: {username} (ID: {user_id})")
             
-            # Opcional: Registrar en la tabla de logs si existe
+            # Opcional: Registrar logout en tabla de logs
             try:
                 from django.db import connection
                 with connection.cursor() as cursor:
@@ -1249,75 +1253,47 @@ def logout_view(request):
                         request.META.get('HTTP_USER_AGENT', '')[:255]
                     ])
             except Exception as e:
-                logger.warning(f"No se pudo registrar logout en tabla de logs: {e}")
+                logger.warning(f"No se pudo registrar logout en logs: {e}")
         
         # Limpiar completamente la sesión
         request.session.flush()
         
-        # Mensaje de confirmación
-        messages.success(request, 'Sesión cerrada correctamente.')
+        # Si es una petición AJAX, devolver JSON
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Sesión cerrada correctamente',
+                'redirect': reverse('core:login')
+            })
         
-        # Redirigir al login
+        # Para peticiones normales, agregar mensaje y redirigir
+        messages.success(request, 'Sesión cerrada correctamente.')
         return redirect('core:login')
         
     except Exception as e:
         logger.error(f"Error durante logout: {e}")
         
         # Asegurar que la sesión se limpie aunque haya errores
-        request.session.flush()
+        try:
+            request.session.flush()
+        except:
+            pass
         
-        # Redirigir al login con mensaje de error
+        # Si es AJAX, devolver error JSON
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Hubo un problema al cerrar la sesión',
+                'redirect': reverse('core:login')
+            }, status=500)
+        
+        # Para peticiones normales
         messages.error(request, 'Hubo un problema al cerrar la sesión.')
         return redirect('core:login')
 
-
-def session_extend(request):
-    """
-    Vista AJAX para extender la sesión del usuario.
-    Permite resetear el temporizador de inactividad.
-    """
-    from django.http import JsonResponse
-    from django.views.decorators.csrf import csrf_exempt
-    from django.views.decorators.http import require_POST
-    import json
-    
-    @csrf_exempt
-    @require_POST
-    def extend_session_view(request):
-        try:
-            # Verificar que el usuario esté logueado
-            if 'user_id' not in request.session:
-                return JsonResponse({
-                    'status': 'error',
-                    'message': 'Usuario no logueado'
-                }, status=401)
-            
-            # Renovar la sesión
-            request.session.set_expiry(None)  # Usar el tiempo por defecto
-            request.session.modified = True
-            
-            # Log de la extensión
-            user_id = request.session.get('user_id')
-            username = request.session.get('username', 'Usuario')
-            
-            print(f"Sesión extendida para usuario {username} (ID: {user_id})")
-            
-            return JsonResponse({
-                'status': 'success',
-                'message': 'Sesión extendida correctamente',
-                'timestamp': timezone.now().isoformat() if 'timezone' in globals() else str(datetime.now())
-            })
-            
-        except Exception as e:
-            return JsonResponse({
-                'status': 'error',
-                'message': f'Error al extender sesión: {str(e)}'
-            }, status=500)
-    
-    return extend_session_view(request)
-
-
+@ajax_login_required
 def check_session_status(request):
+    user_info = get_user_info(request)
     """
     Vista AJAX para verificar el estado de la sesión.
     Útil para verificaciones periódicas desde el frontend.
@@ -1348,3 +1324,194 @@ def check_session_status(request):
             'status': 'error',
             'message': f'Error al verificar sesión: {str(e)}'
         }, status=500)
+    
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.urls import reverse
+import json
+import datetime
+
+
+@csrf_exempt
+@require_POST
+def session_extend(request):
+    """
+    Vista AJAX para extender la sesión del usuario.
+    Permite resetear el temporizador de inactividad.
+    """
+    try:
+        # Verificar que el usuario esté logueado
+        if 'user_id' not in request.session:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Usuario no logueado'
+            }, status=401)
+        
+        # Renovar la sesión
+        request.session.set_expiry(3600)  # Extender por 1 hora
+        request.session['last_activity'] = datetime.datetime.now().timestamp()
+        request.session.modified = True
+        
+        # Log de la extensión
+        user_id = request.session.get('user_id')
+        username = request.session.get('username', 'Usuario')
+        
+        logger.info(f"Sesión extendida para usuario {username} (ID: {user_id})")
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Sesión extendida correctamente',
+            'timestamp': datetime.datetime.now().isoformat(),
+            'expires_in': 3600
+        })
+        
+    except Exception as e:
+        logger.error(f"Error al extender sesión: {e}")
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Error al extender sesión: {str(e)}'
+        }, status=500)
+
+
+def check_session_status(request):
+    """
+    Vista AJAX para verificar el estado de la sesión.
+    Útil para verificaciones periódicas desde el frontend.
+    """
+    try:
+        is_logged_in = 'user_id' in request.session
+        
+        if is_logged_in:
+            # Verificar si la sesión ha expirado por inactividad
+            last_activity = request.session.get('last_activity')
+            current_time = datetime.datetime.now().timestamp()
+            
+            # Si han pasado más de 1 hora desde la última actividad
+            if last_activity and (current_time - last_activity) > 3600:
+                # Limpiar sesión expirada
+                request.session.flush()
+                return JsonResponse({
+                    'status': 'expired',
+                    'message': 'Sesión expirada por inactividad',
+                    'timestamp': datetime.datetime.now().isoformat()
+                })
+            
+            # Actualizar última actividad
+            request.session['last_activity'] = current_time
+            request.session.modified = True
+            
+            return JsonResponse({
+                'status': 'active',
+                'user_id': request.session.get('user_id'),
+                'username': request.session.get('username'),
+                'session_key': request.session.session_key,
+                'timestamp': datetime.datetime.now().isoformat(),
+                'last_activity': last_activity
+            })
+        else:
+            return JsonResponse({
+                'status': 'expired',
+                'message': 'Sesión no válida',
+                'timestamp': datetime.datetime.now().isoformat()
+            })
+            
+    except Exception as e:
+        logger.error(f"Error al verificar sesión: {e}")
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Error al verificar sesión: {str(e)}'
+        }, status=500)
+
+
+# ===================================
+# DECORADORES PERSONALIZADOS (si no existen)
+# ===================================
+
+def login_required_custom(view_func):
+    """
+    Decorador personalizado para verificar autenticación vía sesión
+    """
+    def wrapper(request, *args, **kwargs):
+        if 'user_id' not in request.session:
+            logger.warning(f"Acceso denegado a {request.path} - Usuario no autenticado")
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'error': 'No autenticado',
+                    'redirect': reverse('core:login')
+                }, status=401)
+            return redirect('core:login')
+        
+        # Verificar si la sesión ha expirado
+        last_activity = request.session.get('last_activity')
+        if last_activity:
+            current_time = datetime.datetime.now().timestamp()
+            if (current_time - last_activity) > 3600:  # 1 hora
+                request.session.flush()
+                logger.info(f"Sesión expirada para usuario - redirigiendo al login")
+                return redirect('core:login')
+        
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+def admin_required(view_func):
+    """
+    Decorador para verificar que el usuario sea administrador
+    """
+    def wrapper(request, *args, **kwargs):
+        if 'user_id' not in request.session:
+            return redirect('core:login')
+        
+        # Verificar si es admin
+        if not is_admin(request):
+            logger.warning(f"Acceso admin denegado a {request.path} - Usuario: {request.session.get('username')}")
+            messages.error(request, "No tienes permisos de administrador.")
+            return redirect('core:marketplace')
+        
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+def ajax_login_required(view_func):
+    """
+    Decorador para vistas AJAX que requieren autenticación
+    """
+    def wrapper(request, *args, **kwargs):
+        if 'user_id' not in request.session:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'No autenticado',
+                'redirect': reverse('core:login')
+            }, status=401)
+        
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+def session_refresh(view_func):
+    """
+    Decorador para actualizar la actividad de la sesión
+    """
+    def wrapper(request, *args, **kwargs):
+        if 'user_id' in request.session:
+            request.session['last_activity'] = datetime.datetime.now().timestamp()
+            request.session.modified = True
+        
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+def get_user_info(request):
+    """
+    Función helper para obtener información del usuario de la sesión
+    """
+    return {
+        'user_id': request.session.get('user_id'),
+        'username': request.session.get('username', ''),
+        'nombre': request.session.get('nombre', ''),
+        'apellido': request.session.get('apellido', ''),
+        'comunidad_id': request.session.get('comunidad_id'),
+        'comunidad_nombre': request.session.get('comunidad_nombre', ''),
+        'is_admin': request.session.get('is_admin', False)
+    }

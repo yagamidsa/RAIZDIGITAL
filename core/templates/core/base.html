@@ -7,6 +7,9 @@
     <title>{% block title %}Raíz Digital{% endblock %}</title>
     {% load static %}
 
+    <!-- TOKEN CSRF GLOBAL PARA JAVASCRIPT -->
+    <meta name="csrf-token" content="{{ csrf_token }}">
+
     <!-- Estilos base -->
     <link rel="stylesheet" href="{% static 'core/css/variables.css' %}">
 
@@ -65,12 +68,12 @@
                 /* En móviles usar background local para mejor rendimiento */
                 background-attachment: local;
             }
-
+            
             body {
                 /* Extender altura mínima solo ligeramente */
                 min-height: calc(100vh + 100px);
             }
-
+            
             /* Fondo extendido más grande en móviles */
             body::before {
                 top: -300px;
@@ -122,6 +125,9 @@
 
     <!-- Scripts base -->
     <script>
+        // TOKEN CSRF GLOBAL PARA JAVASCRIPT
+        window.csrfToken = '{{ csrf_token }}';
+
         // Clase base para efectos de canvas
         class CanvasEffect {
             constructor(canvas) {
@@ -145,7 +151,7 @@
         function isUserLoggedIn() {
             // Verificar indicadores de sesión en la página
             return !!(
-                document.querySelector('.user-info') ||
+                document.querySelector('.user-info') || 
                 document.querySelector('.mobile-nav-link.logout') ||
                 document.body.classList.contains('has-menu') ||
                 '{{ request.session.user_id }}' // Variable de sesión de Django
@@ -168,9 +174,9 @@
     <script src="{% static 'core/js/auto-logout.js' %}?v=1"></script>
     <script>
         // Configuración específica del auto-logout para Django
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             console.log('🕐 Iniciando sistema de auto-logout para usuario {{ request.session.username }}');
-
+            
             // Verificar que el usuario esté realmente logueado
             if ('{{ request.session.user_id }}') {
                 // Inicializar con configuración personalizada
@@ -181,7 +187,7 @@
                         logoutUrl: '{% url "core:login" %}', // URL de Django para logout
                         checkInterval: 1000 // Verificar cada segundo
                     });
-
+                    
                     console.log('✅ Auto-logout configurado para 3 minutos de inactividad');
                 } else {
                     console.error('❌ AutoLogoutSystem no está disponible');
@@ -193,36 +199,5 @@
 
     {% block extra_js %}{% endblock %}
 </body>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        let scrollTimeout;
-
-        // Solo en dispositivos móviles
-        if (window.innerWidth <= 768) {
-            // Mostrar indicador durante el scroll
-            window.addEventListener('scroll', function () {
-                document.body.classList.add('scrolling');
-
-                // Ocultar después de 1 segundo de inactividad
-                clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(function () {
-                    document.body.classList.remove('scrolling');
-                }, 1000);
-            }, { passive: true });
-
-            // También mostrar al hacer touch
-            document.addEventListener('touchstart', function () {
-                document.body.classList.add('scrolling');
-            }, { passive: true });
-
-            document.addEventListener('touchend', function () {
-                clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(function () {
-                    document.body.classList.remove('scrolling');
-                }, 1500);
-            }, { passive: true });
-        }
-    });
-</script>
 
 </html>

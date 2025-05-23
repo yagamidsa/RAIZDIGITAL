@@ -93,10 +93,17 @@
     </div>
 </div>
 
-<!-- Script JavaScript para el menú móvil y logout -->
+<!-- FORMULARIO OCULTO PARA LOGOUT CON CSRF -->
+{% if request.session.user_id %}
+<form id="logoutForm" method="POST" action="{% url 'core:logout' %}" style="display: none;">
+    {% csrf_token %}
+</form>
+{% endif %}
+
+<!-- Script JavaScript para el menú móvil y logout CORREGIDO -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Menú móvil
+    // ===== MENÚ MÓVIL =====
     const menuToggle = document.getElementById('mobileMenuToggle');
     const mobileMenu = document.getElementById('mobileMenu');
 
@@ -153,50 +160,137 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Funcionalidad de logout
+    // ===== FUNCIONALIDAD DE LOGOUT CORREGIDA =====
     function handleLogout(event) {
         event.preventDefault();
         
         // Mostrar confirmación
         if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-            // Crear formulario para logout
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '{% url "core:logout" %}';
+            // Usar el formulario oculto que ya tiene el token CSRF
+            const logoutForm = document.getElementById('logoutForm');
             
-            // Agregar token CSRF
-            const csrfToken = getCookie('csrftoken');
-            if (csrfToken) {
-                const csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = 'csrfmiddlewaretoken';
-                csrfInput.value = csrfToken;
-                form.appendChild(csrfInput);
+            if (logoutForm) {
+                // Mostrar indicador de carga (opcional)
+                const loadingIndicator = document.createElement('div');
+                loadingIndicator.innerHTML = `
+                    <div style="
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: rgba(10, 25, 47, 0.95);
+                        color: white;
+                        padding: 20px 30px;
+                        border-radius: 10px;
+                        text-align: center;
+                        z-index: 10000;
+                        border: 2px solid var(--neon-green, #00ff9d);
+                        box-shadow: 0 0 20px rgba(0, 255, 157, 0.3);
+                    ">
+                        <div style="
+                            width: 30px;
+                            height: 30px;
+                            border: 3px solid rgba(0, 255, 157, 0.3);
+                            border-top: 3px solid var(--neon-green, #00ff9d);
+                            border-radius: 50%;
+                            animation: spin 1s linear infinite;
+                            margin: 0 auto 10px;
+                        "></div>
+                        Cerrando sesión...
+                    </div>
+                    <style>
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                    </style>
+                `;
+                document.body.appendChild(loadingIndicator);
+                
+                // Enviar formulario después de un breve delay para mostrar el indicador
+                setTimeout(() => {
+                    logoutForm.submit();
+                }, 300);
+            } else {
+                // Fallback: usar fetch con token CSRF
+                handleLogoutWithFetch();
             }
-            
-            // Enviar formulario
-            document.body.appendChild(form);
-            form.submit();
         }
     }
 
-    // Función para obtener cookie CSRF
-    function getCookie(name) {
+    // Función alternativa usando fetch (fallback)
+    function handleLogoutWithFetch() {
+        // Obtener token CSRF
+        const csrfToken = getCSRFToken();
+        
+        if (!csrfToken) {
+            alert('Error: Token de seguridad no encontrado. Recarga la página e intenta nuevamente.');
+            return;
+        }
+
+        fetch('{% url "core:logout" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (response.ok) {
+                // Redirigir al login
+                window.location.href = '{% url "core:login" %}';
+            } else {
+                throw new Error('Error al cerrar sesión');
+            }
+        })
+        .catch(error => {
+            console.error('Error en logout:', error);
+            alert('Error al cerrar sesión. Intenta nuevamente.');
+        });
+    }
+
+    // Función para obtener token CSRF
+    function getCSRFToken() {
+        // Intentar desde window.csrfToken (si está disponible)
+        if (typeof window.csrfToken !== 'undefined') {
+            return window.csrfToken;
+        }
+        
+        // Buscar en cookies
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
             const cookies = document.cookie.split(';');
             for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                if (cookie.substring(0, 10) === 'csrftoken=') {
+                    cookieValue = decodeURIComponent(cookie.substring(10));
                     break;
                 }
             }
         }
+        
+        // Buscar en meta tags
+        if (!cookieValue) {
+            const csrfMeta = document.querySelector('meta[name=csrf-token]');
+            if (csrfMeta) {
+                cookieValue = csrfMeta.getAttribute('content');
+            }
+        }
+        
+        // Buscar en formulario oculto
+        if (!cookieValue) {
+            const csrfInput = document.querySelector('#logoutForm input[name="csrfmiddlewaretoken"]');
+            if (csrfInput) {
+                cookieValue = csrfInput.value;
+            }
+        }
+        
         return cookieValue;
     }
 
-    // Agregar evento de logout para escritorio y móvil
+    // ===== AGREGAR EVENTOS DE LOGOUT =====
     const desktopLogoutBtn = document.getElementById('desktopLogoutBtn');
     const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
     
