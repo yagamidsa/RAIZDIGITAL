@@ -69,20 +69,54 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'raizdigital.wsgi.application'
 
-# Base de datos con mejor manejo de errores
-DATABASE_URL = os.environ.get('DATABASE_URL')
+# =================================
+# CONFIGURACIÓN DE BASE DE DATOS - MEJORADA
+# =================================
+
+print("🗄️  Configurando base de datos...")
+
+# Verificar qué variables de BD tenemos disponibles
+db_vars = {
+    'DATABASE_URL': os.environ.get('DATABASE_URL'),
+    'PGHOST': os.environ.get('PGHOST'),
+    'PGDATABASE': os.environ.get('PGDATABASE'),
+    'PGUSER': os.environ.get('PGUSER'),
+    'PGPASSWORD': os.environ.get('PGPASSWORD'),
+    'PGPORT': os.environ.get('PGPORT'),
+}
+
+print("Variables de BD disponibles:")
+for key, value in db_vars.items():
+    if value:
+        if 'PASSWORD' in key or 'URL' in key:
+            print(f"  {key}: {'*' * min(len(str(value)), 10)}")
+        else:
+            print(f"  {key}: {value}")
+    else:
+        print(f"  {key}: NO DISPONIBLE")
+
 DATABASES = {}
 
-if DATABASE_URL:
-    print(f"🗄️  Usando DATABASE_URL")
+# Opción 1: Usar DATABASE_URL (preferido)
+if db_vars['DATABASE_URL']:
+    print("🔗 Usando DATABASE_URL para conexión")
     try:
         import dj_database_url
-        DATABASES = {'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
+        DATABASES = {'default': dj_database_url.parse(db_vars['DATABASE_URL'])}
+        
+        # Asegurar configuración SSL para Railway
+        DATABASES['default']['OPTIONS'] = {
+            'sslmode': 'require',
+            'connect_timeout': 60,
+        }
+        DATABASES['default']['CONN_MAX_AGE'] = 600
+        
         print("✅ Base de datos configurada con dj_database_url")
+        
     except ImportError:
         print("⚠️  dj_database_url no disponible, usando parser manual")
         import re
-        match = re.match(r'postgresql://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)', DATABASE_URL)
+        match = re.match(r'postgresql://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)', db_vars['DATABASE_URL'])
         if match:
             user, password, host, port, database = match.groups()
             DATABASES = {
@@ -93,7 +127,10 @@ if DATABASE_URL:
                     'PASSWORD': password,
                     'HOST': host,
                     'PORT': port,
-                    'OPTIONS': {'sslmode': 'require'},
+                    'OPTIONS': {
+                        'sslmode': 'require',
+                        'connect_timeout': 60,
+                    },
                     'CONN_MAX_AGE': 600,
                 }
             }
@@ -101,29 +138,44 @@ if DATABASE_URL:
         else:
             print("❌ ERROR: No se pudo parsear DATABASE_URL")
             raise ValueError("DATABASE_URL tiene formato inválido")
-else:
-    # Usar variables individuales
-    print("🗄️  Usando variables de entorno individuales")
+
+# Opción 2: Usar variables individuales
+elif all([db_vars['PGHOST'], db_vars['PGUSER'], db_vars['PGPASSWORD'], db_vars['PGDATABASE']]):
+    print("🔧 Usando variables de entorno individuales")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('PGDATABASE', 'railway'),
-            'USER': os.environ.get('PGUSER', 'postgres'),
-            'PASSWORD': os.environ.get('PGPASSWORD', ''),
-            'HOST': os.environ.get('PGHOST', 'localhost'),
-            'PORT': os.environ.get('PGPORT', '5432'),
-            'OPTIONS': {'sslmode': 'require'},
+            'NAME': db_vars['PGDATABASE'],
+            'USER': db_vars['PGUSER'],
+            'PASSWORD': db_vars['PGPASSWORD'],
+            'HOST': db_vars['PGHOST'],
+            'PORT': db_vars['PGPORT'] or '5432',
+            'OPTIONS': {
+                'sslmode': 'require',
+                'connect_timeout': 60,
+            },
             'CONN_MAX_AGE': 600,
         }
     }
-    db_config = DATABASES['default']
-    print(f"✅ BD configurada: {db_config['USER']}@{db_config['HOST']}:{db_config['PORT']}/{db_config['NAME']}")
+    print(f"✅ BD configurada: {db_vars['PGUSER']}@{db_vars['PGHOST']}:{db_vars['PGPORT']}/{db_vars['PGDATABASE']}")
 
-# Verificar que tenemos configuración de BD
+else:
+    print("❌ CRITICAL: No se encontraron variables de base de datos")
+    print("💡 Verifica que Railway tenga configuradas las variables:")
+    print("   - DATABASE_URL (preferido)")
+    print("   - O: PGHOST, PGUSER, PGPASSWORD, PGDATABASE, PGPORT")
+    sys.exit(1)
+
+# Verificar que tenemos configuración válida
 if not DATABASES.get('default'):
     print("❌ CRITICAL: No se pudo configurar la base de datos")
-    print("💡 Verifica las variables DATABASE_URL o PG* en Railway")
     sys.exit(1)
+
+# Mostrar configuración final (sin contraseña)
+final_config = DATABASES['default'].copy()
+if 'PASSWORD' in final_config:
+    final_config['PASSWORD'] = '***'
+print(f"🐘 Configuración final de BD: {final_config}")
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -138,7 +190,7 @@ USE_I18N = True
 USE_TZ = True
 
 # =================================
-# CONFIGURACIÓN DE ARCHIVOS ESTÁTICOS - CORREGIDA PARA TU ESTRUCTURA
+# CONFIGURACIÓN DE ARCHIVOS ESTÁTICOS - CORREGIDA
 # =================================
 
 STATIC_URL = '/static/'
@@ -150,15 +202,19 @@ print(f"📁 STATIC_ROOT: {STATIC_ROOT}")
 
 # STATICFILES_DIRS - Configuración correcta para tu estructura
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',  # El directorio global /static
+    BASE_DIR / 'static',  # El directorio global /static (si existe)
 ]
+
+# Solo añadir directorios que existen
+existing_dirs = [d for d in STATICFILES_DIRS if d.exists()]
+STATICFILES_DIRS = existing_dirs
 
 # Verificar que los directorios existen
 for static_dir in STATICFILES_DIRS:
-    if static_dir.exists():
-        print(f"✅ Directorio estático encontrado: {static_dir}")
-    else:
-        print(f"⚠️  Directorio estático no existe: {static_dir}")
+    print(f"✅ Directorio estático encontrado: {static_dir}")
+
+if not STATICFILES_DIRS:
+    print("⚠️  No se encontraron directorios estáticos en STATICFILES_DIRS")
 
 # STATICFILES_FINDERS - Incluye el finder para apps
 STATICFILES_FINDERS = [
@@ -199,13 +255,17 @@ SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_AGE = 3600
 SESSION_SAVE_EVERY_REQUEST = True
 
-# Configuración de logging
+# Configuración de logging mejorada
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
             'style': '{',
         },
     },
@@ -225,9 +285,14 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'ERROR',  # Solo errores de BD para no saturar logs
+            'propagate': False,
+        },
         'django.contrib.staticfiles': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': False,
         },
     },
@@ -236,3 +301,4 @@ LOGGING = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 print('🚀 Railway production settings loaded successfully')
+print('=' * 60)
