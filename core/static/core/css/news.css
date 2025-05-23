@@ -914,11 +914,6 @@ body {
         height: 60px;
     }
 
-    .back-button {
-        top: 50px;
-        left: 16px;
-    }
-
     /* Ajustes de texto y elementos */
     .news-title {
         font-size: 2rem;
@@ -977,6 +972,91 @@ body {
     .edit-button svg {
         width: 16px;
         height: 16px;
+    }
+
+    /* ===== CORRECCIONES ADICIONALES PARA CENTRADO Y BOTÓN VOLVER ===== */
+    
+    /* Corrección para páginas de detalle y edición */
+    .article-container,
+    .create-news-container {
+        margin: 0 auto !important;
+        padding: 20px 15px !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+    
+    /* Botón volver - corrección definitiva para evitar superposición */
+    .back-button {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        margin-bottom: 20px !important;
+        margin-top: 10px !important;
+        padding: 8px 0 !important;
+        width: fit-content !important;
+        z-index: 10 !important;
+    }
+    
+    /* Centrado del contenido de artículos */
+    .article-header,
+    .article-content,
+    .share-buttons,
+    .related-articles {
+        max-width: 100% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+    
+    .article-header {
+        text-align: center !important;
+    }
+    
+    /* Imagen destacada responsive */
+    .article-featured-image {
+        width: 100% !important;
+        height: 200px !important;
+        margin: 0 auto 20px auto !important;
+    }
+    
+    /* Estadísticas y meta centradas */
+    .article-stats {
+        justify-content: center !important;
+        gap: 20px !important;
+        flex-wrap: wrap !important;
+    }
+    
+    .article-meta {
+        flex-direction: column !important;
+        gap: 10px !important;
+        align-items: center !important;
+    }
+    
+    /* Formularios centrados */
+    .form-title {
+        text-align: center !important;
+        margin-bottom: 25px !important;
+    }
+    
+    .form-actions {
+        flex-direction: column !important;
+        gap: 15px !important;
+    }
+    
+    .btn-submit-news,
+    .btn-cancel {
+        width: 100% !important;
+        text-align: center !important;
+    }
+    
+    /* Iconos de paginación más visibles */
+    .page-link svg {
+        background: rgba(0, 0, 0, 0.4) !important;
+        border-radius: 3px !important;
+        padding: 3px !important;
+        fill: rgba(255, 255, 255, 0.95) !important;
     }
 }
 
