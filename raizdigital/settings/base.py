@@ -41,7 +41,67 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.AuthenticationMiddleware',  
+    'core.middleware.SessionSecurityMiddleware',  
 ]
+
+
+
+
+# CONFIGURACIÓN DE SESIONES MÁS SEGURA
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Usar base de datos
+SESSION_COOKIE_AGE = 3600  # 1 hora
+SESSION_COOKIE_SECURE = True  # Solo HTTPS en producción
+SESSION_COOKIE_HTTPONLY = True  # No accesible desde JavaScript
+SESSION_COOKIE_SAMESITE = 'Lax'  # Protección CSRF
+SESSION_SAVE_EVERY_REQUEST = True  # Actualizar sesión en cada request
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Cerrar al cerrar navegador
+
+# CONFIGURACIÓN DE SEGURIDAD ADICIONAL
+CSRF_COOKIE_SECURE = True  # Solo HTTPS en producción
+CSRF_COOKIE_HTTPONLY = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+
+# LOGGING PARA AUDITORÍA
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'security.log',
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'core.middleware': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'core.decorators': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
+
+
 
 ROOT_URLCONF = 'raizdigital.urls'
 
