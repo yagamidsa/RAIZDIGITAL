@@ -27,6 +27,14 @@
             box-sizing: border-box;
         }
 
+        /* SOLUCIÓN SIMPLE Y EFECTIVA PARA EL OVERSCROLL */
+        html {
+            /* Fondo que cubra toda la página incluyendo áreas de overscroll */
+            background: linear-gradient(135deg, var(--dark-blue) 0%, #061826 50%, var(--dark-green) 100%);
+            background-attachment: fixed;
+            min-height: 100%;
+        }
+
         body {
             background: linear-gradient(135deg, var(--dark-blue) 0%, #061826 50%, var(--dark-green) 100%);
             font-family: 'Arial', sans-serif;
@@ -34,6 +42,40 @@
             position: relative;
             overflow-x: hidden;
             color: white;
+            /* Solo prevenir overscroll horizontal, mantener vertical funcional */
+            overscroll-behavior-x: none;
+        }
+
+        /* Fondo extendido para cubrir áreas de overscroll SIN afectar el scroll */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -200px;
+            left: 0;
+            right: 0;
+            height: calc(100vh + 400px);
+            background: linear-gradient(135deg, var(--dark-blue) 0%, #061826 50%, var(--dark-green) 100%);
+            z-index: -999;
+            pointer-events: none;
+        }
+
+        /* Para dispositivos móviles - ajuste específico */
+        @media screen and (max-width: 768px) {
+            html {
+                /* En móviles usar background local para mejor rendimiento */
+                background-attachment: local;
+            }
+
+            body {
+                /* Extender altura mínima solo ligeramente */
+                min-height: calc(100vh + 100px);
+            }
+
+            /* Fondo extendido más grande en móviles */
+            body::before {
+                top: -300px;
+                height: calc(100vh + 600px);
+            }
         }
 
         canvas {
@@ -103,7 +145,7 @@
         function isUserLoggedIn() {
             // Verificar indicadores de sesión en la página
             return !!(
-                document.querySelector('.user-info') || 
+                document.querySelector('.user-info') ||
                 document.querySelector('.mobile-nav-link.logout') ||
                 document.body.classList.contains('has-menu') ||
                 '{{ request.session.user_id }}' // Variable de sesión de Django
@@ -126,9 +168,9 @@
     <script src="{% static 'core/js/auto-logout.js' %}?v=1"></script>
     <script>
         // Configuración específica del auto-logout para Django
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             console.log('🕐 Iniciando sistema de auto-logout para usuario {{ request.session.username }}');
-            
+
             // Verificar que el usuario esté realmente logueado
             if ('{{ request.session.user_id }}') {
                 // Inicializar con configuración personalizada
@@ -139,7 +181,7 @@
                         logoutUrl: '{% url "core:login" %}', // URL de Django para logout
                         checkInterval: 1000 // Verificar cada segundo
                     });
-                    
+
                     console.log('✅ Auto-logout configurado para 3 minutos de inactividad');
                 } else {
                     console.error('❌ AutoLogoutSystem no está disponible');
@@ -151,5 +193,36 @@
 
     {% block extra_js %}{% endblock %}
 </body>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let scrollTimeout;
+
+        // Solo en dispositivos móviles
+        if (window.innerWidth <= 768) {
+            // Mostrar indicador durante el scroll
+            window.addEventListener('scroll', function () {
+                document.body.classList.add('scrolling');
+
+                // Ocultar después de 1 segundo de inactividad
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(function () {
+                    document.body.classList.remove('scrolling');
+                }, 1000);
+            }, { passive: true });
+
+            // También mostrar al hacer touch
+            document.addEventListener('touchstart', function () {
+                document.body.classList.add('scrolling');
+            }, { passive: true });
+
+            document.addEventListener('touchend', function () {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(function () {
+                    document.body.classList.remove('scrolling');
+                }, 1500);
+            }, { passive: true });
+        }
+    });
+</script>
 
 </html>
