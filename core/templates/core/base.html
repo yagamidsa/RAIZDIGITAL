@@ -50,6 +50,7 @@
         }
 
         /* Fondo extendido para cubrir áreas de overscroll SIN afectar el scroll */
+        /* Fondo extendido para cubrir áreas de overscroll SIN afectar el scroll */
         body::before {
             content: '';
             position: fixed;
@@ -58,7 +59,7 @@
             right: 0;
             height: calc(100vh + 400px);
             background: linear-gradient(135deg, var(--dark-blue) 0%, #061826 50%, var(--dark-green) 100%);
-            z-index: -999;
+            z-index: -2; /* Cambiado de -999 a -2 para evitar conflictos */
             pointer-events: none;
         }
 
