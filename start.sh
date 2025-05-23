@@ -54,6 +54,26 @@ else
     echo "⚠️  Script de migración no encontrado"
 fi
 
+
+
+echo "🔧 Verificando conexión a la base de datos..."
+python manage.py check --database default
+
+echo "🧪 Probando consulta SQL simple..."
+python -c "
+import os, django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'raizdigital.settings.production')
+django.setup()
+from django.db import connection
+cursor = connection.cursor()
+cursor.execute('SELECT 1 as test')
+result = cursor.fetchone()
+print(f'✅ Consulta SQL exitosa: {result}')
+cursor.close()
+"
+
+
+
 echo "🌐 Iniciando servidor Gunicorn..."
 exec gunicorn raizdigital.wsgi:application \
     --bind 0.0.0.0:$PORT \
@@ -61,3 +81,5 @@ exec gunicorn raizdigital.wsgi:application \
     --timeout 120 \
     --access-logfile - \
     --error-logfile -
+
+
