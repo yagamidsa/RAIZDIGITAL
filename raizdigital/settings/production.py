@@ -63,7 +63,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'raizdigital.wsgi.application'
 
 # =================================
-# BASE DE DATOS - SOLO RAILWAY
+# BASE DE DATOS - RAILWAY CORREGIDA
 # =================================
 
 print("🗄️  CONFIGURANDO BASE DE DATOS RAILWAY...")
@@ -75,29 +75,54 @@ if DATABASE_URL:
     try:
         import dj_database_url
         DATABASES = {'default': dj_database_url.parse(DATABASE_URL)}
+        
+        # CONFIGURACIÓN CORREGIDA - Solo opciones válidas para PostgreSQL
         DATABASES['default']['OPTIONS'] = {
             'sslmode': 'require',
-            'options': '-c default_transaction_isolation=read_committed'
-        }
-        DATABASES['default']['CONN_MAX_AGE'] = 600
-        DATABASES['default']['ATOMIC_REQUESTS'] = True  # IMPORTANTE: Transacciones automáticas
-        
-        # Configuración adicional para mejor rendimiento
-        DATABASES['default']['OPTIONS'].update({
-            'MAX_CONNS': 20,
+            'options': '-c default_transaction_isolation=read_committed',
+            # Opciones válidas para psycopg
             'connect_timeout': 10,
             'keepalives_idle': 600,
             'keepalives_interval': 30,
             'keepalives_count': 3,
-        })
+        }
         
-        # Mostrar info de conexión
+        # Configuración de conexión
+        DATABASES['default']['CONN_MAX_AGE'] = 600
+        DATABASES['default']['ATOMIC_REQUESTS'] = True
+        
+        # Mostrar info de conexión (sin datos sensibles)
         db_info = DATABASES['default']
         print(f"🐘 RAILWAY BD: {db_info['USER']}@{db_info['HOST']}:{db_info['PORT']}/{db_info['NAME']}")
         
     except ImportError:
-        print("❌ dj_database_url no disponible")
-        sys.exit(1)
+        print("❌ dj_database_url no disponible - instalando...")
+        # Si dj_database_url no está disponible, usar configuración manual
+        import urllib.parse as urlparse
+        
+        if DATABASE_URL:
+            url = urlparse.urlparse(DATABASE_URL)
+            
+            DATABASES = {
+                'default': {
+                    'ENGINE': 'django.db.backends.postgresql',
+                    'NAME': url.path[1:],
+                    'USER': url.username,
+                    'PASSWORD': url.password,
+                    'HOST': url.hostname,
+                    'PORT': url.port,
+                    'OPTIONS': {
+                        'sslmode': 'require',
+                        'connect_timeout': 10,
+                    },
+                    'CONN_MAX_AGE': 600,
+                    'ATOMIC_REQUESTS': True,
+                }
+            }
+            print(f"🐘 BD Manual: {url.username}@{url.hostname}:{url.port}/{url.path[1:]}")
+        else:
+            print("❌ DATABASE_URL no encontrada")
+            sys.exit(1)
 else:
     print("❌ DATABASE_URL no encontrada")
     sys.exit(1)
@@ -114,36 +139,80 @@ TIME_ZONE = 'America/Bogota'
 USE_I18N = True
 USE_TZ = True
 
-# Archivos estáticos
+# Archivos estáticos - CONFIGURACIÓN MEJORADA
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Crear directorio si no existe
 STATIC_ROOT.mkdir(exist_ok=True)
 
+# Directorios de archivos estáticos
 STATICFILES_DIRS = []
-if (BASE_DIR / 'static').exists():
-    STATICFILES_DIRS.append(BASE_DIR / 'static')
+static_dir = BASE_DIR / 'static'
+if static_dir.exists():
+    STATICFILES_DIRS.append(static_dir)
+    print(f"📁 Static dir agregado: {static_dir}")
 
-STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-]
-
+# Configuración de WhiteNoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True
 
-# CSRF
+print(f"📂 STATIC_ROOT: {STATIC_ROOT}")
+print(f"📂 STATICFILES_DIRS: {STATICFILES_DIRS}")
+
+# CSRF y Seguridad
 CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
     'https://*.up.railway.app',
 ]
 
-# Security
+# Configuración de seguridad para Railway
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = False
+SECURE_SSL_REDIRECT = False  # Railway maneja SSL
+USE_TZ = True
 
-# Sessions
-SESSION_COOKIE_AGE = 3600
+# Configuración de sesiones
+SESSION_COOKIE_AGE = 3600  # 1 hora
 SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# Configuración de cookies
+SESSION_COOKIE_SECURE = True  # Solo HTTPS
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = True
+
+# Configuración de logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'core': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
+}
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
