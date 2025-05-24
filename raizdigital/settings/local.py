@@ -18,7 +18,7 @@ def load_env_file():
 
 load_env_file()
 
-# Configuración de PostgreSQL local
+# Configuración de PostgreSQL local COMPATIBLE
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -30,7 +30,31 @@ DATABASES = {
         'OPTIONS': {
             'sslmode': 'prefer',
         },
+        # IMPORTANTE: Transacciones manuales en local para compatibilidad
+        'ATOMIC_REQUESTS': False,
+        'CONN_MAX_AGE': 0,  # Sin pooling en local para evitar problemas
     }
 }
 
+# MIDDLEWARE COMPATIBLE (incluir el personalizado si existe)
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+# Intentar añadir middleware personalizado si existe
+try:
+    import core.middleware
+    MIDDLEWARE.append('core.middleware.AuthenticationMiddleware')
+    print("✅ Middleware personalizado añadido")
+except ImportError:
+    print("⚠️ Middleware personalizado no encontrado, usando solo middlewares estándar")
+
 print(f'🐘 Conectando a PostgreSQL local: {DATABASES["default"]["USER"]}@{DATABASES["default"]["HOST"]}:{DATABASES["default"]["PORT"]}/{DATABASES["default"]["NAME"]}')
+print(f'🔧 ATOMIC_REQUESTS: {DATABASES["default"]["ATOMIC_REQUESTS"]}')
+print(f'🔧 DEBUG: {DEBUG}')

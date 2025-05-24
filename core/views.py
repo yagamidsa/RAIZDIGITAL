@@ -1522,12 +1522,12 @@ def get_user_info(request):
 
 @csrf_protect
 def register(request):
-    """Vista de registro mejorada con validación y manejo de comunidades"""
+    """Vista de registro que funciona tanto en local como en producción"""
     
     # LIMPIAR MENSAJES DE OTRAS VISTAS
     storage = messages.get_messages(request)
     for message in storage:
-        pass  # Esto consume y elimina todos los mensajes pendientes
+        pass
     
     if request.method == 'POST':
         # Obtener datos del formulario
@@ -1580,7 +1580,7 @@ def register(request):
         if not id_comunidad:
             errors.append("Debes seleccionar una comunidad")
             
-        # Validar fecha de nacimiento (mayor de edad)
+        # Validar fecha de nacimiento
         if fecha_nacimiento:
             try:
                 from datetime import datetime, date
@@ -1620,9 +1620,15 @@ def register(request):
         if not errors:
             try:
                 from django.contrib.auth.hashers import make_password
+                from django.db import transaction
+                from django.conf import settings
                 import uuid
                 
-                with connection.cursor() as cursor:
+                # DETECCIÓN AUTOMÁTICA DEL ENTORNO
+                is_atomic_requests = getattr(settings, 'DATABASES', {}).get('default', {}).get('ATOMIC_REQUESTS', False)
+                
+                # MÉTODO UNIVERSAL: Funciona con o sin ATOMIC_REQUESTS
+                def create_user():
                     # Generar ID único
                     user_id = str(uuid.uuid4())
                     
@@ -1630,29 +1636,41 @@ def register(request):
                     hashed_password = make_password(password)
                     
                     # Insertar usuario
-                    cursor.execute("""
-                        INSERT INTO raiz.usuarios (
-                            id, username, password, email, nombre, apellido,
-                            fecha_nacimiento, telefono, direccion, biografia,
-                            id_comunidad, fecha_registro, activo, verificado
-                        ) VALUES (
-                            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
-                            CURRENT_TIMESTAMP, true, false
-                        )
-                    """, [
-                        user_id, username, hashed_password, email, nombre, apellido,
-                        fecha_nacimiento if fecha_nacimiento else None,
-                        telefono if telefono else None,
-                        direccion if direccion else None,
-                        biografia if biografia else None,
-                        int(id_comunidad)
-                    ])
-                    
-                    # IMPORTANTE: Confirmar la transacción
-                    connection.commit()
+                    with connection.cursor() as cursor:
+                        cursor.execute("""
+                            INSERT INTO raiz.usuarios (
+                                id, username, password, email, nombre, apellido,
+                                fecha_nacimiento, telefono, direccion, biografia,
+                                id_comunidad, fecha_registro, activo, verificado
+                            ) VALUES (
+                                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+                                CURRENT_TIMESTAMP, true, false
+                            )
+                        """, [
+                            user_id, username, hashed_password, email, nombre, apellido,
+                            fecha_nacimiento if fecha_nacimiento else None,
+                            telefono if telefono else None,
+                            direccion if direccion else None,
+                            biografia if biografia else None,
+                            int(id_comunidad)
+                        ])
+                        
+                        # RETORNAR EL ID del usuario creado
+                        return user_id
+                
+                # EJECUTAR SEGÚN EL ENTORNO
+                if is_atomic_requests:
+                    # PRODUCCIÓN: Django maneja las transacciones automáticamente
+                    logger.info("Usando transacciones automáticas (ATOMIC_REQUESTS=True)")
+                    user_id = create_user()
+                else:
+                    # LOCAL: Usar transacción manual de Django
+                    logger.info("Usando transacciones manuales (ATOMIC_REQUESTS=False)")
+                    with transaction.atomic():
+                        user_id = create_user()
                 
                 # Log del registro exitoso
-                logger.info(f"Usuario registrado exitosamente: {username} ({email})")
+                logger.info(f"Usuario registrado exitosamente: {username} ({email}) con ID: {user_id}")
                 
                 # Renderizar con éxito
                 form_data = {
@@ -1668,10 +1686,10 @@ def register(request):
                 }
                 
                 return render(request, 'core/register.html', {
-                    'success': True,  # Flag para mostrar el modal
+                    'success': True,
                     'form_data': form_data,
                     'comunidades': obtener_comunidades(),
-                    'registration_success': True  # Flag adicional para el modal
+                    'registration_success': True
                 })
                 
             except Exception as e:
