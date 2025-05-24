@@ -72,12 +72,24 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 print(f"🔍 DATABASE_URL presente: {'SÍ' if DATABASE_URL else 'NO'}")
 
 if DATABASE_URL:
-    print("✅ USANDO DATABASE_URL DE RAILWAY")
     try:
         import dj_database_url
         DATABASES = {'default': dj_database_url.parse(DATABASE_URL)}
-        DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
+        DATABASES['default']['OPTIONS'] = {
+            'sslmode': 'require',
+            'options': '-c default_transaction_isolation=read_committed'
+        }
         DATABASES['default']['CONN_MAX_AGE'] = 600
+        DATABASES['default']['ATOMIC_REQUESTS'] = True  # IMPORTANTE: Transacciones automáticas
+        
+        # Configuración adicional para mejor rendimiento
+        DATABASES['default']['OPTIONS'].update({
+            'MAX_CONNS': 20,
+            'connect_timeout': 10,
+            'keepalives_idle': 600,
+            'keepalives_interval': 30,
+            'keepalives_count': 3,
+        })
         
         # Mostrar info de conexión
         db_info = DATABASES['default']

@@ -1,0 +1,1152 @@
+<!-- core/templates/core/includes/success_modal.html -->
+{% load static %}
+
+<!-- Modal de Registro Exitoso -->
+<div class="success-modal-epic" id="successModalEpic" style="display: none;">
+    <!-- Canvas para efectos 3D -->
+    <canvas id="threejs-canvas-success"></canvas>
+    
+    <!-- Partículas de fondo -->
+    <div id="particles-success"></div>
+
+    <div class="modal-container-epic" id="modalContainerEpic">
+        <!-- Luz ambiental -->
+        <div class="ambient-light-epic"></div>
+        
+        <!-- Ondas de energía -->
+        <div class="energy-wave-epic"></div>
+        <div class="energy-wave-epic" style="animation-delay: 0.5s;"></div>
+        <div class="energy-wave-epic" style="animation-delay: 1s;"></div>
+
+        <!-- Icono de éxito holográfico -->
+        <div class="success-icon-container-epic" id="iconContainerEpic">
+            <svg class="success-icon-epic" id="successIconEpic" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+        </div>
+
+        <!-- Título con efectos -->
+        <h1 class="success-title-epic" id="successTitleEpic">¡REGISTRO EXITOSO!</h1>
+        
+        <!-- Subtítulo -->
+        <p class="success-subtitle-epic" id="successSubtitleEpic">Bienvenido a Raíz Digital</p>
+
+        <!-- Mensaje principal -->
+        <p class="success-message-epic" id="successMessageEpic">
+            Tu cuenta ha sido creada exitosamente. Estás un paso más cerca de conectar con las tradiciones y la cultura ancestral.
+        </p>
+
+        <!-- Información de verificación -->
+        <div class="verification-info-epic">
+            <div class="verification-title-epic">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#00f6ff" style="filter: drop-shadow(0 0 8px rgba(0, 246, 255, 0.6));">
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                </svg>
+                Verifica tu email
+            </div>
+            <p class="verification-text-epic" id="verificationTextEpic">
+                Hemos enviado un enlace de verificación a tu correo electrónico. 
+                Por favor, revisa tu bandeja de entrada y haz clic en el enlace para activar tu cuenta.
+            </p>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="button-container-epic">
+            <button class="btn-professional-epic btn-primary-epic" id="btnLoginEpic">
+                Ir al Login
+            </button>
+            <button class="btn-professional-epic btn-secondary-epic" id="btnResendEpic">
+                Reenviar Email
+            </button>
+        </div>
+
+        <!-- Loader cuántico (oculto inicialmente) -->
+        <div class="quantum-loader-epic" id="quantumLoaderEpic">
+            <div class="loader-ring-epic"></div>
+            <div class="loader-ring-epic"></div>
+            <div class="loader-ring-epic"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos del Modal -->
+<style>
+:root {
+    --neon-green: #00ff9d;
+    --cyber-blue: #00f6ff;
+    --dark-matter: #0a192f;
+    --darker-bg: #061220;
+    --darkest-bg: #030a15;
+    --hologram-purple: #8b00ff;
+    --quantum-gold: #ffd700;
+    --plasma-pink: #ff1493;
+}
+
+/* Modal principal con fondo más oscuro */
+.success-modal-epic {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(0, 0, 0, 0.85);
+}
+
+/* Canvas de fondo para efectos 3D */
+#threejs-canvas-success {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1001;
+    pointer-events: none;
+}
+
+/* Partículas de fondo */
+#particles-success {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 1002;
+    pointer-events: none;
+}
+
+/* Contenedor principal con colores más oscuros para mejor legibilidad */
+.modal-container-epic {
+    position: relative;
+    width: 90%;
+    max-width: 600px;
+    background: linear-gradient(135deg, 
+        var(--darkest-bg) 0%,
+        var(--darker-bg) 50%,
+        var(--darkest-bg) 100%);
+    border-radius: 30px;
+    padding: 3rem;
+    text-align: center;
+    overflow: hidden;
+    box-shadow: 
+        0 25px 60px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(0, 255, 157, 0.15),
+        inset 0 0 30px rgba(0, 255, 157, 0.02);
+    transform: scale(0.5) rotateY(-90deg);
+    opacity: 0;
+}
+
+/* Borde holográfico más sutil */
+.modal-container-epic::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+        rgba(0, 255, 157, 0.2) 0%,
+        rgba(0, 246, 255, 0.2) 25%,
+        rgba(139, 0, 255, 0.2) 50%,
+        rgba(255, 215, 0, 0.2) 75%,
+        rgba(0, 255, 157, 0.2) 100%);
+    background-size: 400% 400%;
+    border-radius: 32px;
+    z-index: -1;
+    opacity: 0.3;
+    animation: hologramBorderEpic 4s ease-in-out infinite;
+    filter: blur(3px);
+}
+
+@keyframes hologramBorderEpic {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Efectos de luz ambiental más sutiles */
+.ambient-light-epic {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background: radial-gradient(ellipse at center,
+        rgba(0, 255, 157, 0.03) 0%,
+        rgba(0, 246, 255, 0.02) 30%,
+        transparent 70%);
+    animation: ambientPulseEpic 6s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes ambientPulseEpic {
+    0%, 100% { 
+        transform: scale(1) rotate(0deg);
+        opacity: 0.2;
+    }
+    50% { 
+        transform: scale(1.2) rotate(180deg);
+        opacity: 0.4;
+    }
+}
+
+/* Icono de éxito con mejor contraste */
+.success-icon-container-epic {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 2rem;
+    background: radial-gradient(circle at center,
+        rgba(0, 255, 157, 0.08) 0%,
+        rgba(0, 255, 157, 0.04) 50%,
+        transparent 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(0, 255, 157, 0.6);
+    box-shadow: 
+        0 0 30px rgba(0, 255, 157, 0.3),
+        inset 0 0 15px rgba(0, 255, 157, 0.05);
+}
+
+.success-icon-container-epic::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border: 1px solid rgba(0, 255, 157, 0.3);
+    border-radius: 50%;
+    animation: orbitRingEpic 8s linear infinite;
+    opacity: 0.4;
+}
+
+@keyframes orbitRingEpic {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+.success-icon-epic {
+    width: 60px;
+    height: 60px;
+    fill: var(--neon-green);
+    filter: drop-shadow(0 0 15px rgba(0, 255, 157, 0.6));
+    animation: iconPulseEpic 2s ease-in-out infinite;
+}
+
+@keyframes iconPulseEpic {
+    0%, 100% { 
+        transform: scale(1) rotate(0deg);
+        filter: drop-shadow(0 0 15px rgba(0, 255, 157, 0.6));
+    }
+    50% { 
+        transform: scale(1.1) rotate(5deg);
+        filter: drop-shadow(0 0 25px rgba(0, 255, 157, 0.8));
+    }
+}
+
+/* Título SIN efectos 3D */
+.success-title-epic {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 900;
+    color: var(--neon-green);
+    margin-bottom: 1rem;
+    letter-spacing: 2px;
+    text-shadow: 0 0 15px rgba(0, 255, 157, 0.6);
+}
+
+/* Subtítulo con mejor legibilidad */
+.success-subtitle-epic {
+    font-size: clamp(1rem, 3vw, 1.3rem);
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 2rem;
+    opacity: 1;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    letter-spacing: 1px;
+}
+
+/* Mensaje principal con mejor contraste */
+.success-message-epic {
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    color: rgba(255, 255, 255, 0.95);
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Información de verificación con fondo más oscuro */
+.verification-info-epic {
+    background: linear-gradient(135deg,
+        rgba(0, 246, 255, 0.05) 0%,
+        rgba(0, 255, 157, 0.05) 100%);
+    border: 1px solid rgba(0, 246, 255, 0.2);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+.verification-info-epic::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.03),
+        transparent);
+    animation: scanLineEpic 3s ease-in-out infinite;
+}
+
+@keyframes scanLineEpic {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: 100%; }
+}
+
+.verification-title-epic {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.verification-text-epic {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.5;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Botones con mejor contraste */
+.button-container-epic {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+}
+
+.btn-professional-epic {
+    position: relative;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    overflow: hidden;
+    min-width: 150px;
+    backdrop-filter: blur(10px);
+}
+
+.btn-primary-epic {
+    background: linear-gradient(135deg,
+        rgba(0, 255, 157, 0.15) 0%,
+        rgba(0, 255, 157, 0.08) 100%);
+    color: #ffffff;
+    border: 2px solid rgba(0, 255, 157, 0.6);
+    box-shadow: 
+        0 0 15px rgba(0, 255, 157, 0.2),
+        inset 0 0 15px rgba(0, 255, 157, 0.03);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.btn-secondary-epic {
+    background: linear-gradient(135deg,
+        rgba(0, 246, 255, 0.15) 0%,
+        rgba(0, 246, 255, 0.08) 100%);
+    color: #ffffff;
+    border: 2px solid rgba(0, 246, 255, 0.6);
+    box-shadow: 
+        0 0 15px rgba(0, 246, 255, 0.2),
+        inset 0 0 15px rgba(0, 246, 255, 0.03);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.btn-professional-epic::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent);
+    transition: 0.5s;
+}
+
+.btn-professional-epic:hover::before {
+    left: 100%;
+}
+
+.btn-primary-epic:hover {
+    background: rgba(0, 255, 157, 0.2);
+    color: #ffffff;
+    box-shadow: 
+        0 0 30px rgba(0, 255, 157, 0.4),
+        0 0 60px rgba(0, 255, 157, 0.3);
+    transform: translateY(-3px) scale(1.05);
+}
+
+.btn-secondary-epic:hover {
+    background: rgba(0, 246, 255, 0.2);
+    color: #ffffff;
+    box-shadow: 
+        0 0 30px rgba(0, 246, 255, 0.4),
+        0 0 60px rgba(0, 246, 255, 0.3);
+    transform: translateY(-3px) scale(1.05);
+}
+
+/* Efectos de ondas de energía más sutiles */
+.energy-wave-epic {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(0, 246, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: energyExpandEpic 2s ease-out infinite;
+    opacity: 0;
+}
+
+@keyframes energyExpandEpic {
+    0% {
+        width: 20px;
+        height: 20px;
+        opacity: 0.6;
+    }
+    100% {
+        width: 300px;
+        height: 300px;
+        opacity: 0;
+    }
+}
+
+/* Loader cuántico */
+.quantum-loader-epic {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    opacity: 0;
+}
+
+.loader-ring-epic {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 3px solid transparent;
+    border-top: 3px solid var(--neon-green);
+    border-radius: 50%;
+    animation: quantumSpinEpic 1s linear infinite;
+}
+
+.loader-ring-epic:nth-child(2) {
+    border-top-color: var(--cyber-blue);
+    animation-delay: -0.3s;
+    animation-direction: reverse;
+}
+
+.loader-ring-epic:nth-child(3) {
+    border-top-color: var(--hologram-purple);
+    animation-delay: -0.6s;
+}
+
+@keyframes quantumSpinEpic {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Animación de confeti cuántico */
+@keyframes quantumFloatEpic {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .modal-container-epic {
+        padding: 2rem 1.5rem;
+        margin: 1rem;
+    }
+    
+    .button-container-epic {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn-professional-epic {
+        width: 100%;
+        max-width: 250px;
+    }
+}
+</style>
+
+<!-- Scripts del Modal -->
+<script>
+// ============================================
+// MODAL DE REGISTRO EXITOSO ULTRA PROFESIONAL
+// ============================================
+
+class EpicSuccessModal {
+    constructor() {
+        this.modal = document.getElementById('successModalEpic');
+        this.container = document.getElementById('modalContainerEpic');
+        this.isAnimating = false;
+        this.quantumSpheres = [];
+        
+        // Solo inicializar si las librerías están cargadas
+        this.waitForLibraries().then(() => {
+            this.init();
+        });
+    }
+
+    waitForLibraries() {
+        return new Promise((resolve) => {
+            const checkLibraries = () => {
+                if (typeof gsap !== 'undefined' && typeof THREE !== 'undefined' && typeof particlesJS !== 'undefined') {
+                    resolve();
+                } else {
+                    setTimeout(checkLibraries, 100);
+                }
+            };
+            checkLibraries();
+        });
+    }
+
+    init() {
+        this.setupThreeJS();
+        this.setupParticles();
+        this.setupEventListeners();
+        this.showModal();
+    }
+
+    // ============================================
+    // EFECTOS 3D CON THREE.JS
+    // ============================================
+    
+    setupThreeJS() {
+        const canvas = document.getElementById('threejs-canvas-success');
+        
+        // Configuración de la escena
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+        
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setClearColor(0x000000, 0);
+
+        // Crear geometría cuántica
+        this.createQuantumGeometry();
+        
+        // Configurar luces
+        const ambientLight = new THREE.AmbientLight(0x00ff9d, 0.2);
+        this.scene.add(ambientLight);
+        
+        const pointLight = new THREE.PointLight(0x00f6ff, 0.8, 100);
+        pointLight.position.set(10, 10, 10);
+        this.scene.add(pointLight);
+
+        this.camera.position.z = 5;
+        
+        // Iniciar renderizado
+        this.animate3D();
+    }
+
+    createQuantumGeometry() {
+        // Crear múltiples esferas cuánticas
+        this.quantumSpheres = [];
+        
+        for (let i = 0; i < 6; i++) {
+            const geometry = new THREE.SphereGeometry(0.08, 16, 16);
+            const material = new THREE.MeshPhongMaterial({
+                color: i % 2 === 0 ? 0x00ff9d : 0x00f6ff,
+                transparent: true,
+                opacity: 0.4,
+                emissive: i % 2 === 0 ? 0x00ff9d : 0x00f6ff,
+                emissiveIntensity: 0.1
+            });
+            
+            const sphere = new THREE.Mesh(geometry, material);
+            sphere.position.set(
+                (Math.random() - 0.5) * 8,
+                (Math.random() - 0.5) * 8,
+                (Math.random() - 0.5) * 8
+            );
+            
+            this.scene.add(sphere);
+            this.quantumSpheres.push(sphere);
+        }
+    }
+
+    animate3D() {
+        requestAnimationFrame(() => this.animate3D());
+        
+        // Animar esferas cuánticas
+        this.quantumSpheres.forEach((sphere, index) => {
+            sphere.rotation.x += 0.008;
+            sphere.rotation.y += 0.008;
+            
+            // Movimiento orbital más sutil
+            const time = Date.now() * 0.0008;
+            sphere.position.x = Math.cos(time + index) * 2.5;
+            sphere.position.y = Math.sin(time + index * 0.5) * 1.8;
+            sphere.position.z = Math.sin(time + index) * 1.8;
+        });
+        
+        this.renderer.render(this.scene, this.camera);
+    }
+
+    // ============================================
+    // SISTEMA DE PARTÍCULAS PROFESIONAL
+    // ============================================
+    
+    setupParticles() {
+        if (typeof particlesJS === 'undefined') return;
+        
+        particlesJS('particles-success', {
+            particles: {
+                number: { value: 40 },
+                color: { value: ['#00ff9d', '#00f6ff', '#8b00ff'] },
+                shape: { type: 'circle' },
+                opacity: {
+                    value: 0.3,
+                    random: true,
+                    animation: {
+                        enable: true,
+                        speed: 0.8,
+                        minimumValue: 0.05
+                    }
+                },
+                size: {
+                    value: 2,
+                    random: true,
+                    animation: {
+                        enable: true,
+                        speed: 1.5,
+                        minimumValue: 0.1
+                    }
+                },
+                line_linked: {
+                    enable: true,
+                    distance: 120,
+                    color: '#00ff9d',
+                    opacity: 0.15,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 1.5,
+                    direction: 'none',
+                    random: true,
+                    straight: false,
+                    outMode: 'out',
+                    bounce: false
+                }
+            },
+            interactivity: {
+                detectOn: 'canvas',
+                events: {
+                    onHover: {
+                        enable: true,
+                        mode: 'repulse'
+                    },
+                    resize: true
+                }
+            },
+            retina_detect: true
+        });
+    }
+
+    // ============================================
+    // ANIMACIONES GSAP PROFESIONALES
+    // ============================================
+    
+    showModal() {
+        if (typeof gsap === 'undefined') {
+            // Fallback sin GSAP
+            this.container.style.transform = 'scale(1) rotateY(0deg)';
+            this.container.style.opacity = '1';
+            return;
+        }
+        
+        const tl = gsap.timeline();
+        
+        // Animación de entrada épica
+        tl.to(this.container, {
+            duration: 1.2,
+            scale: 1,
+            rotationY: 0,
+            opacity: 1,
+            ease: "back.out(1.7)"
+        })
+        .from('#successIconEpic', {
+            duration: 0.8,
+            scale: 0,
+            rotation: -180,
+            ease: "elastic.out(1, 0.3)"
+        }, "-=0.5")
+        .from('#successTitleEpic', {
+            duration: 1,
+            y: -50,
+            opacity: 0,
+            ease: "power3.out"
+        }, "-=0.3")
+        .from('#successSubtitleEpic', {
+            duration: 0.8,
+            y: -30,
+            opacity: 0,
+            ease: "power2.out"
+        }, "-=0.5")
+        .from('#successMessageEpic', {
+            duration: 1,
+            y: 30,
+            opacity: 0,
+            ease: "power2.out"
+        }, "-=0.3")
+        .from('.verification-info-epic', {
+            duration: 0.8,
+            scale: 0.8,
+            opacity: 0,
+            ease: "back.out(1.7)"
+        }, "-=0.2")
+        .from('.btn-professional-epic', {
+            duration: 0.6,
+            y: 50,
+            opacity: 0,
+            stagger: 0.1,
+            ease: "power2.out"
+        }, "-=0.3");
+
+        // Crear confeti cuántico
+        this.createQuantumConfetti();
+        
+        // Efectos continuos
+        this.startQuantumEffects();
+    }
+
+    createQuantumConfetti() {
+        for (let i = 0; i < 20; i++) {
+            setTimeout(() => {
+                const confetti = document.createElement('div');
+                confetti.style.cssText = `
+                    position: fixed;
+                    width: 8px;
+                    height: 8px;
+                    background: var(--neon-green);
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: 9999;
+                    left: ${Math.random() * 100}%;
+                    top: ${window.innerHeight}px;
+                    animation: quantumFloatEpic 4s ease-out forwards;
+                `;
+                
+                document.body.appendChild(confetti);
+                
+                // Remover después de la animación
+                setTimeout(() => confetti.remove(), 4000);
+            }, i * 80);
+        }
+    }
+
+    startQuantumEffects() {
+        if (typeof gsap === 'undefined') return;
+        
+        // Efecto de pulso en el icono
+        gsap.to('#successIconEpic', {
+            duration: 2,
+            scale: 1.1,
+            rotation: 360,
+            repeat: -1,
+            yoyo: true,
+            ease: "power2.inOut"
+        });
+
+        // Efecto de flotación en el modal
+        gsap.to(this.container, {
+            duration: 4,
+            y: -8,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut"
+        });
+    }
+
+    // ============================================
+    // MANEJO DE EVENTOS
+    // ============================================
+    
+    setupEventListeners() {
+        // Botón de login
+        document.getElementById('btnLoginEpic').addEventListener('click', () => {
+            this.handleLoginRedirect();
+        });
+
+        // Botón de reenvío de email
+        document.getElementById('btnResendEpic').addEventListener('click', () => {
+            this.handleResendEmail();
+        });
+
+        // Cerrar modal con ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeModal();
+            }
+        });
+
+        // Ajustar tamaño en resize
+        window.addEventListener('resize', () => {
+            if (this.renderer) {
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
+    }
+
+    handleLoginRedirect() {
+        this.showLoader();
+        
+        // Animación de salida
+        if (typeof gsap !== 'undefined') {
+            gsap.to(this.container, {
+                duration: 0.8,
+                scale: 0.3,
+                rotationY: 90,
+                opacity: 0,
+                ease: "back.in(1.7)",
+                onComplete: () => {
+                    // Redirigir al login
+                    window.location.href = '/login/';
+                }
+            });
+        } else {
+            // Fallback sin GSAP
+            setTimeout(() => {
+                window.location.href = '/login/';
+            }, 500);
+        }
+    }
+
+    handleResendEmail() {
+        const btn = document.getElementById('btnResendEpic');
+        const originalText = btn.textContent;
+        
+        // Deshabilitar botón
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+        
+        // Mostrar loader cuántico
+        this.showQuantumLoader();
+        
+        // Simular envío de email
+        setTimeout(() => {
+            this.hideQuantumLoader();
+            
+            // Cambiar texto de verificación
+            const verificationText = document.getElementById('verificationTextEpic');
+            verificationText.textContent = '¡Email reenviado! Por favor revisa tu bandeja de entrada, incluyendo la carpeta de spam.';
+            
+            // Efecto de brillo en la sección de verificación
+            if (typeof gsap !== 'undefined') {
+                gsap.to('.verification-info-epic', {
+                    duration: 0.5,
+                    boxShadow: "0 0 30px rgba(0, 255, 157, 0.5)",
+                    repeat: 1,
+                    yoyo: true,
+                    ease: "power2.inOut"
+                });
+            }
+            
+            // Rehabilitar botón después de 30 segundos
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }, 30000);
+            
+        }, 2000);
+    }
+
+    showQuantumLoader() {
+        const loader = document.getElementById('quantumLoaderEpic');
+        if (typeof gsap !== 'undefined') {
+            gsap.to(loader, {
+                duration: 0.5,
+                opacity: 1,
+                scale: 1,
+                ease: "back.out(1.7)"
+            });
+        } else {
+            loader.style.opacity = '1';
+            loader.style.transform = 'translate(-50%, -50%) scale(1)';
+        }
+    }
+
+    hideQuantumLoader() {
+        const loader = document.getElementById('quantumLoaderEpic');
+        if (typeof gsap !== 'undefined') {
+            gsap.to(loader, {
+                duration: 0.5,
+                opacity: 0,
+                scale: 0,
+                ease: "back.in(1.7)"
+            });
+        } else {
+            loader.style.opacity = '0';
+            loader.style.transform = 'translate(-50%, -50%) scale(0)';
+        }
+    }
+
+    showLoader() {
+        this.showQuantumLoader();
+    }
+
+    closeModal() {
+        if (this.isAnimating) return;
+        this.isAnimating = true;
+
+        if (typeof gsap !== 'undefined') {
+            // Animación de salida
+            gsap.to(this.container, {
+                duration: 0.8,
+                scale: 0.5,
+                rotationY: -90,
+                opacity: 0,
+                ease: "back.in(1.7)"
+            });
+
+            gsap.to(this.modal, {
+                duration: 0.5,
+                opacity: 0,
+                ease: "power2.out",
+                delay: 0.3,
+                onComplete: () => {
+                    this.modal.style.display = 'none';
+                    this.isAnimating = false;
+                }
+            });
+        } else {
+            // Fallback sin GSAP
+            this.modal.style.opacity = '0';
+            setTimeout(() => {
+                this.modal.style.display = 'none';
+                this.isAnimating = false;
+            }, 500);
+        }
+    }
+
+    // ============================================
+    // MÉTODOS PÚBLICOS
+    // ============================================
+    
+    show(options = {}) {
+        // Personalizar contenido si se proporcionan opciones
+        if (options.title) {
+            document.getElementById('successTitleEpic').textContent = options.title;
+        }
+        
+        if (options.subtitle) {
+            document.getElementById('successSubtitleEpic').textContent = options.subtitle;
+        }
+        
+        if (options.message) {
+            document.getElementById('successMessageEpic').textContent = options.message;
+        }
+        
+        if (options.verificationText) {
+            document.getElementById('verificationTextEpic').textContent = options.verificationText;
+        }
+        
+        this.modal.style.display = 'flex';
+        this.showModal();
+    }
+
+    hide() {
+        this.closeModal();
+    }
+
+    // ============================================
+    // EFECTOS ESPECIALES ADICIONALES
+    // ============================================
+    
+    createHologramEffect() {
+        // Crear efecto de holograma en el modal
+        const hologramLines = [];
+        
+        for (let i = 0; i < 5; i++) {
+            const line = document.createElement('div');
+            line.style.cssText = `
+                position: absolute;
+                width: 100%;
+                height: 1px;
+                background: linear-gradient(90deg, transparent, var(--cyber-blue), transparent);
+                top: ${20 + i * 20}%;
+                left: 0;
+                opacity: 0.3;
+                animation: hologramScan ${3 + i * 0.5}s ease-in-out infinite;
+                pointer-events: none;
+            `;
+            
+            this.container.appendChild(line);
+            hologramLines.push(line);
+        }
+        
+        // Animar líneas de holograma
+        if (typeof gsap !== 'undefined') {
+            hologramLines.forEach((line, index) => {
+                gsap.to(line, {
+                    duration: 2 + index * 0.3,
+                    opacity: 0.8,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "sine.inOut",
+                    delay: index * 0.2
+                });
+            });
+        }
+    }
+
+    addQuantumGlitch() {
+        // Efecto de glitch cuántico ocasional
+        setInterval(() => {
+            if (Math.random() < 0.1) { // 10% de probabilidad
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(this.container, {
+                        duration: 0.1,
+                        x: Math.random() * 10 - 5,
+                        y: Math.random() * 10 - 5,
+                        rotation: Math.random() * 2 - 1,
+                        repeat: 3,
+                        yoyo: true,
+                        ease: "power2.inOut",
+                        onComplete: () => {
+                            gsap.set(this.container, { x: 0, y: 0, rotation: 0 });
+                        }
+                    });
+                }
+            }
+        }, 2000);
+    }
+}
+
+// ============================================
+// INICIALIZACIÓN AUTOMÁTICA
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Crear instancia del modal épico
+    window.epicModal = new EpicSuccessModal();
+    
+    // Agregar efectos adicionales
+    setTimeout(() => {
+        if (window.epicModal) {
+            window.epicModal.createHologramEffect();
+            window.epicModal.addQuantumGlitch();
+        }
+    }, 2000);
+    
+    console.log('🚀 Modal de Registro Exitoso Ultra Profesional inicializado');
+});
+
+// ============================================
+// API PÚBLICA PARA USO EXTERNO
+// ============================================
+
+window.showEpicSuccessModal = function(options = {}) {
+    if (window.epicModal) {
+        window.epicModal.show(options);
+    } else {
+        console.error('Epic Success Modal no está inicializado');
+    }
+};
+
+window.hideEpicSuccessModal = function() {
+    if (window.epicModal) {
+        window.epicModal.hide();
+    }
+};
+
+// ============================================
+// ESTILOS ADICIONALES DINÁMICOS
+// ============================================
+
+const additionalStyles = `
+    @keyframes hologramScan {
+        0% { transform: translateX(-100%); opacity: 0; }
+        50% { opacity: 0.5; }
+        100% { transform: translateX(100%); opacity: 0; }
+    }
+    
+    .btn-professional-epic:active {
+        transform: translateY(-1px) scale(0.98);
+    }
+    
+    .success-icon-container-epic:hover {
+        transform: scale(1.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .quantum-confetti-epic:nth-child(odd) {
+        background: var(--cyber-blue) !important;
+    }
+    
+    .quantum-confetti-epic:nth-child(3n) {
+        background: var(--hologram-purple) !important;
+    }
+    
+    /* Efectos adicionales para mejorar la accesibilidad */
+    @media (prefers-reduced-motion: reduce) {
+        .success-icon-epic,
+        .modal-container-epic,
+        .energy-wave-epic,
+        .ambient-light-epic {
+            animation: none !important;
+        }
+        
+        .btn-professional-epic:hover {
+            transform: none !important;
+        }
+    }
+`;
+
+const styleSheet = document.createElement('style');
+styleSheet.textContent = additionalStyles;
+document.head.appendChild(styleSheet);
+</script>
