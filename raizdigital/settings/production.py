@@ -2,7 +2,6 @@ import os
 import sys
 from pathlib import Path
 
-# VERIFICAR QUE ESTAMOS EN PRODUCTION.PY
 print("🚨 ARCHIVO: production.py SIENDO USADO")
 print("🚨 SETTINGS MODULE: raizdigital.settings.production")
 
@@ -17,8 +16,7 @@ if not SECRET_KEY:
 DEBUG = False
 print(f"🔧 DEBUG mode: {DEBUG}")
 
-# ALLOWED_HOSTS - Solución definitiva
-ALLOWED_HOSTS = ['*']  # Permitir todos temporalmente
+ALLOWED_HOSTS = ['*']
 print(f"🌐 ALLOWED_HOSTS: {ALLOWED_HOSTS}")
 
 INSTALLED_APPS = [
@@ -40,6 +38,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # MIDDLEWARE PERSONALIZADO SOLO SI EXISTE
+    'core.middleware.AuthenticationMiddleware',
 ]
 
 ROOT_URLCONF = 'raizdigital.urls'
@@ -63,7 +63,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'raizdigital.wsgi.application'
 
 # =================================
-# BASE DE DATOS - CONFIGURACIÓN SIMPLIFICADA
+# BASE DE DATOS - CONFIGURACIÓN HÍBRIDA
 # =================================
 
 print("🗄️  CONFIGURANDO BASE DE DATOS RAILWAY...")
@@ -76,26 +76,36 @@ if DATABASE_URL:
         import dj_database_url
         DATABASES = {'default': dj_database_url.parse(DATABASE_URL)}
         
-        # CONFIGURACIÓN SIMPLIFICADA - Sin parámetros problemáticos
+        # Configuración básica
         DATABASES['default']['OPTIONS'] = {
             'sslmode': 'require',
-            # REMOVIDO: problemas con transaction isolation
-            # Solo mantenemos configuración básica y segura
         }
         
-        # Configuración de conexión básica
+        # Configuración de conexión
         DATABASES['default']['CONN_MAX_AGE'] = 600
-        DATABASES['default']['ATOMIC_REQUESTS'] = True
         
-        # Timeouts básicos (sin keepalives por ahora)
+        # CONFIGURACIÓN HÍBRIDA: Detectar si estamos en Railway
+        is_railway = os.environ.get('RAILWAY_ENVIRONMENT_NAME') is not None
+        
+        if is_railway:
+            # EN RAILWAY: Usar transacciones automáticas
+            DATABASES['default']['ATOMIC_REQUESTS'] = True
+            print("🚂 RAILWAY detectado: ATOMIC_REQUESTS=True")
+        else:
+            # LOCAL/OTROS: Transacciones manuales
+            DATABASES['default']['ATOMIC_REQUESTS'] = False
+            print("🏠 Entorno local: ATOMIC_REQUESTS=False")
+        
+        # Timeouts básicos
         DATABASES['default']['OPTIONS'].update({
             'connect_timeout': 10,
         })
         
         # Mostrar info de conexión
         db_info = DATABASES['default']
-        print(f"🐘 RAILWAY BD: {db_info['USER']}@{db_info['HOST']}:{db_info['PORT']}/{db_info['NAME']}")
-        print("📊 Configuración: SSL requerido, timeout 10s, pool 600s")
+        atomic_status = DATABASES['default']['ATOMIC_REQUESTS']
+        print(f"🐘 BD: {db_info['USER']}@{db_info['HOST']}:{db_info['PORT']}/{db_info['NAME']}")
+        print(f"📊 ATOMIC_REQUESTS: {atomic_status}")
         
     except ImportError:
         print("❌ dj_database_url no disponible")
@@ -104,6 +114,7 @@ else:
     print("❌ DATABASE_URL no encontrada")
     sys.exit(1)
 
+# Resto de configuración...
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -149,5 +160,5 @@ SESSION_SAVE_EVERY_REQUEST = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-print('🚀 PRODUCTION SETTINGS CARGADOS CORRECTAMENTE - CONFIGURACIÓN SIMPLIFICADA')
+print('🚀 PRODUCTION SETTINGS CARGADOS CORRECTAMENTE - CONFIGURACIÓN HÍBRIDA')
 print('=' * 60)
