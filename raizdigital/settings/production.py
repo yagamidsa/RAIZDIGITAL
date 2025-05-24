@@ -63,7 +63,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'raizdigital.wsgi.application'
 
 # =================================
-# BASE DE DATOS - CONFIGURACIÓN CORREGIDA
+# BASE DE DATOS - CONFIGURACIÓN CORREGIDA V2
 # =================================
 
 print("🗄️  CONFIGURANDO BASE DE DATOS RAILWAY...")
@@ -76,17 +76,18 @@ if DATABASE_URL:
         import dj_database_url
         DATABASES = {'default': dj_database_url.parse(DATABASE_URL)}
         
-        # CONFIGURACIÓN CORREGIDA - Solo opciones válidas de PostgreSQL
+        # CONFIGURACIÓN CORREGIDA - PostgreSQL válido
         DATABASES['default']['OPTIONS'] = {
             'sslmode': 'require',
-            'options': '-c default_transaction_isolation=read_committed'
+            # CORREGIDO: "read committed" con espacio, no guión bajo
+            'options': '-c default_transaction_isolation="read committed"'
         }
         
-        # Configuración de conexión corregida
+        # Configuración de conexión
         DATABASES['default']['CONN_MAX_AGE'] = 600
         DATABASES['default']['ATOMIC_REQUESTS'] = True
         
-        # Configuración adicional VÁLIDA para psycopg
+        # Configuración adicional de keepalive
         DATABASES['default']['OPTIONS'].update({
             'connect_timeout': 10,
             'keepalives_idle': 600,
