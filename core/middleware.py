@@ -1,8 +1,9 @@
 # core/middleware.py
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.conf import settings
 from django.http import JsonResponse
+from django.contrib import messages 
 import logging
 
 logger = logging.getLogger(__name__)
@@ -169,3 +170,223 @@ class IPWhitelistMiddleware:
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
+    
+
+
+
+
+
+# core/middleware.py - AGREGAR ESTA CLASE
+
+class EmailVerificationMiddleware:
+    """
+    Middleware para controlar acceso de usuarios no verificados
+    """
+    
+    def __init__(self, get_response):
+        self.get_response = get_response
+        
+        # URLs que requieren verificación de email
+        self.verification_required_patterns = [
+            '/noticias/crear/',
+            '/noticias/editar/',
+            '/productos/',
+            '/eventos/crear/',
+        ]
+        
+        # URLs que NO requieren verificación (acceso básico)
+        self.verification_exempt_patterns = [
+            '/login/',
+            '/logout/',
+            '/register/',
+            '/recovery/',
+            '/verify-email/',
+            '/marketplace/',
+            '/noticias/',  # Ver noticias SÍ se permite
+            '/api/',
+        ]
+
+    def __call__(self, request):
+        # Solo aplicar a usuarios logueados
+        if 'user_id' in request.session:
+            # Verificar si el usuario está verificado
+            user_verified = self.is_user_verified(request)
+            
+            # Si no está verificado y la URL requiere verificación
+            if not user_verified and self.requires_verification(request.path):
+                # Redirigir a página de verificación pendiente
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'error': 'Email no verificado',
+                        'message': 'Debes verificar tu email antes de realizar esta acción',
+                        'redirect': '/verify-email/'
+                    }, status=403)
+                
+                messages.warning(request, 
+                    'Debes verificar tu email antes de realizar esta acción. '
+                    'Revisa tu bandeja de entrada.')
+                return redirect('core:verify_email_pending')
+        
+        response = self.get_response(request)
+        return response
+    
+    def is_user_verified(self, request):
+        """Verifica si el usuario actual tiene email verificado"""
+        try:
+            user_id = request.session.get('user_id')
+            from django.db import connection
+            
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT verificado FROM raiz.usuarios WHERE id = %s",
+                    [user_id]
+                )
+                result = cursor.fetchone()
+                return result[0] if result else False
+        except:
+            return False
+    
+    def requires_verification(self, path):
+        """Determina si una URL requiere verificación de email"""
+        # Verificar URLs que requieren verificación
+        for pattern in self.verification_required_patterns:
+            if path.startswith(pattern):
+                return True
+        
+        # Verificar URLs exentas
+        for pattern in self.verification_exempt_patterns:
+            if path.startswith(pattern):
+                return False
+        
+        # Por defecto, no requerir verificación para otras URLs
+        return False
+
+
+# ==========================================
+# VISTA PARA VERIFICACIÓN PENDIENTE
+# ==========================================
+
+def verify_email_pending(request):
+    """Vista para mostrar página de verificación pendiente"""
+    if 'user_id' not in request.session:
+        return redirect('core:login')
+    
+    user_email = request.session.get('email', '')
+    
+    context = {
+        'user_email': user_email,
+        'user_name': request.session.get('nombre', 'Usuario')
+    }
+    
+    return render(request, 'core/verify_email_pending.html', context)
+
+
+# ==========================================
+# VISTA PARA PROCESAR VERIFICACIÓN
+# ==========================================
+
+def verify_email(request, token):
+    """Vista para procesar token de verificación"""
+    try:
+        from django.db import connection
+        
+        with connection.cursor() as cursor:
+            # Buscar usuario por token de verificación
+            cursor.execute("""
+                SELECT id, username, email, nombre 
+                FROM raiz.usuarios 
+                WHERE token_recuperacion = %s 
+                AND verificado = false
+                AND fecha_token > (CURRENT_TIMESTAMP - INTERVAL '24 HOURS')
+            """, [token])
+            
+            user_data = cursor.fetchone()
+            
+            if user_data:
+                user_id, username, email, nombre = user_data
+                
+                # Marcar como verificado
+                cursor.execute("""
+                    UPDATE raiz.usuarios 
+                    SET verificado = true, 
+                        token_recuperacion = NULL, 
+                        fecha_token = NULL
+                    WHERE id = %s
+                """, [user_id])
+                
+                logger.info(f"Email verificado: {username} ({email})")
+                
+                # Mensaje de éxito
+                messages.success(request, 
+                    f'¡Email verificado correctamente! Bienvenido {nombre}. '
+                    'Ahora puedes acceder a todas las funcionalidades.')
+                
+                return redirect('core:marketplace')
+            else:
+                # Token inválido o expirado
+                messages.error(request, 
+                    'El enlace de verificación es inválido o ha expirado. '
+                    'Solicita un nuevo email de verificación.')
+                
+                return redirect('core:login')
+                
+    except Exception as e:
+        logger.error(f"Error en verificación de email: {e}")
+        messages.error(request, 'Error al verificar email.')
+        return redirect('core:login')
+
+
+# ==========================================
+# FUNCIÓN PARA ENVIAR EMAIL DE VERIFICACIÓN
+# ==========================================
+
+def send_verification_email(user_id, email, username, nombre):
+    """
+    Envía email de verificación al usuario
+    """
+    import uuid
+    import datetime
+    from django.core.mail import send_mail
+    from django.template.loader import render_to_string
+    from django.conf import settings
+    
+    try:
+        # Generar token único
+        verification_token = str(uuid.uuid4())
+        
+        # Guardar token en BD
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE raiz.usuarios 
+                SET token_recuperacion = %s, 
+                    fecha_token = CURRENT_TIMESTAMP 
+                WHERE id = %s
+            """, [verification_token, user_id])
+        
+        # Crear enlace de verificación
+        verification_url = f"{settings.SITE_URL}/verify-email/{verification_token}/"
+        
+        # Renderizar email HTML
+        email_html = render_to_string('emails/verification_email.html', {
+            'nombre': nombre,
+            'username': username,
+            'verification_url': verification_url,
+        })
+        
+        # Enviar email
+        send_mail(
+            subject='Verifica tu cuenta en Raíz Digital',
+            message=f'Hola {nombre}, verifica tu cuenta en: {verification_url}',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            html_message=email_html,
+            fail_silently=False,
+        )
+        
+        logger.info(f"Email de verificación enviado a {email}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error enviando email de verificación: {e}")
+        return False

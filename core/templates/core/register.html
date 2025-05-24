@@ -1,0 +1,1109 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Registro - Raíz Digital{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/variables.css' %}">
+<style>
+    :root {
+        --neon-green: #00ff9d;
+        --cyber-blue: #00f6ff;
+        --dark-matter: #0a192f;
+        --glow-green: rgba(0, 255, 157, 0.5);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: linear-gradient(125deg, var(--dark-matter) 0%, #071a2c 40%, #061c1e 80%, #052016 100%);
+        font-family: 'Arial', sans-serif;
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+        color: white;
+    }
+
+    /* NUEVO: Prevenir animaciones automáticas hasta que el usuario interactúe */
+    .form-group {
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+    }
+    
+    /* Solo animar al hacer hover o focus */
+    .form-group:hover,
+    .form-group:focus-within {
+        transform: translateY(-2px);
+        transition: transform 0.3s ease;
+    }
+    
+    /* Animación suave para el título sin auto-typing */
+    .register-title {
+        opacity: 1;
+        animation: fadeInTitle 1s ease-out;
+    }
+    
+    @keyframes fadeInTitle {
+        0% { opacity: 0; transform: translateY(-20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Elementos de fondo */
+    .cyber-grid {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            linear-gradient(var(--glow-green) 1px, transparent 1px),
+            linear-gradient(90deg, var(--glow-green) 1px, transparent 1px);
+        background-size: 50px 50px;
+        opacity: 0.1;
+        transform: perspective(500px) rotateX(60deg);
+        animation: grid-animation 20s linear infinite;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .organic-shapes {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        filter: blur(80px);
+        opacity: 0.2;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .organic-shape {
+        position: absolute;
+        border-radius: 50%;
+        animation: float 20s infinite ease-in-out;
+        pointer-events: none;
+    }
+
+    .shape1 {
+        width: 300px;
+        height: 300px;
+        left: -100px;
+        top: -100px;
+        background: radial-gradient(circle at center, var(--neon-green), transparent 70%);
+    }
+
+    .shape2 {
+        width: 400px;
+        height: 400px;
+        right: -150px;
+        bottom: -150px;
+        background: radial-gradient(circle at center, var(--cyber-blue), transparent 70%);
+        animation-delay: -5s;
+    }
+
+    /* Contenedor principal */
+    .page-container {
+        min-height: 100vh;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Botón volver mejorado */
+    .back-button {
+        position: absolute;
+        top: -60px;
+        left: 0;
+        color: var(--neon-green);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        z-index: 25;
+        background: rgba(10, 25, 47, 0.8);
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 255, 157, 0.3);
+        box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);
+    }
+
+    .back-icon {
+        width: 20px;
+        height: 20px;
+        fill: var(--neon-green);
+        transition: all 0.3s ease;
+    }
+
+    .back-button:hover {
+        transform: translateY(-3px);
+        text-shadow: 0 0 10px var(--neon-green);
+        box-shadow: 0 0 20px rgba(0, 255, 157, 0.4);
+        background: rgba(0, 255, 157, 0.1);
+    }
+
+    .back-button:hover .back-icon {
+        transform: translateX(-3px);
+    }
+
+    /* Contenedor del registro con espacio para el botón volver */
+    .register-container {
+        background: rgba(10, 25, 47, 0.3);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        width: 100%;
+        max-width: 600px;
+        position: relative;
+        overflow: hidden;
+        z-index: 15;
+        margin-top: 60px;
+    }
+
+    .register-border {
+        position: absolute;
+        inset: 0;
+        border-radius: 20px;
+        padding: 2px;
+        background: linear-gradient(45deg, var(--neon-green), var(--cyber-blue), var(--neon-green));
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask-composite: exclude;
+        opacity: 0.7;
+        animation: borderRotate 4s linear infinite;
+    }
+
+    .register-content {
+        position: relative;
+        padding: 2.5rem;
+    }
+
+    .register-title {
+        color: var(--neon-green);
+        text-align: center;
+        font-size: clamp(2rem, 5vw, 2.5rem);
+        font-weight: 900;
+        margin-bottom: 0.5rem;
+        letter-spacing: 2px;
+        text-shadow: 0 0 10px var(--neon-green);
+    }
+
+    .register-subtitle {
+        color: var(--cyber-blue);
+        text-align: center;
+        margin-bottom: 2rem;
+        opacity: 0.8;
+        font-size: 0.9rem;
+    }
+
+    /* Formulario */
+    .register-form {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .form-label {
+        color: var(--neon-green);
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .form-label.required::after {
+        content: ' *';
+        color: #ff4444;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .form-input, .form-select {
+        width: 100%;
+        padding: 1rem;
+        background: rgba(0, 255, 157, 0.05);
+        border: 1px solid var(--neon-green);
+        border-radius: 8px;
+        color: white;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .form-input:focus, .form-select:focus {
+        outline: none;
+        background: rgba(0, 255, 157, 0.1);
+        box-shadow: 0 0 15px rgba(0, 255, 157, 0.3);
+    }
+
+    /* Select personalizado */
+    .form-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%2300ff9d'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 20px;
+    }
+
+    .form-select option {
+        background: var(--dark-matter);
+        color: white;
+    }
+
+    /* Iconos de los campos */
+    .input-icon {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 20px;
+        fill: var(--neon-green);
+        opacity: 0.7;
+        pointer-events: none;
+    }
+
+    /* Selector de fecha personalizado */
+    .date-input {
+        background: rgba(0, 255, 157, 0.05);
+        border: 1px solid var(--neon-green);
+        border-radius: 8px;
+        color: white;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .date-input::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        cursor: pointer;
+    }
+
+    /* Campo de error */
+    .field-error {
+        border-color: #ff4444 !important;
+        box-shadow: 0 0 10px rgba(255, 68, 68, 0.3) !important;
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    /* Botón submit */
+    .btn-submit {
+        width: 100%;
+        padding: 1rem;
+        background: transparent;
+        color: var(--neon-green);
+        border: 2px solid var(--neon-green);
+        border-radius: 8px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-submit:hover {
+        background: var(--neon-green);
+        color: var(--dark-matter);
+        box-shadow: 0 0 20px var(--neon-green), 0 0 40px var(--neon-green);
+    }
+
+    .btn-submit::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0, 255, 157, 0.4), transparent);
+        transition: 0.5s;
+    }
+
+    .btn-submit:hover::before {
+        left: 100%;
+    }
+
+    .btn-submit.loading {
+        position: relative;
+        color: transparent;
+    }
+
+    .btn-submit.loading::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 20px;
+        height: 20px;
+        border: 2px solid transparent;
+        border-top: 2px solid var(--neon-green);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* Mensajes */
+    .error-messages, .success-message {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+
+    .error-messages {
+        background: rgba(255, 0, 0, 0.1);
+        border: 1px solid rgba(255, 0, 0, 0.3);
+        color: #ff4444;
+    }
+
+    .success-message {
+        background: rgba(0, 255, 157, 0.1);
+        border: 1px solid rgba(0, 255, 157, 0.3);
+        color: var(--neon-green);
+    }
+
+    .error-messages ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .error-messages li {
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .error-messages li::before {
+        content: '⚠️';
+        font-size: 1rem;
+    }
+
+    /* Link al login */
+    .login-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+    }
+
+    .login-link a {
+        color: var(--cyber-blue);
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .login-link a:hover {
+        text-shadow: 0 0 10px var(--cyber-blue);
+    }
+
+    /* Información de verificación */
+    .verification-info {
+        background: rgba(0, 246, 255, 0.1);
+        border: 1px solid rgba(0, 246, 255, 0.3);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+        font-size: 0.85rem;
+        color: var(--cyber-blue);
+    }
+
+    /* Textarea */
+    textarea.form-input {
+        resize: vertical;
+        min-height: 80px;
+        font-family: inherit;
+    }
+
+    /* Animaciones */
+    @keyframes borderRotate {
+        0% { background-position: 0% center; }
+        100% { background-position: 200% center; }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translate(0, 0); }
+        25% { transform: translate(50px, 50px); }
+        50% { transform: translate(0, 100px); }
+        75% { transform: translate(-50px, 50px); }
+    }
+
+    @keyframes grid-animation {
+        0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+        100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
+    }
+
+    @keyframes floatUp {
+        0% {
+            transform: translateY(0) rotate(0deg);
+            opacity: 0.7;
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(-100vh) rotate(360deg);
+            opacity: 0;
+        }
+    }
+
+    /* Responsive mejorado */
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .register-content {
+            padding: 2rem 1.5rem;
+        }
+        
+        .page-container {
+            padding: 1rem;
+        }
+        
+        .register-container {
+            margin-top: 40px;
+        }
+        
+        .back-button {
+            top: -50px;
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+        }
+        
+        .back-icon {
+            width: 18px;
+            height: 18px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .register-content {
+            padding: 1.5rem;
+        }
+        
+        .register-container {
+            margin-top: 30px;
+        }
+        
+        .back-button {
+            top: -40px;
+            font-size: 0.75rem;
+            padding: 0.3rem 0.6rem;
+        }
+        
+        .back-icon {
+            width: 16px;
+            height: 16px;
+        }
+    }
+
+    /* Accesibilidad */
+    @media (prefers-reduced-motion: reduce) {
+        .cyber-grid, .organic-shape, .register-border, .btn-submit::before {
+            animation: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cyber-grid"></div>
+<div class="organic-shapes">
+    <div class="organic-shape shape1"></div>
+    <div class="organic-shape shape2"></div>
+</div>
+
+<div class="page-container">
+    <div class="register-container">
+        <!-- Botón volver -->
+        <a href="{% url 'core:login' %}" class="back-button">
+            <svg class="back-icon" viewBox="0 0 24 24">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+            </svg>
+            <span>Volver al Login</span>
+        </a>
+
+        <div class="register-border"></div>
+        <div class="register-content">
+            <h2 class="register-title">Crear Cuenta</h2>
+            <p class="register-subtitle">Únete a la comunidad digital de tradiciones</p>
+
+            <!-- SOLO MOSTRAR MENSAJES DE ERROR DE VALIDACIÓN -->
+            {% if errors %}
+            <div class="error-messages">
+                <ul>
+                    {% for error in errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- MOSTRAR SOLO MENSAJES DE ÉXITO (no otros tipos) -->
+            {% if messages %}
+                {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                        <div class="success-message">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
+            <form class="register-form" method="post" action="{% url 'core:register' %}" novalidate>
+                {% csrf_token %}
+                
+                <!-- Fila 1: Nombre y Apellido -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label required">Nombre</label>
+                        <div class="input-wrapper">
+                            <input type="text" class="form-input" name="nombre" 
+                                   value="{{ form_data.nombre|default:'' }}" 
+                                   placeholder="Tu nombre" required>
+                            <svg class="input-icon" viewBox="0 0 24 24">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required">Apellido</label>
+                        <div class="input-wrapper">
+                            <input type="text" class="form-input" name="apellido" 
+                                   value="{{ form_data.apellido|default:'' }}" 
+                                   placeholder="Tu apellido" required>
+                            <svg class="input-icon" viewBox="0 0 24 24">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fila 2: Usuario y Email -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label required">Usuario</label>
+                        <div class="input-wrapper">
+                            <input type="text" class="form-input" name="username" 
+                                   value="{{ form_data.username|default:'' }}" 
+                                   placeholder="Nombre de usuario único" required>
+                            <svg class="input-icon" viewBox="0 0 24 24">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required">Email</label>
+                        <div class="input-wrapper">
+                            <input type="email" class="form-input" name="email" 
+                                   value="{{ form_data.email|default:'' }}" 
+                                   placeholder="tu@email.com" required>
+                            <svg class="input-icon" viewBox="0 0 24 24">
+                                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fila 3: Contraseña y Confirmar -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label required">Contraseña</label>
+                        <div class="input-wrapper">
+                            <input type="password" class="form-input" name="password" 
+                                   placeholder="Mínimo 8 caracteres" required>
+                            <svg class="input-icon" viewBox="0 0 24 24">
+                                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM15.1 8H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required">Confirmar Contraseña</label>
+                        <div class="input-wrapper">
+                            <input type="password" class="form-input" name="password_confirm" 
+                                   placeholder="Repite tu contraseña" required>
+                            <svg class="input-icon" viewBox="0 0 24 24">
+                                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM15.1 8H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fila 4: Fecha de Nacimiento y Teléfono -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Fecha de Nacimiento</label>
+                        <div class="input-wrapper">
+                            <input type="date" class="form-input date-input" name="fecha_nacimiento"
+                                   value="{{ form_data.fecha_nacimiento|default:'' }}">
+                            <svg class="input-icon" viewBox="0 0 24 24">
+                                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Teléfono</label>
+                        <div class="input-wrapper">
+                            <input type="tel" class="form-input" name="telefono" 
+                                   value="{{ form_data.telefono|default:'' }}" 
+                                   placeholder="+57 300 123 4567">
+                            <svg class="input-icon" viewBox="0 0 24 24">
+                                <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comunidad -->
+                <div class="form-group">
+                    <label class="form-label required">Comunidad</label>
+                    <select class="form-select" name="id_comunidad" required>
+                        <option value="">Selecciona tu comunidad</option>
+                        {% for comunidad in comunidades %}
+                        <option value="{{ comunidad.id }}" 
+                                {% if form_data.id_comunidad|default:'' == comunidad.id|stringformat:"s" %}selected{% endif %}>
+                            {{ comunidad.display_name }}
+                        </option>
+                        {% endfor %}
+                        {% if not comunidades %}
+                        <option value="" disabled>No hay comunidades disponibles</option>
+                        {% endif %}
+                    </select>
+                </div>
+
+                <!-- Dirección (opcional) -->
+                <div class="form-group">
+                    <label class="form-label">Dirección</label>
+                    <div class="input-wrapper">
+                        <input type="text" class="form-input" name="direccion" 
+                               value="{{ form_data.direccion|default:'' }}" 
+                               placeholder="Tu dirección (opcional)">
+                        <svg class="input-icon" viewBox="0 0 24 24">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Biografía (opcional) -->
+                <div class="form-group">
+                    <label class="form-label">Cuéntanos sobre ti</label>
+                    <div class="input-wrapper">
+                        <textarea class="form-input" name="biografia" rows="3" 
+                                  placeholder="Breve descripción sobre ti y tus intereses en las tradiciones (opcional)">{{ form_data.biografia|default:'' }}</textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <span>Crear Mi Cuenta</span>
+                </button>
+            </form>
+
+            <div class="verification-info">
+                <strong>📧 Verificación de Email:</strong><br>
+                Después del registro, enviaremos un email de verificación a tu correo. 
+                Debes verificar tu cuenta para poder acceder completamente a la plataforma.
+            </div>
+
+            <div class="login-link">
+                ¿Ya tienes una cuenta? <a href="{% url 'core:login' %}">Inicia sesión aquí</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'core/js/digital-effects.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Inicializando página de registro');
+    
+    // ========================================
+    // VALIDACIÓN EN TIEMPO REAL DEL FORMULARIO
+    // ========================================
+    
+    const form = document.querySelector('.register-form');
+    const submitBtn = document.querySelector('.btn-submit');
+    
+    // Validación de contraseñas
+    const passwordInput = document.querySelector('input[name="password"]');
+    const confirmPasswordInput = document.querySelector('input[name="password_confirm"]');
+    
+    function validatePassword() {
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        
+        // Remover clases de error previas
+        passwordInput.classList.remove('field-error');
+        confirmPasswordInput.classList.remove('field-error');
+        
+        // Validar longitud mínima
+        if (password.length > 0 && password.length < 8) {
+            passwordInput.classList.add('field-error');
+            return false;
+        }
+        
+        // Validar coincidencia de contraseñas
+        if (confirmPassword.length > 0 && password !== confirmPassword) {
+            confirmPasswordInput.classList.add('field-error');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // Validación de email
+    const emailInput = document.querySelector('input[name="email"]');
+    function validateEmail() {
+        const email = emailInput.value;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        emailInput.classList.remove('field-error');
+        
+        if (email.length > 0 && !emailRegex.test(email)) {
+            emailInput.classList.add('field-error');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // Validación de username (solo letras, números y guiones bajos)
+    const usernameInput = document.querySelector('input[name="username"]');
+    function validateUsername() {
+        const username = usernameInput.value;
+        const usernameRegex = /^[a-zA-Z0-9_]+$/;
+        
+        usernameInput.classList.remove('field-error');
+        
+        if (username.length > 0 && (!usernameRegex.test(username) || username.length < 3)) {
+            usernameInput.classList.add('field-error');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // Event listeners para validación en tiempo real
+    if (passwordInput && confirmPasswordInput) {
+        passwordInput.addEventListener('input', validatePassword);
+        confirmPasswordInput.addEventListener('input', validatePassword);
+    }
+    
+    if (emailInput) {
+        emailInput.addEventListener('input', validateEmail);
+    }
+    
+    if (usernameInput) {
+        usernameInput.addEventListener('input', validateUsername);
+    }
+    
+    // ========================================
+    // MANEJO DEL ENVÍO DEL FORMULARIO
+    // ========================================
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            console.log('📝 Enviando formulario de registro...');
+            
+            // Validar todos los campos antes del envío
+            const isPasswordValid = validatePassword();
+            const isEmailValid = validateEmail();
+            const isUsernameValid = validateUsername();
+            
+            if (!isPasswordValid || !isEmailValid || !isUsernameValid) {
+                e.preventDefault();
+                console.log('❌ Formulario inválido, evitando envío');
+                
+                // Mostrar mensaje de error
+                showNotification('Por favor, corrige los errores en el formulario', 'error');
+                return;
+            }
+            
+            // Verificar que los campos requeridos estén llenos
+            const requiredFields = form.querySelectorAll('input[required], select[required]');
+            let allFieldsValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('field-error');
+                    allFieldsValid = false;
+                }
+            });
+            
+            if (!allFieldsValid) {
+                e.preventDefault();
+                showNotification('Todos los campos marcados con * son obligatorios', 'error');
+                return;
+            }
+            
+            // Añadir clase de loading al botón
+            if (submitBtn) {
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+            }
+            
+            console.log('✅ Formulario válido, enviando...');
+        });
+    }
+    
+    // ========================================
+    // EFECTOS VISUALES Y ANIMACIONES
+    // ========================================
+    
+    // Efecto de enfoque en los campos
+    const formInputs = document.querySelectorAll('.form-input, .form-select');
+    formInputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.parentElement.style.transform = 'translateY(-2px)';
+            this.parentElement.parentElement.style.transition = 'transform 0.3s ease';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.parentElement.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Animación de entrada para los elementos del formulario
+    const formGroups = document.querySelectorAll('.form-group');
+    formGroups.forEach((group, index) => {
+        group.style.opacity = '0';
+        group.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            group.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            group.style.opacity = '1';
+            group.style.transform = 'translateY(0)';
+        }, 100 + (index * 50));
+    });
+    
+    // ========================================
+    // FUNCIONES AUXILIARES
+    // ========================================
+    
+    function showNotification(message, type = 'info') {
+        // Crear notificación
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            z-index: 9999;
+            max-width: 300px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        `;
+        
+        // Estilos según el tipo
+        if (type === 'error') {
+            notification.style.background = 'rgba(255, 68, 68, 0.9)';
+            notification.style.color = 'white';
+            notification.style.border = '1px solid #ff4444';
+        } else if (type === 'success') {
+            notification.style.background = 'rgba(0, 255, 157, 0.9)';
+            notification.style.color = 'var(--dark-matter)';
+            notification.style.border = '1px solid var(--neon-green)';
+        } else {
+            notification.style.background = 'rgba(0, 246, 255, 0.9)';
+            notification.style.color = 'var(--dark-matter)';
+            notification.style.border = '1px solid var(--cyber-blue)';
+        }
+        
+        document.body.appendChild(notification);
+        
+        // Mostrar con animación
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // Ocultar después de 4 segundos
+        setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 300);
+        }, 4000);
+    }
+    
+    // ========================================
+    // EFECTOS DE PARTÍCULAS DE ÉXITO
+    // ========================================
+    
+    // Si hay mensaje de éxito, crear efecto de partículas
+    if (document.querySelector('.success-message')) {
+        createSuccessParticles();
+    }
+    
+    function createSuccessParticles() {
+        for (let i = 0; i < 20; i++) {
+            setTimeout(() => {
+                const particle = document.createElement('div');
+                particle.style.cssText = `
+                    position: fixed;
+                    width: 6px;
+                    height: 6px;
+                    background: var(--neon-green);
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: 9999;
+                    box-shadow: 0 0 10px var(--neon-green);
+                    left: ${Math.random() * window.innerWidth}px;
+                    top: ${window.innerHeight}px;
+                    animation: floatUp 3s ease-out forwards;
+                `;
+                
+                document.body.appendChild(particle);
+                
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.remove();
+                    }
+                }, 3000);
+            }, i * 100);
+        }
+    }
+    
+    // ========================================
+    // MANEJO DE ERRORES DEL SERVIDOR
+    // ========================================
+    
+    // Si hay errores, enfocar el primer campo con error
+    const firstErrorField = document.querySelector('.field-error');
+    if (firstErrorField) {
+        firstErrorField.focus();
+        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    // Si el formulario falló, rehabilitar el botón
+    if (document.querySelector('.error-messages') && submitBtn) {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+    }
+    
+    console.log('✅ Página de registro inicializada correctamente');
+});
+
+// ========================================
+// EFECTOS ADICIONALES DE FONDO
+// ========================================
+
+// Efecto de cursor personalizado para la página de registro
+document.addEventListener('mousemove', function(e) {
+    // Solo en dispositivos con mouse (no táctiles)
+    if (window.matchMedia('(hover: hover)').matches) {
+        createMouseParticle(e.clientX, e.clientY);
+    }
+});
+
+function createMouseParticle(x, y) {
+    // Limitar la frecuencia de partículas
+    if (Math.random() > 0.95) {
+        const particle = document.createElement('div');
+        particle.style.cssText = `
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            background: var(--cyber-blue);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 5;
+            left: ${x}px;
+            top: ${y}px;
+            opacity: 0.7;
+            animation: fadeOut 1s ease-out forwards;
+        `;
+        
+        document.body.appendChild(particle);
+        
+        setTimeout(() => {
+            if (particle.parentNode) {
+                particle.remove();
+            }
+        }, 1000);
+    }
+}
+
+// CSS para la animación de fadeOut
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeOut {
+        0% {
+            opacity: 0.7;
+            transform: scale(1);
+        }
+        100% {
+            opacity: 0;
+            transform: scale(0.3);
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% if success %}
+{% include 'core/includes/success_modal.html' %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const userData = {
+        username: '{{ form_data.username|default:"" }}',
+        email: '{{ form_data.email|default:"" }}'
+    };
+    
+    // Mostrar el modal automáticamente
+    if (window.showEpicSuccessModal) {
+        window.showEpicSuccessModal({
+            title: "¡REGISTRO EXITOSO!",
+            subtitle: "Bienvenido a Raíz Digital",
+            message: "Tu cuenta ha sido creada exitosamente para " + userData.username + ".",
+            verificationText: "Hemos enviado un enlace de verificación a " + userData.email + ". Por favor revisa tu bandeja de entrada."
+        });
+    }
+});
+</script>
+{% endif %}
+{% endblock %}
