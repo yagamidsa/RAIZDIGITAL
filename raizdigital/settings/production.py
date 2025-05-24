@@ -63,7 +63,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'raizdigital.wsgi.application'
 
 # =================================
-# BASE DE DATOS - CONFIGURACIÓN CORREGIDA V2
+# BASE DE DATOS - CONFIGURACIÓN SIMPLIFICADA
 # =================================
 
 print("🗄️  CONFIGURANDO BASE DE DATOS RAILWAY...")
@@ -76,28 +76,26 @@ if DATABASE_URL:
         import dj_database_url
         DATABASES = {'default': dj_database_url.parse(DATABASE_URL)}
         
-        # CONFIGURACIÓN CORREGIDA - PostgreSQL válido
+        # CONFIGURACIÓN SIMPLIFICADA - Sin parámetros problemáticos
         DATABASES['default']['OPTIONS'] = {
             'sslmode': 'require',
-            # CORREGIDO: "read committed" con espacio, no guión bajo
-            'options': '-c default_transaction_isolation="read committed"'
+            # REMOVIDO: problemas con transaction isolation
+            # Solo mantenemos configuración básica y segura
         }
         
-        # Configuración de conexión
+        # Configuración de conexión básica
         DATABASES['default']['CONN_MAX_AGE'] = 600
         DATABASES['default']['ATOMIC_REQUESTS'] = True
         
-        # Configuración adicional de keepalive
+        # Timeouts básicos (sin keepalives por ahora)
         DATABASES['default']['OPTIONS'].update({
             'connect_timeout': 10,
-            'keepalives_idle': 600,
-            'keepalives_interval': 30,
-            'keepalives_count': 3,
         })
         
         # Mostrar info de conexión
         db_info = DATABASES['default']
         print(f"🐘 RAILWAY BD: {db_info['USER']}@{db_info['HOST']}:{db_info['PORT']}/{db_info['NAME']}")
+        print("📊 Configuración: SSL requerido, timeout 10s, pool 600s")
         
     except ImportError:
         print("❌ dj_database_url no disponible")
@@ -151,5 +149,5 @@ SESSION_SAVE_EVERY_REQUEST = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-print('🚀 PRODUCTION SETTINGS CARGADOS CORRECTAMENTE')
+print('🚀 PRODUCTION SETTINGS CARGADOS CORRECTAMENTE - CONFIGURACIÓN SIMPLIFICADA')
 print('=' * 60)
