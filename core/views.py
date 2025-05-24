@@ -1518,16 +1518,13 @@ def get_user_info(request):
         'is_admin': request.session.get('is_admin', False)
     }
 
-
-
-
 # En core/views.py - ELIMINAR la función register simple y usar solo esta:
 
 @csrf_protect
 def register(request):
     """Vista de registro mejorada con validación y manejo de comunidades"""
     
-    # LIMPIAR MENSAJES DE OTRAS VISTAS (solución al problema de mensajes persistentes)
+    # LIMPIAR MENSAJES DE OTRAS VISTAS
     storage = messages.get_messages(request)
     for message in storage:
         pass  # Esto consume y elimina todos los mensajes pendientes
@@ -1650,210 +1647,14 @@ def register(request):
                         biografia if biografia else None,
                         int(id_comunidad)
                     ])
-                
-                # Mensaje de éxito
-                messages.success(request, 
-                    f'¡Cuenta creada exitosamente para {username}! '
-                    'Se ha enviado un email de verificación a tu correo. '
-                    'Por favor verifica tu cuenta antes de iniciar sesión.'
-                )
+                    
+                    # IMPORTANTE: Confirmar la transacción
+                    connection.commit()
                 
                 # Log del registro exitoso
                 logger.info(f"Usuario registrado exitosamente: {username} ({email})")
                 
-                # Redirigir al login
-                return redirect('core:login')
-                
-            except Exception as e:
-                logger.error(f"Error creando usuario: {e}")
-                errors.append("Error al crear la cuenta. Intenta nuevamente.")
-        
-        # Si hay errores, mostrarlos
-        if errors:
-            form_data = {
-                'nombre': nombre,
-                'apellido': apellido,
-                'username': username,
-                'email': email,
-                'fecha_nacimiento': fecha_nacimiento,
-                'telefono': telefono,
-                'direccion': direccion,
-                'biografia': biografia,
-                'id_comunidad': id_comunidad
-            }
-            
-            return render(request, 'core/register.html', {
-                'errors': errors,
-                'form_data': form_data,
-                'comunidades': obtener_comunidades()
-            })
-    
-    # GET request o errores - mostrar formulario
-    return render(request, 'core/register.html', {
-        'comunidades': obtener_comunidades()
-    })
-
-def obtener_comunidades():
-    """Función helper para obtener comunidades activas"""
-    try:
-        comunidades = []
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT id, nombre, region, pais 
-                FROM raiz.comunidades 
-                WHERE activo = true 
-                ORDER BY nombre
-            """)
-            
-            for row in cursor.fetchall():
-                comunidad_id, nombre, region, pais = row
-                display_name = f"{nombre}"
-                if region:
-                    display_name += f" - {region}"
-                if pais:
-                    display_name += f" ({pais})"
-                    
-                comunidades.append({
-                    'id': comunidad_id,
-                    'nombre': nombre,
-                    'display_name': display_name
-                })
-        
-        return comunidades
-    except Exception as e:
-        logger.error(f"Error obteniendo comunidades: {e}")
-        return []@csrf_protect
-def register(request):
-    """Vista de registro mejorada con validación y manejo de comunidades"""
-    
-    # LIMPIAR MENSAJES DE OTRAS VISTAS (solución al problema de mensajes persistentes)
-    storage = messages.get_messages(request)
-    for message in storage:
-        pass  # Esto consume y elimina todos los mensajes pendientes
-    
-    if request.method == 'POST':
-        # Obtener datos del formulario
-        nombre = request.POST.get('nombre', '').strip()
-        apellido = request.POST.get('apellido', '').strip()
-        username = request.POST.get('username', '').strip()
-        email = request.POST.get('email', '').strip()
-        password = request.POST.get('password', '')
-        password_confirm = request.POST.get('password_confirm', '')
-        fecha_nacimiento = request.POST.get('fecha_nacimiento', '')
-        telefono = request.POST.get('telefono', '').strip()
-        direccion = request.POST.get('direccion', '').strip()
-        biografia = request.POST.get('biografia', '').strip()
-        id_comunidad = request.POST.get('id_comunidad', '')
-        
-        # Lista de errores
-        errors = []
-        
-        # Validaciones
-        if not nombre:
-            errors.append("El nombre es requerido")
-        elif len(nombre) < 2:
-            errors.append("El nombre debe tener al menos 2 caracteres")
-            
-        if not apellido:
-            errors.append("El apellido es requerido")
-        elif len(apellido) < 2:
-            errors.append("El apellido debe tener al menos 2 caracteres")
-            
-        if not username:
-            errors.append("El nombre de usuario es requerido")
-        elif len(username) < 3:
-            errors.append("El nombre de usuario debe tener al menos 3 caracteres")
-        elif not username.replace('_', '').isalnum():
-            errors.append("El nombre de usuario solo puede contener letras, números y guiones bajos")
-            
-        if not email:
-            errors.append("El email es requerido")
-        elif '@' not in email or '.' not in email:
-            errors.append("El email no tiene un formato válido")
-            
-        if not password:
-            errors.append("La contraseña es requerida")
-        elif len(password) < 8:
-            errors.append("La contraseña debe tener al menos 8 caracteres")
-            
-        if password != password_confirm:
-            errors.append("Las contraseñas no coinciden")
-            
-        if not id_comunidad:
-            errors.append("Debes seleccionar una comunidad")
-            
-        # Validar fecha de nacimiento (mayor de edad)
-        if fecha_nacimiento:
-            try:
-                from datetime import datetime, date
-                fecha_obj = datetime.strptime(fecha_nacimiento, '%Y-%m-%d').date()
-                today = date.today()
-                age = today.year - fecha_obj.year - ((today.month, today.day) < (fecha_obj.month, fecha_obj.day))
-                if age < 18:
-                    errors.append("Debes ser mayor de 18 años para registrarte")
-            except ValueError:
-                errors.append("Fecha de nacimiento inválida")
-        
-        # Verificar unicidad de usuario y email
-        if not errors:
-            try:
-                from django.db import connection
-                with connection.cursor() as cursor:
-                    # Verificar usuario existente
-                    cursor.execute("SELECT id FROM raiz.usuarios WHERE username = %s", [username])
-                    if cursor.fetchone():
-                        errors.append("El nombre de usuario ya está en uso")
-                    
-                    # Verificar email existente
-                    cursor.execute("SELECT id FROM raiz.usuarios WHERE email = %s", [email])
-                    if cursor.fetchone():
-                        errors.append("El email ya está registrado")
-                    
-                    # Verificar que la comunidad existe
-                    cursor.execute("SELECT id FROM raiz.comunidades WHERE id = %s AND activo = true", [id_comunidad])
-                    if not cursor.fetchone():
-                        errors.append("La comunidad seleccionada no es válida")
-                        
-            except Exception as e:
-                logger.error(f"Error verificando datos únicos: {e}")
-                errors.append("Error al verificar datos. Intenta nuevamente.")
-        
-        # Si no hay errores, crear el usuario
-        if not errors:
-            try:
-                from django.contrib.auth.hashers import make_password
-                import uuid
-                
-                with connection.cursor() as cursor:
-                    # Generar ID único
-                    user_id = str(uuid.uuid4())
-                    
-                    # Hashear la contraseña
-                    hashed_password = make_password(password)
-                    
-                    # Insertar usuario
-                    cursor.execute("""
-                        INSERT INTO raiz.usuarios (
-                            id, username, password, email, nombre, apellido,
-                            fecha_nacimiento, telefono, direccion, biografia,
-                            id_comunidad, fecha_registro, activo, verificado
-                        ) VALUES (
-                            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
-                            CURRENT_TIMESTAMP, true, false
-                        )
-                    """, [
-                        user_id, username, hashed_password, email, nombre, apellido,
-                        fecha_nacimiento if fecha_nacimiento else None,
-                        telefono if telefono else None,
-                        direccion if direccion else None,
-                        biografia if biografia else None,
-                        int(id_comunidad)
-                    ])
-                
-                # Log del registro exitoso
-                logger.info(f"Usuario registrado exitosamente: {username} ({email})")
-                
-                # CAMBIO IMPORTANTE: En lugar de redirigir, renderizar con éxito
+                # Renderizar con éxito
                 form_data = {
                     'nombre': nombre,
                     'apellido': apellido,
@@ -1869,12 +1670,15 @@ def register(request):
                 return render(request, 'core/register.html', {
                     'success': True,  # Flag para mostrar el modal
                     'form_data': form_data,
-                    'comunidades': obtener_comunidades()
+                    'comunidades': obtener_comunidades(),
+                    'registration_success': True  # Flag adicional para el modal
                 })
                 
             except Exception as e:
                 logger.error(f"Error creando usuario: {e}")
-                errors.append("Error al crear la cuenta. Intenta nuevamente.")
+                import traceback
+                traceback.print_exc()
+                errors.append(f"Error al crear la cuenta: {str(e)}")
         
         # Si hay errores, mostrarlos
         if errors:
@@ -1896,10 +1700,11 @@ def register(request):
                 'comunidades': obtener_comunidades()
             })
     
-    # GET request o errores - mostrar formulario
+    # GET request - mostrar formulario
     return render(request, 'core/register.html', {
         'comunidades': obtener_comunidades()
     })
+
 
 def obtener_comunidades():
     """Función helper para obtener comunidades activas"""
