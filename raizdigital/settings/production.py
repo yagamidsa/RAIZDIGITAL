@@ -17,8 +17,8 @@ if not SECRET_KEY:
 DEBUG = False
 print(f"🔧 DEBUG mode: {DEBUG}")
 
-# ALLOWED_HOSTS - Solución definitiva
-ALLOWED_HOSTS = ['*']  # Permitir todos temporalmente
+# ALLOWED_HOSTS - Permitir todos para Railway
+ALLOWED_HOSTS = ['*']
 print(f"🌐 ALLOWED_HOSTS: {ALLOWED_HOSTS}")
 
 INSTALLED_APPS = [
@@ -63,7 +63,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'raizdigital.wsgi.application'
 
 # =================================
-# BASE DE DATOS - RAILWAY CORREGIDA
+# BASE DE DATOS - CONFIGURACIÓN MINIMALISTA
 # =================================
 
 print("🗄️  CONFIGURANDO BASE DE DATOS RAILWAY...")
@@ -73,31 +73,24 @@ print(f"🔍 DATABASE_URL presente: {'SÍ' if DATABASE_URL else 'NO'}")
 
 if DATABASE_URL:
     try:
+        # Método 1: Intentar con dj_database_url
         import dj_database_url
         DATABASES = {'default': dj_database_url.parse(DATABASE_URL)}
         
-        # CONFIGURACIÓN CORREGIDA - Solo opciones válidas para PostgreSQL
+        # CONFIGURACIÓN MINIMALISTA - SOLO LO ESENCIAL
         DATABASES['default']['OPTIONS'] = {
             'sslmode': 'require',
-            'options': '-c default_transaction_isolation=read_committed',
-            # Opciones válidas para psycopg
-            'connect_timeout': 10,
-            'keepalives_idle': 600,
-            'keepalives_interval': 30,
-            'keepalives_count': 3,
         }
         
-        # Configuración de conexión
-        DATABASES['default']['CONN_MAX_AGE'] = 600
-        DATABASES['default']['ATOMIC_REQUESTS'] = True
+        # Configuración básica
+        DATABASES['default']['CONN_MAX_AGE'] = 60  # Reducido para evitar problemas
         
-        # Mostrar info de conexión (sin datos sensibles)
         db_info = DATABASES['default']
-        print(f"🐘 RAILWAY BD: {db_info['USER']}@{db_info['HOST']}:{db_info['PORT']}/{db_info['NAME']}")
+        print(f"🐘 RAILWAY BD (dj_database_url): {db_info['USER']}@{db_info['HOST']}:{db_info['PORT']}/{db_info['NAME']}")
         
     except ImportError:
-        print("❌ dj_database_url no disponible - instalando...")
-        # Si dj_database_url no está disponible, usar configuración manual
+        # Método 2: Configuración manual sin dj_database_url
+        print("📦 dj_database_url no disponible - usando configuración manual")
         import urllib.parse as urlparse
         
         if DATABASE_URL:
@@ -113,20 +106,23 @@ if DATABASE_URL:
                     'PORT': url.port,
                     'OPTIONS': {
                         'sslmode': 'require',
-                        'connect_timeout': 10,
                     },
-                    'CONN_MAX_AGE': 600,
-                    'ATOMIC_REQUESTS': True,
+                    'CONN_MAX_AGE': 60,
                 }
             }
             print(f"🐘 BD Manual: {url.username}@{url.hostname}:{url.port}/{url.path[1:]}")
         else:
             print("❌ DATABASE_URL no encontrada")
             sys.exit(1)
+            
+except Exception as e:
+    print(f"❌ Error configurando BD: {e}")
+    sys.exit(1)
 else:
-    print("❌ DATABASE_URL no encontrada")
+    print("❌ DATABASE_URL no encontrada en variables de entorno")
     sys.exit(1)
 
+# Validaciones de contraseña
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -134,78 +130,78 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# Configuración regional
 LANGUAGE_CODE = 'es-es'
 TIME_ZONE = 'America/Bogota'
 USE_I18N = True
 USE_TZ = True
 
-# Archivos estáticos - CONFIGURACIÓN MEJORADA
+# =================================
+# ARCHIVOS ESTÁTICOS - CONFIGURACIÓN SIMPLE
+# =================================
+
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Crear directorio si no existe
-STATIC_ROOT.mkdir(exist_ok=True)
+try:
+    STATIC_ROOT.mkdir(exist_ok=True)
+    print(f"📂 STATIC_ROOT creado: {STATIC_ROOT}")
+except Exception as e:
+    print(f"⚠️ Error creando STATIC_ROOT: {e}")
 
 # Directorios de archivos estáticos
 STATICFILES_DIRS = []
 static_dir = BASE_DIR / 'static'
 if static_dir.exists():
     STATICFILES_DIRS.append(static_dir)
-    print(f"📁 Static dir agregado: {static_dir}")
+    print(f"📁 Static dir encontrado: {static_dir}")
 
-# Configuración de WhiteNoise
+# Configuración básica de WhiteNoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
-WHITENOISE_USE_FINDERS = True
-WHITENOISE_AUTOREFRESH = True
 
 print(f"📂 STATIC_ROOT: {STATIC_ROOT}")
 print(f"📂 STATICFILES_DIRS: {STATICFILES_DIRS}")
 
-# CSRF y Seguridad
+# =================================
+# SEGURIDAD Y COOKIES
+# =================================
+
+# CSRF para Railway
 CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
     'https://*.up.railway.app',
 ]
 
-# Configuración de seguridad para Railway
+# Headers de seguridad para Railway
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = False  # Railway maneja SSL
-USE_TZ = True
 
-# Configuración de sesiones
+# Configuración de sesiones básica
 SESSION_COOKIE_AGE = 3600  # 1 hora
 SESSION_SAVE_EVERY_REQUEST = True
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-# Configuración de cookies
-SESSION_COOKIE_SECURE = True  # Solo HTTPS
-SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = 'Lax'
+# Solo aplicar configuración segura de cookies si estamos en HTTPS
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = True
 
-CSRF_COOKIE_SECURE = True
-CSRF_COOKIE_HTTPONLY = True
-
-# Configuración de logging
+# Configuración básica de logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
-    },
     'handlers': {
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
         },
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'WARNING',  # Solo warnings y errores
         },
         'core': {
             'handlers': ['console'],
@@ -216,5 +212,6 @@ LOGGING = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-print('🚀 PRODUCTION SETTINGS CARGADOS CORRECTAMENTE')
+print('🚀 PRODUCTION SETTINGS MINIMALISTAS CARGADOS')
+print('✅ Configuración lista para Railway')
 print('=' * 60)
