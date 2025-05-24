@@ -96,6 +96,7 @@
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     background: rgba(0, 0, 0, 0.85);
+    padding: 1rem; /* NUEVO: Padding para móvil */
 }
 
 /* Canvas de fondo para efectos 3D */
@@ -118,7 +119,7 @@
     pointer-events: none;
 }
 
-/* Contenedor principal con colores más oscuros para mejor legibilidad */
+/* CONTENEDOR PRINCIPAL - OPTIMIZADO PARA MÓVIL */
 .modal-container-epic {
     position: relative;
     width: 90%;
@@ -137,6 +138,128 @@
         inset 0 0 30px rgba(0, 255, 157, 0.02);
     transform: scale(0.5) rotateY(-90deg);
     opacity: 0;
+    
+    /* CRÍTICO PARA MÓVIL: Limitar altura máxima */
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* ========================================
+   OPTIMIZACIÓN ESPECÍFICA PARA MÓVIL
+   ======================================== */
+@media (max-width: 768px) {
+    .success-modal-epic {
+        padding: 0.5rem !important;
+        /* CENTRADO ABSOLUTO SIN SCROLL */
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    .modal-container-epic {
+        width: 90% !important;
+        max-width: none !important;
+        /* ALTURA FIJA PARA QUE QUEPA SIN SCROLL */
+        height: 85vh !important;
+        max-height: 85vh !important;
+        margin: 0 auto !important;
+        padding: 1.2rem 1rem !important;
+        border-radius: 15px !important;
+        
+        /* SCROLL INTERNO CONTROLADO */
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        
+        /* CENTRADO PERFECTO */
+        position: relative !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+    }
+    
+    /* Reducir tamaños para que quepa mejor */
+    .success-icon-container-epic {
+        width: 80px !important;
+        height: 80px !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    .success-icon-epic {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .success-title-epic {
+        font-size: clamp(1.3rem, 5vw, 1.6rem) !important;
+        margin-bottom: 0.5rem !important;
+        line-height: 1.2 !important;
+    }
+    
+    .success-subtitle-epic {
+        font-size: clamp(0.8rem, 3vw, 1rem) !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    .success-message-epic {
+        font-size: clamp(0.75rem, 2.5vw, 0.9rem) !important;
+        margin-bottom: 1rem !important;
+        line-height: 1.3 !important;
+    }
+    
+    .verification-info-epic {
+        padding: 0.8rem !important;
+        margin: 1rem 0 !important;
+    }
+    
+    .verification-title-epic {
+        font-size: 0.9rem !important;
+        margin-bottom: 0.4rem !important;
+    }
+    
+    .verification-text-epic {
+        font-size: 0.75rem !important;
+        line-height: 1.3 !important;
+    }
+    
+    .button-container-epic {
+        margin-top: 1rem !important;
+        flex-direction: column !important;
+        gap: 0.6rem !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .btn-professional-epic {
+        width: 100% !important;
+        max-width: none !important;
+        padding: 0.7rem 1rem !important;
+        font-size: 0.8rem !important;
+        min-width: auto !important;
+    }
+}
+
+/* Para móviles muy pequeños */
+@media (max-width: 400px) {
+    .modal-container-epic {
+        padding: 1rem 0.8rem !important;
+        height: 80vh !important;
+        max-height: 80vh !important;
+    }
+    
+    .success-title-epic {
+        font-size: 1.2rem !important;
+    }
+    
+    .verification-info-epic {
+        padding: 0.6rem !important;
+    }
+    
+    .verification-text-epic {
+        font-size: 0.7rem !important;
+    }
+    
+    .btn-professional-epic {
+        padding: 0.6rem 0.8rem !important;
+        font-size: 0.75rem !important;
+    }
 }
 
 /* Borde holográfico más sutil */
@@ -499,26 +622,28 @@
     }
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-    .modal-container-epic {
-        padding: 2rem 1.5rem;
-        margin: 1rem;
-    }
-    
-    .button-container-epic {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .btn-professional-epic {
-        width: 100%;
-        max-width: 250px;
-    }
+/* ========================================
+   SCROLLBAR PERSONALIZADA PARA MÓVIL
+   ======================================== */
+.modal-container-epic::-webkit-scrollbar {
+    width: 4px;
+}
+
+.modal-container-epic::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.modal-container-epic::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 157, 0.3);
+    border-radius: 2px;
+}
+
+.modal-container-epic::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 157, 0.5);
 }
 </style>
 
-<!-- Scripts del Modal -->
+<!-- Scripts del Modal (IDÉNTICOS - SIN CAMBIOS) -->
 <script>
 // ============================================
 // MODAL DE REGISTRO EXITOSO ULTRA PROFESIONAL
