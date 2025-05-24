@@ -28,6 +28,17 @@
         <div class="login-border"></div>
         <div class="login-content">
             <h2 class="login-title">Acceso Digital</h2>
+            
+            <!-- NUEVO: Mensaje de logout condicional -->
+            {% if logout_message %}
+            <div class="success-message" style="background: rgba(0, 255, 157, 0.1); border: 1px solid rgba(0, 255, 157, 0.3); color: var(--neon-green); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center;">
+                <svg style="width: 20px; height: 20px; fill: var(--neon-green); vertical-align: middle; margin-right: 8px;" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                {{ logout_message }}
+            </div>
+            {% endif %}
+            
             <form method="post" action="{% url 'core:login' %}" class="login-form">
                 {% csrf_token %}
                 
@@ -36,7 +47,7 @@
                     <label class="form-label">Usuario</label>
                     <div class="input-wrapper">
                         <input type="text" name="username" class="form-input" placeholder="Ingresa tu usuario" required
-                            autocomplete="username">
+                            autocomplete="username" value="{{ username|default:'' }}">
                         <svg class="input-icon user-icon" viewBox="0 0 24 24">
                             <path
                                 d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
@@ -44,14 +55,13 @@
                     </div>
                 </div>
 
-                <!-- Campo de contraseña SIMPLIFICADO -->
+                <!-- Campo de contraseña -->
                 <div class="form-group">
                     <label class="form-label">Contraseña</label>
                     <div class="input-wrapper password-wrapper">
                         <input type="password" id="passwordInput" name="password" class="form-input password-input"
                             placeholder="Ingresa tu contraseña" required autocomplete="current-password">
                         
-                        <!-- Solo nuestro ícono personalizado -->
                         <button type="button" id="passwordToggle" class="password-toggle-btn" tabindex="-1">
                             <svg class="password-icon" viewBox="0 0 24 24">
                                 <path id="eyePath" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
@@ -73,9 +83,14 @@
                 <button type="submit" class="btn-submit">
                     <span>Ingresar al Sistema</span>
                 </button>
+                
                 <div class="form-footer">
                     <a href="{% url 'core:password_recovery' %}" class="recovery-link">
                         ¿Olvidaste tu contraseña?
+                    </a>
+                    <br><br>
+                    <a href="{% url 'core:register' %}" class="recovery-link" style="color: var(--cyber-blue);">
+                        ¿No tienes cuenta? Regístrate aquí
                     </a>
                 </div>
             </form>
@@ -88,4 +103,22 @@
 {% block extra_js %}
 <script src="{% static 'core/js/digital-effects.js' %}?v=2"></script>
 <script src="{% static 'core/js/login-effects.js' %}?v=5"></script>
+
+<script>
+// Auto-ocultar mensaje de logout después de 5 segundos
+document.addEventListener('DOMContentLoaded', function() {
+    const logoutMessage = document.querySelector('.success-message');
+    if (logoutMessage) {
+        setTimeout(() => {
+            logoutMessage.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            logoutMessage.style.opacity = '0';
+            logoutMessage.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                logoutMessage.remove();
+            }, 500);
+        }, 5000); // 5 segundos
+    }
+});
+</script>
 {% endblock %}

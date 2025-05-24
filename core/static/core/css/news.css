@@ -2181,3 +2181,17 @@ body {
 }
 
 
+@media (max-width: 768px) {
+    .featured-article {
+        margin-bottom: 40px !important;
+    }
+    
+    .news-grid {
+        margin-top: 20px !important;
+        gap: 30px !important;
+    }
+    
+    .news-card {
+        margin-bottom: 25px !important;
+    }
+}
