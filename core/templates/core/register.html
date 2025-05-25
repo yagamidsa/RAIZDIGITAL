@@ -1,4 +1,4 @@
-{{% extends 'core/base.html' %}
+{% extends 'core/base.html' %}
 {% load static %}
 
 {% block title %}Registro - Raíz Digital{% endblock %}
@@ -22,12 +22,12 @@
         
         /* 🎨 GRADIENTES REFINADOS */
         --gradient-primary: linear-gradient(135deg, #00e085 0%, #00ff9d 100%);
-        --gradient-secondary: linear-gradient(135deg, #426d9e 0%, #4e60af 100%);
+        --gradient-secondary: linear-gradient(135deg, #4a90e2 0%, #667eea 100%);
         --gradient-accent: linear-gradient(135deg, #151718 0%, #030303 100%);
         --gradient-bg: linear-gradient(135deg, #0c0c26 0%, #1a1a3e 50%, #2d1b69 100%);
         
-        --color-primary: #285f4a;
-        --color-secondary: #101e2e;
+        --color-primary: #00ff9d;
+        --color-secondary: #4a90e2;
         --color-accent: #667eea;
         --color-success: #00e085;
         --color-warning: #f0d969;
@@ -137,52 +137,60 @@
         }
     }
 
-    /* 🏗️ LAYOUT PRINCIPAL - OPTIMIZADO PARA DESKTOP */
+    /* 🏗️ LAYOUT PRINCIPAL - FORZADO VERTICAL Y CENTRADO */
     .page-container {
         min-height: 100vh;
         width: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 3rem;
+        padding: 1rem;
         position: relative;
         z-index: 10;
         
-        /* 🔧 CONTENEDOR MÁXIMO PARA DESKTOP */
-        max-width: 1400px;
+        /* 🔧 FORZAR ANCHO MÍNIMO PARA VERTICAL */
+        max-width: 450px;
         margin: 0 auto;
     }
 
-    /* 🎪 CONTENEDOR PRINCIPAL DEL FORMULARIO - MÁS REDUCIDO EN DESKTOP */
+    /* 🎪 CONTENEDOR PRINCIPAL DEL FORMULARIO - CRYSTAL GLASS VERTICAL */
     .register-container {
-        background: var(--bg-glass);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
         border-radius: var(--radius-card);
-        border: 1px solid var(--border-glass);
-        box-shadow: var(--shadow-glass);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.2),
+            0 0 0 1px rgba(255, 255, 255, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
         overflow: hidden;
         position: relative;
         width: 100%;
         
-        /* 🔧 TAMAÑO MÁS COMPACTO PARA TODAS LAS PANTALLAS */
-        max-width: 380px;
+        /* 🔧 DISEÑO SUPER VERTICAL Y COMPACTO */
+        max-width: 360px;
         margin: 0 auto;
+        
+        /* 🔧 ALTURA CONTROLADA PARA EVITAR PROBLEMAS DE SCROLL */
+        max-height: 95vh;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 
-    /* 🌈 BORDE GRADIENTE ANIMADO - Verde neón sutil */
+    /* 🌈 BORDE GRADIENTE ANIMADO - CRYSTAL GLASS EFFECT */
     .register-border {
         position: absolute;
-        inset: -2px;
-        border-radius: calc(var(--radius-card) + 2px);
+        inset: -1px;
+        border-radius: calc(var(--radius-card) + 1px);
         background: linear-gradient(45deg, 
-            var(--neon-green-subtle), 
-            var(--color-secondary), 
-            var(--color-accent),
-            var(--neon-green));
+            rgba(255, 255, 255, 0.3), 
+            rgba(0, 255, 157, 0.2), 
+            rgba(255, 255, 255, 0.25),
+            rgba(0, 255, 157, 0.15));
         background-size: 300% 300%;
         z-index: -1;
-        animation: gradientRotate 10s ease-in-out infinite;
+        animation: gradientRotate 15s ease-in-out infinite;
         opacity: 0.4;
     }
 
@@ -191,13 +199,30 @@
         50% { background-position: 100% 50%; }
     }
 
-    /* 🎯 CONTENIDO INTERNO - MÁS COMPACTO */
+    /* 🎯 CONTENIDO INTERNO - CRYSTAL GLASS THEME */
     .register-content {
         position: relative;
-        padding: 2rem;
+        padding: 1.8rem 1.5rem;
         background: linear-gradient(145deg, 
-            rgba(255, 255, 255, 0.08) 0%, 
-            rgba(255, 255, 255, 0.04) 100%);
+            rgba(255, 255, 255, 0.1) 0%, 
+            rgba(255, 255, 255, 0.05) 50%,
+            rgba(255, 255, 255, 0.08) 100%);
+        border-radius: calc(var(--radius-card) - 2px);
+    }
+
+    /* 🔧 EFECTO ESPEJO ADICIONAL */
+    .register-content::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, 
+            transparent, 
+            rgba(255, 255, 255, 0.4), 
+            transparent);
+        border-radius: var(--radius-card) var(--radius-card) 0 0;
     }
 
     /* 🎭 HEADER DEL FORMULARIO - MÁS COMPACTO */
@@ -294,29 +319,32 @@
         margin-left: 2px;
     }
 
-    /* 🎪 INPUTS ESTILO GLASSMORPHISM */
+    /* 🎪 INPUTS ESTILO CRYSTAL GLASSMORPHISM */
     .input-wrapper {
         position: relative;
     }
 
     .form-input, .form-select {
         width: 100%;
-        padding: 1rem 1.1rem;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 0.9rem 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: var(--radius-input);
         color: var(--text-primary);
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         font-weight: 500;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        backdrop-filter: blur(10px);
+        backdrop-filter: blur(15px);
         outline: none;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 
     .form-input:focus, .form-select:focus {
-        background: rgba(255, 255, 255, 0.12);
-        border-color: var(--neon-green);
-        box-shadow: 0 0 0 4px var(--neon-green-glow);
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(0, 255, 157, 0.5);
+        box-shadow: 
+            0 0 0 3px rgba(0, 255, 157, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
         transform: translateY(-1px);
     }
 
@@ -381,23 +409,28 @@
         font-family: inherit;
     }
 
-    /* 🚀 BOTÓN PRINCIPAL - VERDE NEÓN SUTIL Y MÁS COMPACTO */
+    /* 🚀 BOTÓN PRINCIPAL - CRYSTAL GLASS CON VERDE NEÓN */
     .btn-submit {
         position: relative;
         width: 100%;
         padding: 1.1rem;
-        background: var(--gradient-primary);
+        background: linear-gradient(135deg,
+            rgba(0, 255, 157, 0.8) 0%,
+            rgba(0, 224, 133, 0.9) 100%);
         color: white;
-        border: none;
+        border: 1px solid rgba(0, 255, 157, 0.4);
         border-radius: var(--radius-button);
         font-size: 1rem;
         font-weight: 700;
         cursor: pointer;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: var(--shadow-button);
+        box-shadow: 
+            0 4px 15px rgba(0, 255, 157, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
         overflow: hidden;
         margin-top: 0.3rem;
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
     }
 
     .btn-submit::before {
@@ -416,8 +449,12 @@
 
     .btn-submit:hover, .btn-submit:active {
         transform: translateY(-2px);
-        box-shadow: var(--shadow-hover);
-        background: linear-gradient(135deg, #00ff9d 0%, #00e085 100%);
+        background: linear-gradient(135deg,
+            rgba(0, 255, 157, 0.9) 0%,
+            rgba(0, 224, 133, 1) 100%);
+        box-shadow: 
+            0 8px 25px rgba(0, 255, 157, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
     }
 
     .btn-submit:hover::before {
@@ -534,10 +571,10 @@
         }
     }
 
-    /* 💡 INFORMACIÓN DE VERIFICACIÓN - VERDE NEÓN DESTACADO Y MÁS COMPACTO */
+    /* 💡 INFORMACIÓN DE VERIFICACIÓN - CRYSTAL GLASS DESTACADO */
     .verification-info {
-        background: rgba(0, 255, 157, 0.08);
-        border: 2px solid var(--neon-green-glow);
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(0, 255, 157, 0.3);
         border-radius: var(--radius-input);
         padding: 1.2rem;
         margin-top: 1.2rem;
@@ -546,6 +583,10 @@
         line-height: 1.5;
         position: relative;
         overflow: hidden;
+        backdrop-filter: blur(15px);
+        box-shadow: 
+            inset 0 1px 0 rgba(255, 255, 255, 0.1),
+            0 2px 8px rgba(0, 255, 157, 0.1);
     }
 
     .verification-info::before {
@@ -626,86 +667,152 @@
         transform: scaleX(1);
     }
 
-    /* 📱 RESPONSIVE DESIGN - TAMAÑO CONSISTENTE */
+    /* 📱 RESPONSIVE DESIGN - MÓVIL OPTIMIZADO Y DESKTOP VERTICAL */
     
-    /* Móvil */
+    /* Móvil - OPTIMIZADO PARA FLUIDEZ */
     @media (max-width: 480px) {
+        body {
+            /* 🔧 PREVENIR ZOOM Y MOVIMIENTO EN MÓVIL */
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            touch-action: manipulation;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        html {
+            /* 🔧 SCROLL CONTROLADO */
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+        }
+
         .page-container {
-            padding: 1.5rem;
+            padding: 0.5rem;
+            height: 100vh;
+            max-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            /* 🔧 FORZAR ANCHO VERTICAL INCLUSO EN MÓVIL */
+            max-width: 100%;
+            align-items: flex-start;
+            padding-top: 1rem;
         }
 
         .register-container {
             max-width: 100%;
-            border-radius: 20px;
+            width: 100%;
+            border-radius: 16px;
+            max-height: none;
+            overflow: visible;
+            margin: 0;
         }
 
         .register-content {
-            padding: 2rem 1.5rem;
+            padding: 1.5rem 1rem;
         }
 
         .app-icon {
-            width: 70px;
-            height: 70px;
+            width: 60px;
+            height: 60px;
+            margin-bottom: 1rem;
         }
 
         .app-icon svg {
-            width: 35px;
-            height: 35px;
+            width: 30px;
+            height: 30px;
         }
 
         .register-title {
-            font-size: 2rem;
+            font-size: 1.8rem;
+        }
+
+        .register-subtitle {
+            font-size: 0.85rem;
         }
 
         .form-input, .form-select {
+            padding: 0.9rem;
+            font-size: 16px; /* 🔧 PREVENIR ZOOM EN SAFARI MÓVIL */
+            transform: translateZ(0); /* 🔧 OPTIMIZACIÓN GPU */
+        }
+
+        .btn-submit {
             padding: 1rem;
             font-size: 0.95rem;
         }
 
-        .btn-submit {
-            padding: 1.125rem;
-            font-size: 1rem;
+        .back-button {
+            top: -60px;
+            padding: 0.6rem 0.8rem;
+            font-size: 0.75rem;
         }
 
-        .back-button {
-            top: -70px;
-            padding: 0.75rem 1rem;
+        /* 🔧 PREVENIR MOVIMIENTO AL ESCRIBIR */
+        .form-input:focus, .form-select:focus {
+            transform: none;
+            zoom: 1;
+        }
+
+        /* 🔧 OPTIMIZACIÓN DE SCROLL EN MÓVIL */
+        .register-form {
+            gap: 1rem;
+        }
+
+        .verification-info {
+            padding: 1rem;
+            margin-top: 1rem;
             font-size: 0.8rem;
+        }
+
+        .login-link {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
         }
     }
 
-    /* Tablet y Desktop - MISMO TAMAÑO QUE MÓVIL */
+    /* Tablet y Desktop - FORZAR DISEÑO SUPER VERTICAL */
     @media (min-width: 481px) {
         .page-container {
-            padding: 4rem;
-            max-width: 1200px;
+            padding: 1.5rem;
+            /* 🔧 SUPER VERTICAL EN TODAS LAS PANTALLAS */
+            max-width: 450px;
             margin: 0 auto;
         }
         
-        /* 🔧 MANTENEMOS EL TAMAÑO COMPACTO EN DESKTOP */
+        /* 🔧 CONTENEDOR MUY COMPACTO Y VERTICAL */
         .register-container {
-            max-width: 380px;
+            max-width: 360px;
         }
         
         .register-content {
-            padding: 2rem;
+            padding: 1.8rem 1.5rem;
         }
 
-        /* Espaciado ligeramente mayor en desktop */
+        /* Espaciado optimizado para super vertical */
         .register-header {
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .register-form {
-            gap: 1.2rem;
+            gap: 1rem;
         }
     }
 
-    /* Desktop extra grande - Mayor padding lateral */
+    /* Desktop extra grande - MANTENER SUPER VERTICAL */
     @media (min-width: 1200px) {
         .page-container {
-            max-width: 1400px;
-            padding: 5rem;
+            /* 🔧 MÁXIMO 450PX PARA FORZAR VERTICAL */
+            max-width: 450px;
+            padding: 2rem;
+        }
+
+        .register-container {
+            /* 🔧 MÁXIMO 360PX PARA SER MUY VERTICAL */
+            max-width: 360px;
         }
     }
 
@@ -736,15 +843,42 @@
         }
     }
 
-    /* 🔥 EFECTOS HOVER ADICIONALES */
-    .form-group:hover .form-input:not(:focus) {
-        border-color: rgba(0, 255, 157, 0.2);
-        background: rgba(0, 255, 157, 0.05);
+    /* 🔥 EFECTOS HOVER ADICIONALES - CRYSTAL GLASS */
+    @media (hover: hover) and (pointer: fine) {
+        .form-group:hover .form-input:not(:focus) {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
     }
 
-    /* 🎪 MICRO-INTERACCIONES */
+    /* 🔧 SCROLLBAR PERSONALIZADA PARA MÓVIL */
+    .register-container::-webkit-scrollbar {
+        width: 3px;
+    }
+
+    .register-container::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    .register-container::-webkit-scrollbar-thumb {
+        background: rgba(0, 255, 157, 0.3);
+        border-radius: 2px;
+    }
+
+    .register-container::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 255, 157, 0.5);
+    }
+
+    /* 🎪 MICRO-INTERACCIONES - OPTIMIZADAS PARA MÓVIL */
     .form-input:focus {
-        animation: focusPulse 0.3s ease-out;
+        animation: none; /* 🔧 DESACTIVAR ANIMACIONES EN MÓVIL QUE CAUSAN MOVIMIENTO */
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        .form-input:focus {
+            animation: focusPulse 0.3s ease-out;
+        }
     }
 
     @keyframes focusPulse {
@@ -1499,4 +1633,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endif %}
-{% endblock %}</label
+{% endblock %}
