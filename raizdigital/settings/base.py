@@ -45,9 +45,6 @@ MIDDLEWARE = [
     'core.middleware.SessionSecurityMiddleware',  
 ]
 
-
-
-
 # CONFIGURACIÓN DE SESIONES MÁS SEGURA
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Usar base de datos
 SESSION_COOKIE_AGE = 3600  # 1 hora
@@ -101,8 +98,6 @@ LOGGING = {
     },
 }
 
-
-
 ROOT_URLCONF = 'raizdigital.urls'
 
 TEMPLATES = [
@@ -115,6 +110,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.media_url',  # ✅ Agregar context processor
             ],
         },
     },
@@ -159,6 +155,22 @@ STATIC_URL = '/static/'
 static_dir = BASE_DIR / "static"
 if static_dir.exists():
     STATICFILES_DIRS = [static_dir]
+
+# =================================
+# ARCHIVOS MULTIMEDIA - NUEVA CONFIGURACIÓN
+# =================================
+
+# URL para servir archivos multimedia
+MEDIA_URL = '/media/'
+
+# Directorio donde se guardan los archivos multimedia
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Crear el directorio si no existe
+MEDIA_ROOT.mkdir(exist_ok=True)
+
+print(f"📁 MEDIA_URL: {MEDIA_URL}")
+print(f"📁 MEDIA_ROOT: {MEDIA_ROOT}")
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
