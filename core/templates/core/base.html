@@ -148,18 +148,176 @@
             animation: none !important;
         }
 
-        /* DEBUG TEMPORAL */
-        .debug-layout {
+        /* DEBUG TEMPORAL - REMOVIDO */
+    </style>
+
+    <!-- 🔧 CORRECCIÓN ESPECÍFICA PARA NOTICIAS Y NAVEGACIÓN -->
+    <style>
+        /* NAVEGACIÓN - ASEGURAR VISIBILIDAD */
+        .news-header {
             position: fixed !important;
-            top: 10px !important;
-            right: 10px !important;
-            background: rgba(0, 255, 157, 0.9) !important;
-            color: black !important;
-            padding: 5px 10px !important;
-            font-size: 11px !important;
-            z-index: 9999 !important;
-            border-radius: 4px !important;
-            font-weight: bold !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            z-index: 1000 !important;
+            background: rgba(10, 25, 47, 0.95) !important;
+            backdrop-filter: blur(10px) !important;
+            border-bottom: 1px solid rgba(0, 255, 157, 0.2) !important;
+            padding: 0 20px !important;
+            height: 70px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+        }
+
+        /* MENÚ MÓVIL - ASEGURAR VISIBILIDAD */
+        .mobile-nav {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            z-index: 2000 !important;
+            background: rgba(0, 0, 0, 0.9) !important;
+            backdrop-filter: blur(20px) !important;
+        }
+
+        /* CONTENIDO PRINCIPAL - CENTRADO CORRECTO */
+        .news-container {
+            position: relative !important;
+            width: 100% !important;
+            min-height: 100vh !important;
+            padding-top: 70px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+        }
+
+        .news-content {
+            position: relative !important;
+            z-index: 10 !important;
+            width: 100% !important;
+            max-width: 1200px !important;
+            margin: 0 auto !important;
+            padding: 20px !important;
+            left: auto !important;
+            right: auto !important;
+            transform: none !important;
+        }
+
+        .article-container,
+        .create-news-container {
+            position: relative !important;
+            z-index: 10 !important;
+            width: 100% !important;
+            max-width: 900px !important;
+            margin: 20px auto !important;
+            padding: 30px 20px !important;
+            left: auto !important;
+            right: auto !important;
+            transform: none !important;
+        }
+
+        /* NEWS GRID CENTRADO */
+        .news-grid {
+            position: relative !important;
+            z-index: 10 !important;
+            width: 100% !important;
+            max-width: 1200px !important;
+            margin: 0 auto !important;
+            display: grid !important;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)) !important;
+            gap: 24px !important;
+            padding: 0 20px !important;
+        }
+
+        /* FEATURED ARTICLE CENTRADO */
+        .featured-article {
+            position: relative !important;
+            z-index: 10 !important;
+            width: 100% !important;
+            max-width: 1200px !important;
+            margin: 0 auto 30px auto !important;
+            padding: 0 20px !important;
+            left: auto !important;
+            right: auto !important;
+            transform: none !important;
+        }
+
+        /* CORRECCIONES MÓVIL */
+        @media (max-width: 768px) {
+            .news-header {
+                height: 60px !important;
+                padding: 0 15px !important;
+            }
+            
+            .news-container {
+                padding-top: 60px !important;
+            }
+            
+            .news-content,
+            .article-container,
+            .create-news-container {
+                padding: 15px !important;
+                margin: 10px auto !important;
+                max-width: calc(100% - 20px) !important;
+            }
+            
+            .news-grid {
+                grid-template-columns: 1fr !important;
+                padding: 0 15px !important;
+                gap: 20px !important;
+            }
+            
+            .featured-article {
+                padding: 0 15px !important;
+                margin: 0 auto 20px auto !important;
+            }
+            
+            .mobile-menu-toggle {
+                display: flex !important;
+                z-index: 1001 !important;
+            }
+            
+            .desktop-nav {
+                display: none !important;
+            }
+        }
+
+        /* CORRECCIONES DESKTOP */
+        @media (min-width: 769px) {
+            .mobile-menu-toggle {
+                display: none !important;
+            }
+            
+            .desktop-nav {
+                display: flex !important;
+            }
+            
+            .mobile-nav {
+                display: none !important;
+            }
+        }
+
+        /* NAVIGATION LINKS */
+        .nav-link,
+        .mobile-nav-link {
+            position: relative !important;
+            z-index: 1001 !important;
+            display: flex !important;
+            align-items: center !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+            text-decoration: none !important;
+            padding: 10px 15px !important;
+            border-radius: 8px !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .nav-link:hover,
+        .mobile-nav-link:hover {
+            background: rgba(0, 255, 157, 0.1) !important;
+            color: var(--neon-green) !important;
         }
     </style>
 
@@ -167,9 +325,6 @@
 </head>
 
 <body class="{% if request.resolver_match.url_name == 'index' %}no-menu{% else %}has-menu{% endif %}">
-    <!-- DEBUG TEMPORAL -->
-    <div class="debug-layout">LAYOUT FIX ACTIVO</div>
-    
     <!-- Incluir el menú de navegación solo para páginas que no sean las seleccionadas-->
     {% if request.resolver_match.url_name not in 'index,login,password_recovery,register,marketplace' %}
     {% include 'core/includes/menu_nav.html' %}
