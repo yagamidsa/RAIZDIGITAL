@@ -4,23 +4,23 @@
 {% block title %}Registro - Raíz Digital{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'core/css/variables.css' %}">
+<!-- 🔧 CARGAR VARIABLES CSS PRIMERO SIEMPRE -->
+<link rel="stylesheet" href="{% static 'core/css/variables.css' %}?v={{ "now"|date:"U" }}">
 
 <!-- ✨ LIBRERÍAS PROFESIONALES PREMIUM ✨ -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 
+<!-- 🔧 ESTILOS CRÍTICOS INLINE PARA MÓVIL - FALLBACK SI NO CARGAN ARCHIVOS EXTERNOS -->
 <style>
-    /* 🎨 VARIABLES DE DISEÑO REFINADAS */
+    /* 🔥 FALLBACK CRÍTICO: Si los archivos CSS externos no cargan, usar estos estilos mínimos */
     :root {
-        /* ✨ VERDE NEÓN REFINADO - Más sutil y profesional */
         --neon-green: #00ff9d;
         --neon-green-subtle: #00e085;
         --neon-green-soft: rgba(0, 255, 157, 0.8);
         --neon-green-glow: rgba(0, 255, 157, 0.3);
         
-        /* 🎨 GRADIENTES REFINADOS */
         --gradient-primary: linear-gradient(135deg, #00e085 0%, #00ff9d 100%);
         --gradient-secondary: linear-gradient(135deg, #4a90e2 0%, #667eea 100%);
         --gradient-accent: linear-gradient(135deg, #151718 0%, #030303 100%);
@@ -52,127 +52,29 @@
         --font-body: 'SF Pro Text', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     }
 
-    /* 🚀 RESET Y BASE - OPTIMIZADO PARA SCROLL FLUIDO */
+    /* 🔥 RESET BÁSICO */
     * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
     }
 
-    /* 🔧 SCROLL ULTRA FLUIDO - OPTIMIZACIÓN CRÍTICA */
-    html {
-        width: 100%;
-        height: 100%;
-        overflow-x: hidden;
-        overflow-y: auto;
-        scroll-behavior: smooth;
-        /* 🔥 NUEVO: Optimizaciones anti-parpadeo */
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior: none;
-        /* 🔥 OPTIMIZACIÓN GPU */
-        transform: translateZ(0);
-        will-change: scroll-position;
-    }
-
-    body {
+    /* 🔥 BASE CRÍTICA PARA MÓVIL */
+    html, body {
         width: 100%;
         min-height: 100vh;
-        height: auto;
         overflow-x: hidden;
         overflow-y: auto;
         font-family: var(--font-body);
         background: var(--gradient-bg);
         color: var(--text-primary);
-        line-height: 1.6;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        
-        /* 🔥 NUEVO: Optimizaciones críticas para fluidez */
-        transform: translateZ(0);
-        will-change: scroll-position;
-        backface-visibility: hidden;
-        -webkit-backface-visibility: hidden;
-        /* 🔥 PREVENIR PARPADEO EN SCROLL */
-        perspective: 1000px;
-        -webkit-perspective: 1000px;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
     }
 
-    /* 🔥 OPTIMIZACIÓN DE ELEMENTOS ANIMADOS - SIN PARPADEO */
-    .floating-elements {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 1;
-        pointer-events: none;
-        overflow: hidden;
-        /* 🔥 NUEVO: Optimización GPU para elementos flotantes */
-        transform: translateZ(0);
-        will-change: transform;
-        backface-visibility: hidden;
-    }
-
-    .floating-circle {
-        position: absolute;
-        border-radius: 50%;
-        filter: blur(80px);
-        opacity: 0.1; /* 🔥 REDUCIDO para menos distracción */
-        animation: float 20s ease-in-out infinite; /* 🔥 MÁS LENTO para fluidez */
-        /* 🔥 NUEVO: Optimizaciones GPU */
-        transform: translateZ(0);
-        will-change: transform;
-        backface-visibility: hidden;
-    }
-
-    .floating-circle:nth-child(1) {
-        width: 350px;
-        height: 350px;
-        background: var(--gradient-primary);
-        top: -20%;
-        left: -10%;
-        animation-delay: 0s;
-    }
-
-    .floating-circle:nth-child(2) {
-        width: 280px;
-        height: 280px;
-        background: var(--gradient-secondary);
-        top: 50%;
-        right: -15%;
-        animation-delay: -7s;
-    }
-
-    .floating-circle:nth-child(3) {
-        width: 220px;
-        height: 220px;
-        background: var(--gradient-accent);
-        bottom: -10%;
-        left: 30%;
-        animation-delay: -14s;
-    }
-
-    /* 🔥 ANIMACIÓN OPTIMIZADA - MENOS INTENSIVA */
-    @keyframes float {
-        0%, 100% { 
-            transform: translateY(0px) translateX(0px) scale(1) translateZ(0); 
-            opacity: 0.1;
-        }
-        25% { 
-            transform: translateY(-15px) translateX(10px) scale(1.02) translateZ(0); 
-            opacity: 0.15;
-        }
-        50% { 
-            transform: translateY(-8px) translateX(-8px) scale(0.98) translateZ(0); 
-            opacity: 0.2;
-        }
-        75% { 
-            transform: translateY(-20px) translateX(15px) scale(1.03) translateZ(0); 
-            opacity: 0.12;
-        }
-    }
-
-    /* 🏗️ LAYOUT PRINCIPAL - SCROLL ÚNICO Y FLUIDO */
+    /* 🔥 CONTAINER PRINCIPAL BÁSICO */
     .page-container {
         min-height: 100vh;
         width: 100%;
@@ -182,65 +84,25 @@
         padding: 2rem 1rem;
         position: relative;
         z-index: 10;
-        
-        /* 🔧 SCROLL ÚNICO OPTIMIZADO */
         max-width: 450px;
         margin: 0 auto;
-        /* 🔥 NUEVO: Optimización GPU */
-        transform: translateZ(0);
-        will-change: auto;
     }
 
-    /* 🎪 CONTENEDOR PRINCIPAL DEL FORMULARIO - OPTIMIZADO */
+    /* 🔥 CONTENEDOR DEL FORMULARIO BÁSICO */
     .register-container {
         background: rgba(255, 255, 255, 0.08);
         backdrop-filter: blur(25px);
         -webkit-backdrop-filter: blur(25px);
         border-radius: var(--radius-card);
         border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 
-            0 8px 32px rgba(0, 0, 0, 0.2),
-            0 0 0 1px rgba(255, 255, 255, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        box-shadow: var(--shadow-glass);
         overflow: visible;
         position: relative;
         width: 100%;
         max-width: 360px;
         margin: 0 auto;
-        height: auto;
-        min-height: auto;
-        
-        /* 🔥 NUEVO: Optimización GPU */
-        transform: translateZ(0);
-        will-change: auto;
-        backface-visibility: hidden;
     }
 
-    /* 🌈 BORDE GRADIENTE ANIMADO - OPTIMIZADO */
-    .register-border {
-        position: absolute;
-        inset: -1px;
-        border-radius: calc(var(--radius-card) + 1px);
-        background: linear-gradient(45deg, 
-            rgba(255, 255, 255, 0.3), 
-            rgba(0, 255, 157, 0.2), 
-            rgba(255, 255, 255, 0.25),
-            rgba(0, 255, 157, 0.15));
-        background-size: 300% 300%;
-        z-index: -1;
-        animation: gradientRotate 20s ease-in-out infinite; /* 🔥 MÁS LENTO */
-        opacity: 0.3; /* 🔥 MÁS SUTIL */
-        /* 🔥 NUEVO: Optimización GPU */
-        transform: translateZ(0);
-        will-change: background-position;
-    }
-
-    @keyframes gradientRotate {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-    }
-
-    /* 🎯 CONTENIDO INTERNO - OPTIMIZADO */
     .register-content {
         position: relative;
         padding: 1.8rem 1.5rem;
@@ -249,31 +111,14 @@
             rgba(255, 255, 255, 0.05) 50%,
             rgba(255, 255, 255, 0.08) 100%);
         border-radius: calc(var(--radius-card) - 2px);
-        /* 🔥 NUEVO: Optimización GPU */
-        transform: translateZ(0);
     }
 
-    .register-content::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, 
-            transparent, 
-            rgba(255, 255, 255, 0.4), 
-            transparent);
-        border-radius: var(--radius-card) var(--radius-card) 0 0;
-    }
-
-    /* 🎭 HEADER DEL FORMULARIO */
+    /* 🔥 HEADER BÁSICO */
     .register-header {
         text-align: center;
         margin-bottom: 2rem;
     }
 
-    /* 🔥 ÍCONO DE APP - OPTIMIZADO */
     .app-icon {
         width: 70px;
         height: 70px;
@@ -283,41 +128,14 @@
         align-items: center;
         justify-content: center;
         margin: 0 auto 1.2rem;
-        box-shadow: 
-            var(--shadow-button),
-            0 0 25px var(--neon-green-glow),
-            inset 0 0 15px rgba(255, 255, 255, 0.1);
+        box-shadow: var(--shadow-button);
         border: 2px solid var(--neon-green);
-        position: relative;
-        overflow: hidden;
-        /* 🔥 NUEVO: Optimización GPU */
-        transform: translateZ(0);
-        will-change: transform;
-    }
-
-    .app-icon::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-        transform: translateX(-100%) translateZ(0);
-        animation: shimmer 6s ease-in-out infinite; /* 🔥 MÁS LENTO */
-    }
-
-    @keyframes shimmer {
-        0% { transform: translateX(-100%) translateZ(0); }
-        50% { transform: translateX(100%) translateZ(0); }
-        100% { transform: translateX(100%) translateZ(0); }
     }
 
     .app-icon svg {
         width: 35px;
         height: 35px;
         fill: white;
-        z-index: 1;
-        filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.5));
-        /* 🔥 NUEVO: Optimización GPU */
-        transform: translateZ(0);
     }
 
     .register-title {
@@ -338,14 +156,13 @@
         font-weight: 400;
     }
 
-    /* 📝 FORMULARIO */
+    /* 🔥 FORMULARIO BÁSICO */
     .register-form {
         display: flex;
         flex-direction: column;
         gap: 1.2rem;
     }
 
-    /* 🎯 GRUPOS DE CAMPOS */
     .form-group {
         position: relative;
     }
@@ -366,7 +183,6 @@
         margin-left: 2px;
     }
 
-    /* 🎪 INPUTS ESTILO CRYSTAL GLASSMORPHISM - OPTIMIZADOS */
     .input-wrapper {
         position: relative;
     }
@@ -384,25 +200,19 @@
         backdrop-filter: blur(15px);
         outline: none;
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        /* 🔥 NUEVO: Optimización GPU */
-        transform: translateZ(0);
-        will-change: auto;
     }
 
     .form-input:focus, .form-select:focus {
         background: rgba(255, 255, 255, 0.15);
         border-color: rgba(0, 255, 157, 0.5);
-        box-shadow: 
-            0 0 0 3px rgba(0, 255, 157, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        transform: translateY(-1px) translateZ(0);
+        box-shadow: 0 0 0 3px rgba(0, 255, 157, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
 
     .form-input::placeholder {
         color: var(--text-muted);
     }
 
-    /* 🎯 SELECT PERSONALIZADO */
+    /* 🔥 SELECT PERSONALIZADO */
     .form-select {
         appearance: none;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2300ff9d' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
@@ -412,98 +222,12 @@
         cursor: pointer;
     }
 
-    .form-select option {
-        background: #1a1a3e;
-        color: white;
-        padding: 0.75rem;
-    }
-
-    /* 🔥 CAMPO FECHA - CORREGIDO PARA MÓVIL */
-    input[type="date"].form-input {
-        color-scheme: dark;
-        position: relative;
-        /* 🔥 NUEVO: Padding especial para móvil */
-        padding-right: 2.5rem; /* Espacio extra para el ícono */
-    }
-
-    /* 🔥 ÍCONO DEL CALENDARIO - OPTIMIZADO PARA MÓVIL */
-    input[type="date"].form-input::-webkit-calendar-picker-indicator {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='%2300ff9d'%3E%3Cpath d='M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z'/%3E%3C/svg%3E");
-        background-size: 16px 16px;
-        background-repeat: no-repeat;
-        background-position: center;
-        width: 24px; /* 🔥 MÁS GRANDE para móvil */
-        height: 24px; /* 🔥 MÁS GRANDE para móvil */
-        cursor: pointer;
-        opacity: 0.8;
-        transition: all 0.3s ease;
-        filter: drop-shadow(0 0 4px rgba(0, 255, 157, 0.5));
-        /* 🔥 NUEVO: Posición mejorada */
-        position: absolute;
-        right: 0.75rem;
-        top: 50%;
-        transform: translateY(-50%);
-    }
-
-    input[type="date"].form-input::-webkit-calendar-picker-indicator:hover {
-        opacity: 1;
-        transform: translateY(-50%) scale(1.1);
-        filter: drop-shadow(0 0 8px rgba(0, 255, 157, 0.8));
-    }
-
-    /* 🔥 ESPECÍFICO PARA MÓVIL - CAMPO FECHA */
-    @media (max-width: 768px) {
-        input[type="date"].form-input {
-            padding-right: 3rem; /* 🔥 MÁS ESPACIO en móvil */
-            font-size: 16px; /* 🔥 PREVENIR ZOOM EN SAFARI */
-        }
-        
-        input[type="date"].form-input::-webkit-calendar-picker-indicator {
-            width: 28px; /* 🔥 AÚN MÁS GRANDE para móvil */
-            height: 28px;
-            background-size: 20px 20px;
-            right: 0.5rem;
-        }
-        
-        /* 🔥 ALTERNATIVO para dispositivos que no soportan el ícono */
-        input[type="date"].form-input::after {
-            content: '📅';
-            position: absolute;
-            right: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.2rem;
-            pointer-events: none;
-            color: var(--neon-green);
-            display: none; /* Solo si el ícono CSS no funciona */
-        }
-    }
-
-    /* 🔧 ALTERNATIVO PARA FIREFOX */
-    input[type="date"].form-input::-moz-calendar-picker-indicator {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='%2300ff9d'%3E%3Cpath d='M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z'/%3E%3C/svg%3E");
-        opacity: 0.8;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        width: 24px;
-        height: 24px;
-    }
-
-    /* 📝 TEXTAREA */
-    textarea.form-input {
-        resize: vertical;
-        min-height: 100px;
-        font-family: inherit;
-    }
-
-    /* 🚀 BOTÓN PRINCIPAL - OPTIMIZADO */
+    /* 🔥 BOTÓN PRINCIPAL */
     .btn-submit {
         position: relative;
         width: 100%;
         padding: 1.1rem;
-        background: linear-gradient(135deg,
-            rgba(0, 255, 157, 0.8) 0%,
-            rgba(0, 224, 133, 0.9) 100%);
+        background: linear-gradient(135deg, rgba(0, 255, 157, 0.8) 0%, rgba(0, 224, 133, 0.9) 100%);
         color: white;
         border: 1px solid rgba(0, 255, 157, 0.4);
         border-radius: var(--radius-button);
@@ -511,73 +235,18 @@
         font-weight: 700;
         cursor: pointer;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 
-            0 4px 15px rgba(0, 255, 157, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        overflow: hidden;
+        box-shadow: var(--shadow-button);
         margin-top: 0.3rem;
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-        backdrop-filter: blur(10px);
-        /* 🔥 NUEVO: Optimización GPU */
-        transform: translateZ(0);
-        will-change: transform;
     }
 
-    .btn-submit::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, 
-            transparent, 
-            rgba(255, 255, 255, 0.2), 
-            transparent);
-        transition: left 0.6s ease;
-        /* 🔥 NUEVO: Optimización GPU */
-        transform: translateZ(0);
+    .btn-submit:hover {
+        background: linear-gradient(135deg, rgba(0, 255, 157, 0.9) 0%, rgba(0, 224, 133, 1) 100%);
+        box-shadow: var(--shadow-hover);
+        transform: translateY(-2px);
     }
 
-    .btn-submit:hover, .btn-submit:active {
-        transform: translateY(-2px) translateZ(0);
-        background: linear-gradient(135deg,
-            rgba(0, 255, 157, 0.9) 0%,
-            rgba(0, 224, 133, 1) 100%);
-        box-shadow: 
-            0 8px 25px rgba(0, 255, 157, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    }
-
-    .btn-submit:hover::before {
-        left: 100%;
-    }
-
-    .btn-submit.loading {
-        color: transparent;
-        pointer-events: none;
-    }
-
-    .btn-submit.loading::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) translateZ(0);
-        width: 24px;
-        height: 24px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-top: 2px solid white;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-        0% { transform: translate(-50%, -50%) rotate(0deg) translateZ(0); }
-        100% { transform: translate(-50%, -50%) rotate(360deg) translateZ(0); }
-    }
-
-    /* 🔙 BOTÓN DE REGRESO - OPTIMIZADO */
+    /* 🔥 BOTÓN VOLVER */
     .back-button {
         position: absolute;
         top: -80px;
@@ -596,9 +265,6 @@
         font-weight: 600;
         transition: all 0.3s ease;
         z-index: 20;
-        /* 🔥 NUEVO: Optimización GPU */
-        transform: translateZ(0);
-        will-change: transform;
     }
 
     .back-icon {
@@ -608,20 +274,17 @@
     }
 
     .back-button:hover {
-        transform: translateY(-2px) translateZ(0);
         background: var(--bg-glass-hover);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-        border-color: var(--neon-green-glow);
+        transform: translateY(-2px);
     }
 
-    /* 🎨 MENSAJES DE ESTADO */
+    /* 🔥 MENSAJES DE ERROR/ÉXITO */
     .error-messages, .success-message {
         padding: 1.25rem;
         border-radius: var(--radius-input);
         margin-bottom: 1.5rem;
         backdrop-filter: blur(10px);
         border: 1px solid;
-        animation: slideInUp 0.4s ease-out;
     }
 
     .error-messages {
@@ -655,18 +318,7 @@
         font-size: 1rem;
     }
 
-    @keyframes slideInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px) translateZ(0);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0) translateZ(0);
-        }
-    }
-
-    /* 💡 INFORMACIÓN DE VERIFICACIÓN - OPTIMIZADO */
+    /* 🔥 INFORMACIÓN DE VERIFICACIÓN */
     .verification-info {
         background: rgba(255, 255, 255, 0.08);
         border: 1px solid rgba(0, 255, 157, 0.3);
@@ -676,46 +328,15 @@
         font-size: 0.85rem;
         color: var(--text-primary);
         line-height: 1.5;
-        position: relative;
-        overflow: hidden;
         backdrop-filter: blur(15px);
-        box-shadow: 
-            inset 0 1px 0 rgba(255, 255, 255, 0.1),
-            0 2px 8px rgba(0, 255, 157, 0.1);
-        /* 🔥 NUEVO: Optimización GPU */
-        transform: translateZ(0);
-    }
-
-    .verification-info::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, 
-            transparent, 
-            rgba(0, 255, 157, 0.1), 
-            transparent);
-        animation: verificationScan 4s ease-in-out infinite; /* 🔥 MÁS LENTO */
-        /* 🔥 NUEVO: Optimización GPU */
-        transform: translateZ(0);
-    }
-
-    @keyframes verificationScan {
-        0% { left: -100%; }
-        50% { left: 100%; }
-        100% { left: 100%; }
     }
 
     .verification-info strong {
         color: var(--neon-green);
         font-weight: 700;
-        text-shadow: 0 0 10px var(--neon-green-glow);
-        font-size: 1rem;
     }
 
-    /* 🔗 ENLACES */
+    /* 🔥 ENLACES */
     .login-link {
         text-align: center;
         margin-top: 1.2rem;
@@ -728,100 +349,32 @@
         text-decoration: none;
         font-weight: 600;
         transition: all 0.3s ease;
-        text-shadow: 0 0 5px var(--neon-green-glow);
     }
 
     .login-link a:hover {
         color: var(--neon-green-subtle);
-        text-shadow: 0 0 10px var(--neon-green-glow);
     }
 
-    /* 🌟 EFECTOS DE VALIDACIÓN */
-    .form-input.valid {
-        border-color: var(--neon-green);
-        box-shadow: 0 0 0 4px var(--neon-green-glow);
-    }
-
-    .form-input.invalid {
-        border-color: var(--color-danger);
-        box-shadow: 0 0 0 4px rgba(240, 65, 65, 0.2);
-    }
-
-    .input-effect {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 2px;
-        background: var(--gradient-primary);
-        transform: scaleX(0) translateZ(0);
-        transform-origin: center;
-        transition: transform 0.3s ease;
-        opacity: 0;
-        border-radius: 1px;
-    }
-
-    .form-input:focus + .input-effect {
-        opacity: 1;
-        transform: scaleX(1) translateZ(0);
-    }
-
-    /* 📱 RESPONSIVE DESIGN - SCROLL FLUIDO OPTIMIZADO */
-    
-    /* Móvil - SCROLL PRINCIPAL ULTRA FLUIDO */
+    /* 🔥 ESPECÍFICO PARA MÓVIL */
     @media (max-width: 480px) {
-        /* 🔥 OPTIMIZACIONES CRÍTICAS PARA SCROLL FLUIDO EN MÓVIL */
-        html {
+        html, body {
             overflow-y: auto !important;
             overflow-x: hidden !important;
             -webkit-overflow-scrolling: touch;
-            overscroll-behavior: none;
-            /* 🔥 NUEVO: Optimizaciones específicas iOS/Android */
-            -webkit-transform: translateZ(0);
-            -moz-transform: translateZ(0);
-            -ms-transform: translateZ(0);
-            transform: translateZ(0);
-        }
-
-        body {
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
             -webkit-text-size-adjust: 100%;
-            -ms-text-size-adjust: 100%;
-            touch-action: manipulation;
-            /* 🔥 PREVENIR REBOTE Y PARPADEO */
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: none;
-            overscroll-behavior-y: none;
-            position: relative;
-            /* 🔥 OPTIMIZACIÓN GPU MÓVIL */
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-            will-change: scroll-position;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
         }
 
         .page-container {
             padding: 1rem 0.5rem;
             min-height: 100vh;
-            height: auto;
-            align-items: flex-start;
             padding-top: 2rem;
-            padding-bottom: 3rem; /* 🔥 MÁS ESPACIO abajo */
-            /* 🔥 OPTIMIZACIÓN GPU */
-            transform: translateZ(0);
-            will-change: auto;
+            padding-bottom: 3rem;
         }
 
         .register-container {
             max-width: 100%;
             width: 100%;
             border-radius: 16px;
-            height: auto;
-            margin: 0;
-            /* 🔥 OPTIMIZACIÓN GPU */
-            transform: translateZ(0);
         }
 
         .register-content {
@@ -849,7 +402,7 @@
 
         .form-input, .form-select {
             padding: 0.9rem;
-            font-size: 16px; /* 🔥 PREVENIR ZOOM EN SAFARI MÓVIL */
+            font-size: 16px; /* PREVENIR ZOOM EN SAFARI MÓVIL */
         }
 
         .btn-submit {
@@ -861,11 +414,6 @@
             top: -60px;
             padding: 0.6rem 0.8rem;
             font-size: 0.75rem;
-        }
-
-        /* 🔥 OPTIMIZACIÓN DE CAMPOS SIN ANIMACIONES DISRUPTIVAS */
-        .form-input:focus, .form-select:focus {
-            transform: translateY(-1px) translateZ(0);
         }
 
         .register-form {
@@ -883,159 +431,190 @@
             margin-top: 1rem;
             margin-bottom: 2rem;
         }
-
-        /* 🔥 ESPECÍFICO PARA CAMPO FECHA EN MÓVIL */
-        .form-group:has(input[type="date"]) .form-label::after {
-            content: " (Toca el ícono del calendario)";
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            font-weight: normal;
-            text-transform: none;
-        }
-
-        /* 🔥 ANIMACIONES SIMPLIFICADAS EN MÓVIL */
-        .floating-circle {
-            animation-duration: 25s; /* Más lento en móvil */
-            opacity: 0.05; /* Más sutil en móvil */
-        }
-
-        .register-border {
-            animation-duration: 25s; /* Más lento en móvil */
-            opacity: 0.2; /* Más sutil en móvil */
-        }
     }
 
-    /* Tablet y Desktop - SCROLL FLUIDO */
-    @media (min-width: 481px) {
-        .page-container {
-            padding: 3rem 1.5rem;
-            min-height: 100vh;
-            height: auto;
-            max-width: 450px;
-            margin: 0 auto;
-            align-items: flex-start;
-            justify-content: center;
-            padding-top: 4rem;
-            padding-bottom: 4rem;
+    /* 🔥 CAMPO FECHA ESPECÍFICO PARA MÓVIL */
+    input[type="date"].form-input {
+        color-scheme: dark;
+        position: relative;
+        padding-right: 2.5rem;
+    }
+
+    input[type="date"].form-input::-webkit-calendar-picker-indicator {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='%2300ff9d'%3E%3Cpath d='M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z'/%3E%3C/svg%3E");
+        background-size: 16px 16px;
+        background-repeat: no-repeat;
+        background-position: center;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: all 0.3s ease;
+        filter: drop-shadow(0 0 4px rgba(0, 255, 157, 0.5));
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    @media (max-width: 768px) {
+        input[type="date"].form-input {
+            padding-right: 3rem;
+            font-size: 16px;
         }
         
-        .register-container {
-            max-width: 360px;
-            height: auto;
-        }
-        
-        .register-content {
-            padding: 1.8rem 1.5rem;
-        }
-
-        .register-header {
-            margin-bottom: 1.5rem;
-        }
-
-        .register-form {
-            gap: 1rem;
+        input[type="date"].form-input::-webkit-calendar-picker-indicator {
+            width: 28px;
+            height: 28px;
+            background-size: 20px 20px;
+            right: 0.5rem;
         }
     }
 
-    /* Desktop extra grande */
-    @media (min-width: 1200px) {
-        .page-container {
-            max-width: 450px;
-            padding: 4rem 2rem;
-            padding-top: 5rem;
-            padding-bottom: 5rem;
-        }
-
-        .register-container {
-            max-width: 360px;
-        }
+    /* 🔥 EFECTOS FLOATING SIMPLES */
+    .floating-elements {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        pointer-events: none;
+        overflow: hidden;
     }
 
-    /* 🎭 ANIMACIONES DE ENTRADA - OPTIMIZADAS */
-    .form-group {
-        animation: fadeInUp 0.6s ease-out backwards;
-        /* 🔥 OPTIMIZACIÓN GPU */
-        transform: translateZ(0);
-        will-change: transform, opacity;
+    .floating-circle {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.1;
+        animation: float 20s ease-in-out infinite;
     }
 
-    .form-group:nth-child(1) { animation-delay: 0.1s; }
-    .form-group:nth-child(2) { animation-delay: 0.15s; }
-    .form-group:nth-child(3) { animation-delay: 0.2s; }
-    .form-group:nth-child(4) { animation-delay: 0.25s; }
-    .form-group:nth-child(5) { animation-delay: 0.3s; }
-    .form-group:nth-child(6) { animation-delay: 0.35s; }
-    .form-group:nth-child(7) { animation-delay: 0.4s; }
-    .form-group:nth-child(8) { animation-delay: 0.45s; }
-    .form-group:nth-child(9) { animation-delay: 0.5s; }
-    .form-group:nth-child(10) { animation-delay: 0.55s; }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px) translateZ(0);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0) translateZ(0);
-        }
+    .floating-circle:nth-child(1) {
+        width: 350px;
+        height: 350px;
+        background: var(--gradient-primary);
+        top: -20%;
+        left: -10%;
+        animation-delay: 0s;
     }
 
-    /* 🔥 EFECTOS HOVER OPTIMIZADOS */
-    @media (hover: hover) and (pointer: fine) {
-        .form-group:hover .form-input:not(:focus) {
-            border-color: rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.12);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
-            transform: translateZ(0);
-        }
+    .floating-circle:nth-child(2) {
+        width: 280px;
+        height: 280px;
+        background: var(--gradient-secondary);
+        top: 50%;
+        right: -15%;
+        animation-delay: -7s;
     }
 
-    /* 🎪 MICRO-INTERACCIONES - OPTIMIZADAS PARA MÓVIL */
-    .form-input:focus {
-        animation: none; /* 🔥 DESACTIVAR ANIMACIONES EN MÓVIL */
+    .floating-circle:nth-child(3) {
+        width: 220px;
+        height: 220px;
+        background: var(--gradient-accent);
+        bottom: -10%;
+        left: 30%;
+        animation-delay: -14s;
     }
 
-    @media (hover: hover) and (pointer: fine) {
-        .form-input:focus {
-            animation: focusPulse 0.3s ease-out;
-        }
-    }
-
-    @keyframes focusPulse {
-        0% { transform: scale(1) translateZ(0); }
-        50% { transform: scale(1.01) translateZ(0); }
-        100% { transform: scale(1) translateZ(0); }
-    }
-
-    /* 🎯 ANIMACIÓN ESPECIAL PARA EL ÍCONO - OPTIMIZADA */
-    .app-icon {
-        animation: iconFloat 8s ease-in-out infinite; /* 🔥 MÁS LENTO */
-    }
-
-    @keyframes iconFloat {
+    @keyframes float {
         0%, 100% { 
-            transform: translateY(0px) rotate(0deg) translateZ(0);
-            box-shadow: 
-                var(--shadow-button),
-                0 0 30px var(--neon-green-glow),
-                inset 0 0 20px rgba(255, 255, 255, 0.1);
+            transform: translateY(0px) translateX(0px) scale(1); 
+            opacity: 0.1;
+        }
+        25% { 
+            transform: translateY(-15px) translateX(10px) scale(1.02); 
+            opacity: 0.15;
         }
         50% { 
-            transform: translateY(-5px) rotate(2deg) translateZ(0);
-            box-shadow: 
-                var(--shadow-hover),
-                0 0 40px var(--neon-green-glow),
-                inset 0 0 25px rgba(255, 255, 255, 0.15);
+            transform: translateY(-8px) translateX(-8px) scale(0.98); 
+            opacity: 0.2;
+        }
+        75% { 
+            transform: translateY(-20px) translateX(15px) scale(1.03); 
+            opacity: 0.12;
         }
     }
 
-    /* 🔥 OPTIMIZACIONES CRÍTICAS PARA PREVENIR PARPADEO */
+    /* 🔥 BORDE GRADIENTE ANIMADO */
+    .register-border {
+        position: absolute;
+        inset: -1px;
+        border-radius: calc(var(--radius-card) + 1px);
+        background: linear-gradient(45deg, 
+            rgba(255, 255, 255, 0.3), 
+            rgba(0, 255, 157, 0.2), 
+            rgba(255, 255, 255, 0.25),
+            rgba(0, 255, 157, 0.15));
+        background-size: 300% 300%;
+        z-index: -1;
+        animation: gradientRotate 20s ease-in-out infinite;
+        opacity: 0.3;
+    }
+
+    @keyframes gradientRotate {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    /* 🔥 ESTADOS DE VALIDACIÓN */
+    .form-input.valid {
+        border-color: var(--neon-green);
+        box-shadow: 0 0 0 4px var(--neon-green-glow);
+    }
+
+    .form-input.invalid {
+        border-color: var(--color-danger);
+        box-shadow: 0 0 0 4px rgba(240, 65, 65, 0.2);
+    }
+
+    /* 🔥 EFECTO LOADING EN BOTÓN */
+    .btn-submit.loading {
+        color: transparent;
+        pointer-events: none;
+    }
+
+    .btn-submit.loading::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 24px;
+        height: 24px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* 🔥 DESACTIVAR ANIMACIONES PESADAS EN MÓVIL PARA MEJORAR RENDIMIENTO */
+    @media (max-width: 768px) {
+        .floating-circle {
+            animation-duration: 30s;
+            opacity: 0.05;
+        }
+        
+        .register-border {
+            animation-duration: 30s;
+            opacity: 0.2;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            transform: none;
+        }
+    }
+
+    /* 🔥 REDUCIR ANIMACIONES SI EL USUARIO LO PREFIERE */
     @media (prefers-reduced-motion: reduce) {
         .floating-circle,
-        .register-border,
-        .app-icon,
-        .verification-info::before {
+        .register-border {
             animation: none !important;
         }
         
@@ -1047,41 +626,10 @@
             transform: none !important;
         }
     }
-
-    /* 🔥 FORZAR ACELERACIÓN GPU EN TODOS LOS ELEMENTOS PRINCIPALES */
-    .page-container,
-    .register-container,
-    .register-content,
-    .form-group,
-    .form-input,
-    .form-select,
-    .btn-submit,
-    .back-button {
-        -webkit-transform: translateZ(0);
-        -moz-transform: translateZ(0);
-        -ms-transform: translateZ(0);
-        transform: translateZ(0);
-        -webkit-backface-visibility: hidden;
-        backface-visibility: hidden;
-        -webkit-perspective: 1000;
-        perspective: 1000;
-    }
-
-    /* 🔥 ESPECÍFICO PARA WEBKIT (Safari/Chrome) */
-    @supports (-webkit-appearance: none) {
-        input[type="date"].form-input::-webkit-calendar-picker-indicator {
-            background-color: transparent;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='%2300ff9d'%3E%3Cpath d='M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: 18px;
-            cursor: pointer;
-            opacity: 0.9;
-            transition: all 0.3s ease;
-            filter: drop-shadow(0 0 4px rgba(0, 255, 157, 0.6));
-        }
-    }
 </style>
+
+<!-- 🔧 CARGAR CSS EXTERNO DESPUÉS DEL FALLBACK - CON CACHE BUSTING -->
+<link rel="stylesheet" href="{% static 'core/css/register.css' %}?v={{ "now"|date:"U" }}" media="all">
 {% endblock %}
 
 {% block content %}
@@ -1287,322 +835,100 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'core/js/digital-effects.js' %}"></script>
+<script src="{% static 'core/js/digital-effects.js' %}?v={{ "now"|date:"U" }}"></script>
+
+<!-- 🔧 SCRIPT CRÍTICO PARA DEBUG Y FUNCIONALIDAD MÓVIL -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Iniciando Registro Ultra Fluido - Optimizado');
+    console.log('🚀 Registro - Versión CORREGIDA para móvil iniciada');
     
-    // ========================================
-    // 🔥 OPTIMIZACIONES CRÍTICAS PARA SCROLL FLUIDO
-    // ========================================
-    
-    // Prevenir rebote en iOS y Android
-    let isScrolling = false;
-    let scrollTimeout;
-
-    function optimizeScrollPerformance() {
-        // Throttle scroll events para mejor rendimiento
-        if (!isScrolling) {
-            window.requestAnimationFrame(function() {
-                // Operaciones durante el scroll
-                isScrolling = false;
-            });
-            isScrolling = true;
-        }
-
-        // Clear timeout y set nuevo
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(function() {
-            // Scroll terminado - optimizaciones post-scroll
-            document.body.style.transform = 'translateZ(0)';
-        }, 150);
+    // 🔧 DEBUG: Verificar carga de archivos CSS
+    const link = document.querySelector('link[href*="variables.css"]');
+    if (link) {
+        console.log('✅ variables.css detectado:', link.href);
+        
+        // Verificar si se cargó correctamente
+        link.onload = function() {
+            console.log('✅ variables.css cargado exitosamente');
+        };
+        
+        link.onerror = function() {
+            console.log('❌ Error cargando variables.css');
+            console.log('🔧 Usando estilos inline de fallback');
+        };
+    } else {
+        console.log('❌ variables.css NO encontrado');
     }
-
-    // Aplicar listener de scroll optimizado
-    window.addEventListener('scroll', optimizeScrollPerformance, { passive: true });
-
-    // Prevenir zoom accidental en móvil
-    if ('ontouchstart' in window) {
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function(event) {
-            const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                const target = event.target;
-                if (!target.closest('input, button, select, textarea, a')) {
-                    event.preventDefault();
-                }
+    
+    // 🔧 DEBUG: Verificar estilos aplicados
+    const testElement = document.querySelector('.register-container');
+    if (testElement) {
+        const styles = window.getComputedStyle(testElement);
+        console.log('🎨 Background del container:', styles.background);
+        console.log('🎨 Border radius:', styles.borderRadius);
+        
+        if (styles.background.includes('rgba') || styles.borderRadius !== '0px') {
+            console.log('✅ Estilos CSS aplicados correctamente');
+        } else {
+            console.log('⚠️ Estilos CSS no aplicados, usando fallback inline');
+        }
+    }
+    
+    // 🔧 OPTIMIZACIONES PARA MÓVIL
+    if (window.innerWidth <= 768) {
+        console.log('📱 Modo móvil detectado - aplicando optimizaciones');
+        
+        // Prevenir zoom en inputs
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.style.fontSize = '16px'; // Prevenir zoom en iOS
+        });
+        
+        // Optimizar scroll
+        document.body.style.webkitOverflowScrolling = 'touch';
+        document.body.style.overscrollBehavior = 'none';
+        
+        // Prevenir pull-to-refresh
+        let startY = 0;
+        document.addEventListener('touchstart', function(e) {
+            startY = e.touches[0].clientY;
+        }, { passive: true });
+        
+        document.addEventListener('touchmove', function(e) {
+            const currentY = e.touches[0].clientY;
+            const scrollTop = window.scrollY;
+            
+            if (scrollTop <= 0 && currentY > startY) {
+                e.preventDefault();
             }
-            lastTouchEnd = now;
         }, { passive: false });
     }
-
-    // ========================================
-    // INICIALIZACIÓN AOS Y GSAP - OPTIMIZADA
-    // ========================================
-    if (typeof AOS !== 'undefined') {
-        AOS.init({
-            duration: 600, // 🔥 MÁS RÁPIDO para fluidez
-            easing: 'ease-out-cubic',
-            once: true,
-            offset: 30, // 🔥 MENOR offset para mejor timing
-            disable: window.innerWidth <= 768 // 🔥 DESACTIVAR en móvil
-        });
-    }
-
-    // ========================================
-    // ANIMACIONES GSAP - ULTRA OPTIMIZADAS
-    // ========================================
-    if (typeof gsap !== 'undefined') {
-        // 🔥 CONFIGURACIÓN OPTIMIZADA DE GSAP
-        gsap.config({
-            force3D: true,
-            nullTargetWarn: false
-        });
-
-        // Animación del contenedor principal - más sutil
-        gsap.fromTo('.register-container', 
-            {
-                scale: 0.98,
-                opacity: 0,
-                y: 20
-            },
-            {
-                scale: 1,
-                opacity: 1,
-                y: 0,
-                duration: 0.6, // 🔥 MÁS RÁPIDO
-                ease: "power2.out",
-                force3D: true
-            }
-        );
-
-        // Animaciones de elementos flotantes - MÁS LENTAS y SUTILES
-        gsap.to('.floating-circle:nth-child(1)', {
-            rotation: 360,
-            duration: 30, // 🔥 MÁS LENTO
-            repeat: -1,
-            ease: "none",
-            force3D: true
-        });
-
-        gsap.to('.floating-circle:nth-child(2)', {
-            rotation: -360,
-            duration: 35, // 🔥 MÁS LENTO
-            repeat: -1,
-            ease: "none",
-            force3D: true
-        });
-
-        gsap.to('.floating-circle:nth-child(3)', {
-            rotation: 360,
-            duration: 40, // 🔥 MÁS LENTO
-            repeat: -1,
-            ease: "none",
-            force3D: true
-        });
-
-        // Animación del ícono - más sutil
-        gsap.to('.app-icon', {
-            rotationY: 360,
-            duration: 12, // 🔥 MÁS LENTO
-            repeat: -1,
-            ease: "power1.inOut",
-            yoyo: true,
-            force3D: true
-        });
-
-        // Pulso del borde - más sutil
-        gsap.to('.register-border', {
-            opacity: 0.4, // 🔥 MÁS SUTIL
-            duration: 3, // 🔥 MÁS LENTO
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-            force3D: true
-        });
-    }
-
-    // ========================================
-    // EFECTOS DE FORMULARIO - OPTIMIZADOS
-    // ========================================
+    
+    // 🔧 SISTEMA DE VALIDACIÓN MEJORADO
     const form = document.querySelector('.register-form');
     const inputs = form.querySelectorAll('.form-input, .form-select');
     const submitBtn = form.querySelector('.btn-submit');
 
-    // Efectos de interacción más suaves
-    inputs.forEach((input, index) => {
-        // Efecto de focus SOLO en desktop
-        if (window.innerWidth > 768) {
-            input.addEventListener('focus', function() {
-                if (typeof gsap !== 'undefined') {
-                    gsap.to(this.parentElement.parentElement, {
-                        scale: 1.005, // 🔥 MÁS SUTIL
-                        duration: 0.15, // 🔥 MÁS RÁPIDO
-                        ease: "power1.out",
-                        force3D: true
-                    });
-                }
-            });
-
-            input.addEventListener('blur', function() {
-                if (typeof gsap !== 'undefined') {
-                    gsap.to(this.parentElement.parentElement, {
-                        scale: 1,
-                        duration: 0.15,
-                        ease: "power1.out",
-                        force3D: true
-                    });
-                }
-            });
-        }
-
-        // Validación en tiempo real
+    // Validación en tiempo real
+    inputs.forEach(input => {
         input.addEventListener('input', function() {
+            validateField(this);
+        });
+        
+        input.addEventListener('blur', function() {
             validateField(this);
         });
     });
 
-    // ========================================
-    // 🔥 OPTIMIZACIÓN ESPECÍFICA PARA CAMPO FECHA
-    // ========================================
-    const dateInput = document.querySelector('input[type="date"]');
-    if (dateInput) {
-        // Agregar indicador visual adicional en móvil
-        if (window.innerWidth <= 768) {
-            const dateLabel = dateInput.closest('.form-group').querySelector('.form-label');
-            if (dateLabel && !dateLabel.textContent.includes('calendario')) {
-                const helpText = document.createElement('small');
-                helpText.style.cssText = `
-                    display: block;
-                    color: var(--text-muted);
-                    font-size: 0.7rem;
-                    margin-top: 0.25rem;
-                    font-weight: normal;
-                `;
-                helpText.textContent = '📅 Toca el ícono del calendario para seleccionar';
-                dateLabel.parentNode.insertBefore(helpText, dateInput.parentNode);
-            }
-        }
-
-        // Mejorar experiencia de usuario
-        dateInput.addEventListener('focus', function() {
-            console.log('📅 Campo fecha enfocado');
-        });
-
-        dateInput.addEventListener('change', function() {
-            console.log('📅 Fecha seleccionada:', this.value);
-            if (this.value) {
-                this.classList.add('valid');
-            }
-        });
-    }
-
-    // ========================================
-    // VALIDACIÓN OPTIMIZADA
-    // ========================================
-
-    // Validación de contraseñas
-    const passwordInput = document.querySelector('input[name="password"]');
-    const confirmPasswordInput = document.querySelector('input[name="password_confirm"]');
-
-    function validatePassword() {
-        if (!passwordInput || !confirmPasswordInput) return true;
-        
-        const password = passwordInput.value;
-        const confirmPassword = confirmPasswordInput.value;
-        
-        // Remover clases de error previas
-        passwordInput.classList.remove('field-error', 'invalid', 'valid');
-        confirmPasswordInput.classList.remove('field-error', 'invalid', 'valid');
-        
-        // Validar longitud mínima
-        if (password.length > 0 && password.length < 8) {
-            passwordInput.classList.add('field-error', 'invalid');
-            return false;
-        } else if (password.length >= 8) {
-            passwordInput.classList.add('valid');
-        }
-        
-        // Validar coincidencia de contraseñas
-        if (confirmPassword.length > 0 && password !== confirmPassword) {
-            confirmPasswordInput.classList.add('field-error', 'invalid');
-            return false;
-        } else if (confirmPassword.length > 0 && password === confirmPassword) {
-            confirmPasswordInput.classList.add('valid');
-        }
-        
-        return true;
-    }
-
-    // Validación de email
-    const emailInput = document.querySelector('input[name="email"]');
-    function validateEmail() {
-        if (!emailInput) return true;
-        
-        const email = emailInput.value;
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        
-        emailInput.classList.remove('field-error', 'invalid', 'valid');
-        
-        if (email.length > 0 && !emailRegex.test(email)) {
-            emailInput.classList.add('field-error', 'invalid');
-            return false;
-        } else if (email.length > 0 && emailRegex.test(email)) {
-            emailInput.classList.add('valid');
-        }
-        
-        return true;
-    }
-
-    // Validación de username
-    const usernameInput = document.querySelector('input[name="username"]');
-    function validateUsername() {
-        if (!usernameInput) return true;
-        
-        const username = usernameInput.value;
-        const usernameRegex = /^[a-zA-Z0-9_]+$/;
-        
-        usernameInput.classList.remove('field-error', 'invalid', 'valid');
-        
-        if (username.length > 0 && (!usernameRegex.test(username) || username.length < 3)) {
-            usernameInput.classList.add('field-error', 'invalid');
-            return false;
-        } else if (username.length >= 3 && usernameRegex.test(username)) {
-            usernameInput.classList.add('valid');
-        }
-        
-        return true;
-    }
-
-    // Event listeners para validación en tiempo real
-    if (passwordInput && confirmPasswordInput) {
-        passwordInput.addEventListener('input', validatePassword);
-        confirmPasswordInput.addEventListener('input', validatePassword);
-    }
-
-    if (emailInput) {
-        emailInput.addEventListener('input', validateEmail);
-    }
-
-    if (usernameInput) {
-        usernameInput.addEventListener('input', validateUsername);
-    }
-
-    // ========================================
-    // VALIDACIÓN UNIVERSAL DE CAMPOS
-    // ========================================
-    
     function validateField(field) {
         const value = field.value.trim();
         const fieldName = field.name;
         let isValid = true;
 
-        // Remover clases previas
-        field.classList.remove('valid', 'invalid', 'field-error');
+        field.classList.remove('valid', 'invalid');
 
         if (value.length === 0) {
-            // Campo vacío - no mostrar validación
-            return true;
+            return true; // Campo vacío - no mostrar validación
         }
 
         switch(fieldName) {
@@ -1625,93 +951,69 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
         }
 
-        // Aplicar clases de validación
         if (isValid) {
             field.classList.add('valid');
-            // Efecto de éxito verde neón - SOLO en desktop
-            if (typeof gsap !== 'undefined' && window.innerWidth > 768) {
-                gsap.fromTo(field, 
-                    { borderColor: '#00ff9d' },
-                    { borderColor: '#00ff9d', duration: 0.2, ease: "power1.out" }
-                );
-            }
         } else {
             field.classList.add('invalid');
-            // Efecto de error - SOLO en desktop
-            if (typeof gsap !== 'undefined' && window.innerWidth > 768) {
-                gsap.fromTo(field, 
-                    { x: -2 },
-                    { x: 2, duration: 0.1, repeat: 1, yoyo: true, ease: "power1.out" }
-                );
-            }
         }
 
         return isValid;
     }
 
-    // ========================================
-    // MANEJO DEL ENVÍO DEL FORMULARIO
-    // ========================================
-    
+    // 🔧 MANEJO DEL ENVÍO DEL FORMULARIO
     if (form) {
         form.addEventListener('submit', function(e) {
-            console.log('📝 Enviando formulario de registro...');
+            console.log('📝 Enviando formulario...');
             
-            // Validar todos los campos antes del envío
-            const isPasswordValid = validatePassword();
-            const isEmailValid = validateEmail();
-            const isUsernameValid = validateUsername();
-            
-            if (!isPasswordValid || !isEmailValid || !isUsernameValid) {
-                e.preventDefault();
-                console.log('❌ Formulario inválido, evitando envío');
-                showNotification('Por favor, corrige los errores en el formulario', 'error');
-                return;
-            }
-            
-            // Verificar que los campos requeridos estén llenos
+            // Validar campos requeridos
             const requiredFields = form.querySelectorAll('input[required], select[required]');
-            let allFieldsValid = true;
+            let allValid = true;
             
             requiredFields.forEach(field => {
                 if (!field.value.trim()) {
-                    field.classList.add('field-error', 'invalid');
-                    allFieldsValid = false;
+                    field.classList.add('invalid');
+                    allValid = false;
                 }
             });
             
-            if (!allFieldsValid) {
+            if (!allValid) {
                 e.preventDefault();
-                showNotification('Todos los campos marcados con * son obligatorios', 'error');
+                showNotification('Por favor, completa todos los campos obligatorios', 'error');
                 return;
             }
             
-            // Añadir clase de loading al botón
+            // Validar contraseñas
+            const password = document.querySelector('input[name="password"]').value;
+            const confirmPassword = document.querySelector('input[name="password_confirm"]').value;
+            
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                showNotification('Las contraseñas no coinciden', 'error');
+                return;
+            }
+            
+            if (password.length < 8) {
+                e.preventDefault();
+                showNotification('La contraseña debe tener al menos 8 caracteres', 'error');
+                return;
+            }
+            
+            // Agregar loading al botón
             if (submitBtn) {
                 submitBtn.classList.add('loading');
                 submitBtn.disabled = true;
-                
-                // Animación más sutil en móvil
-                if (typeof gsap !== 'undefined' && window.innerWidth > 768) {
-                    gsap.to(submitBtn, {
-                        scale: 0.98,
-                        duration: 0.1,
-                        yoyo: true,
-                        repeat: 1,
-                        force3D: true
-                    });
-                }
             }
             
             console.log('✅ Formulario válido, enviando...');
         });
     }
 
-    // ========================================
-    // SISTEMA DE NOTIFICACIONES OPTIMIZADO
-    // ========================================
-
+    // 🔧 SISTEMA DE NOTIFICACIONES
     function showNotification(message, type = 'info') {
+        // Remover notificaciones existentes
+        const existing = document.querySelectorAll('.notification');
+        existing.forEach(n => n.remove());
+        
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
         notification.innerHTML = `
@@ -1730,26 +1032,19 @@ document.addEventListener('DOMContentLoaded', function() {
             font-weight: 600;
             z-index: 9999;
             max-width: 400px;
-            min-width: 300px;
             backdrop-filter: blur(20px);
             border: 1px solid;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            transform: translateX(100%) translateZ(0);
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(100%);
+            transition: transform 0.4s ease;
         `;
         
-        // Estilos según el tipo
         if (type === 'error') {
             notification.style.background = 'rgba(240, 65, 65, 0.9)';
             notification.style.color = 'white';
             notification.style.borderColor = '#f04141';
         } else if (type === 'success') {
             notification.style.background = 'rgba(0, 224, 133, 0.9)';
-            notification.style.color = 'white';
-            notification.style.borderColor = '#00ff9d';
-            notification.style.boxShadow = '0 10px 40px rgba(0, 255, 157, 0.3)';
-        } else {
-            notification.style.background = 'rgba(0, 255, 157, 0.9)';
             notification.style.color = 'white';
             notification.style.borderColor = '#00ff9d';
         }
@@ -1760,24 +1055,17 @@ document.addEventListener('DOMContentLoaded', function() {
             notification.style.right = '1rem';
             notification.style.left = '1rem';
             notification.style.maxWidth = 'none';
-            notification.style.minWidth = 'auto';
         }
         
         document.body.appendChild(notification);
         
-        // Mostrar con animación
         setTimeout(() => {
-            notification.style.transform = 'translateX(0) translateZ(0)';
+            notification.style.transform = 'translateX(0)';
         }, 100);
         
-        // Ocultar después de 4 segundos
         setTimeout(() => {
-            notification.style.transform = 'translateX(100%) translateZ(0)';
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.remove();
-                }
-            }, 400);
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => notification.remove(), 400);
         }, 4000);
     }
 
@@ -1789,210 +1077,105 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // ========================================
-    // EFECTOS DE PARTÍCULAS DE ÉXITO - OPTIMIZADOS
-    // ========================================
+    // 🔧 CARGAR LIBRERÍAS EXTERNAS DE FORMA SEGURA
+    function loadExternalLibraries() {
+        // AOS - Animaciones
+        if (typeof AOS !== 'undefined' && window.innerWidth > 768) {
+            try {
+                AOS.init({
+                    duration: 600,
+                    easing: 'ease-out-cubic',
+                    once: true,
+                    offset: 30,
+                    disable: window.innerWidth <= 768
+                });
+                console.log('✅ AOS inicializado');
+            } catch (error) {
+                console.log('⚠️ Error inicializando AOS:', error);
+            }
+        }
 
-    if (document.querySelector('.success-message')) {
-        createSuccessParticles();
-    }
+        // GSAP - Animaciones avanzadas
+        if (typeof gsap !== 'undefined' && window.innerWidth > 768) {
+            try {
+                gsap.config({
+                    force3D: true,
+                    nullTargetWarn: false
+                });
 
-    function createSuccessParticles() {
-        // Menos partículas en móvil
-        const particleCount = window.innerWidth <= 768 ? 8 : 15;
-        
-        for (let i = 0; i < particleCount; i++) {
-            setTimeout(() => {
-                const particle = document.createElement('div');
-                particle.style.cssText = `
-                    position: fixed;
-                    width: 4px;
-                    height: 4px;
-                    background: linear-gradient(135deg, #00ff9d, #00e085);
-                    border-radius: 50%;
-                    pointer-events: none;
-                    z-index: 9999;
-                    box-shadow: 0 0 6px rgba(0, 255, 157, 0.6);
-                    left: ${Math.random() * window.innerWidth}px;
-                    top: ${window.innerHeight}px;
-                    animation: floatUp 3s ease-out forwards;
-                    transform: translateZ(0);
-                `;
-                
-                document.body.appendChild(particle);
-                
-                setTimeout(() => {
-                    if (particle.parentNode) {
-                        particle.remove();
-                    }
-                }, 3000);
-            }, i * 80);
+                // Animación sutil del contenedor
+                gsap.fromTo('.register-container', 
+                    { scale: 0.98, opacity: 0, y: 20 },
+                    { scale: 1, opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
+                );
+
+                console.log('✅ GSAP inicializado');
+            } catch (error) {
+                console.log('⚠️ Error inicializando GSAP:', error);
+            }
         }
     }
 
-    // ========================================
-    // EFECTOS ESPECIALES PARA VERIFICACIÓN - OPTIMIZADOS
-    // ========================================
-    
-    const verificationInfo = document.querySelector('.verification-info');
-    if (verificationInfo && typeof gsap !== 'undefined' && window.innerWidth > 768) {
-        // Pulso muy sutil solo en desktop
-        gsap.to(verificationInfo, {
-            boxShadow: "0 0 15px rgba(0, 255, 157, 0.3)",
-            duration: 4,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-            force3D: true
-        });
-    }
+    // Cargar librerías después de un breve delay
+    setTimeout(loadExternalLibraries, 500);
 
-    // ========================================
-    // 🔥 OPTIMIZACIONES FINALES PARA FLUIDEZ
-    // ========================================
-
-    // Optimizar elementos después de carga completa
-    window.addEventListener('load', function() {
-        // Forzar repaint inicial
-        document.body.style.transform = 'translateZ(0)';
-        
-        // Optimizar todos los elementos principales
-        const mainElements = document.querySelectorAll('.page-container, .register-container, .form-group');
-        mainElements.forEach(el => {
-            el.style.transform = 'translateZ(0)';
-            el.style.backfaceVisibility = 'hidden';
+    // 🔧 FIELD FOCUS MEJORADO PARA MÓVIL
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            // Scroll suave al campo en móvil
+            if (window.innerWidth <= 768) {
+                setTimeout(() => {
+                    this.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center',
+                        inline: 'nearest'
+                    });
+                }, 300); // Delay para que el teclado aparezca
+            }
         });
-        
-        console.log('🔥 Optimizaciones de fluidez aplicadas');
     });
 
-    // Optimizar en cambio de orientación móvil
+    // 🔧 MANEJO DE ORIENTACIÓN EN MÓVIL
     window.addEventListener('orientationchange', function() {
         setTimeout(() => {
-            // Re-optimizar después del cambio
-            document.body.style.transform = 'translateZ(0)';
-            
-            // Ajustar notificaciones si existen
-            const notifications = document.querySelectorAll('.notification');
-            notifications.forEach(notif => {
-                if (window.innerWidth <= 768) {
-                    notif.style.left = '1rem';
-                    notif.style.right = '1rem';
-                    notif.style.maxWidth = 'none';
-                }
-            });
+            // Re-optimizar después del cambio de orientación
+            if (window.innerWidth <= 768) {
+                document.body.style.height = 'auto';
+                window.scrollTo(0, 0);
+            }
         }, 200);
     });
 
-    // Optimizar scroll en dispositivos táctiles
-    if ('ontouchstart' in window) {
-        let touchStartY = 0;
-        
-        document.addEventListener('touchstart', function(e) {
-            touchStartY = e.touches[0].clientY;
-        }, { passive: true });
-        
-        document.addEventListener('touchmove', function(e) {
-            // Optimizar rendimiento durante scroll táctil
-            const touchY = e.touches[0].clientY;
-            const deltaY = touchY - touchStartY;
-            
-            // Aplicar optimizaciones durante scroll
-            if (Math.abs(deltaY) > 10) {
-                document.body.style.willChange = 'scroll-position';
-            }
-        }, { passive: true });
-        
-        document.addEventListener('touchend', function() {
-            // Limpiar optimizaciones después del scroll
-            setTimeout(() => {
-                document.body.style.willChange = 'auto';
-            }, 100);
-        }, { passive: true });
-    }
-
-    console.log('✨ Registro Ultra Fluido - Optimizado y listo');
+    console.log('✨ Registro móvil - Inicialización completa');
 });
 
-// ========================================
-// CSS ADICIONAL PARA ANIMACIONES Y FLUIDEZ
-// ========================================
-
-const additionalCSS = `
-    @keyframes floatUp {
-        0% {
-            transform: translateY(0) rotate(0deg) translateZ(0);
-            opacity: 0.8;
+// 🔧 SCRIPT PARA DETECTAR PROBLEMAS DE CARGA CSS
+window.addEventListener('load', function() {
+    const cssLoaded = Array.from(document.styleSheets).some(sheet => {
+        try {
+            return sheet.href && sheet.href.includes('variables.css');
+        } catch (e) {
+            return false;
         }
-        50% {
-            opacity: 1;
-        }
-        100% {
-            transform: translateY(-100vh) rotate(360deg) translateZ(0);
-            opacity: 0;
+    });
+    
+    if (cssLoaded) {
+        console.log('✅ CSS externo cargado correctamente');
+    } else {
+        console.log('⚠️ CSS externo no detectado - usando estilos inline');
+    }
+    
+    // Test final de estilos
+    const container = document.querySelector('.register-container');
+    if (container) {
+        const bgColor = window.getComputedStyle(container).backgroundColor;
+        if (bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+            console.log('✅ Estilos aplicados correctamente');
+        } else {
+            console.log('❌ Estilos no aplicados - problema con archivos CSS');
         }
     }
-
-    /* 🔥 Optimizaciones críticas para móvil */
-    @media (max-width: 480px) {
-        /* Prevenir scroll horizontal */
-        * {
-            max-width: 100vw !important;
-        }
-        
-        /* Optimizar animaciones en móvil */
-        .floating-circle {
-            animation-duration: 30s !important;
-            opacity: 0.03 !important;
-        }
-        
-        .register-border {
-            animation-duration: 30s !important;
-            opacity: 0.15 !important;
-        }
-        
-        /* Optimizar efectos de focus en móvil */
-        .form-input:focus,
-        .form-select:focus {
-            transform: none !important;
-            animation: none !important;
-        }
-    }
-
-    /* 🔥 Forzar aceleración GPU en elementos críticos */
-    .page-container,
-    .register-container,
-    .register-content,
-    .floating-elements,
-    .floating-circle {
-        -webkit-transform: translateZ(0);
-        transform: translateZ(0);
-        -webkit-backface-visibility: hidden;
-        backface-visibility: hidden;
-        -webkit-perspective: 1000px;
-        perspective: 1000px;
-    }
-
-    /* 🔥 Optimizaciones para reducir reflows */
-    .form-input,
-    .form-select,
-    .btn-submit {
-        contain: layout style paint;
-    }
-
-    /* 🔥 Optimizar transiciones */
-    .form-input,
-    .form-select {
-        transition: border-color 0.2s ease, 
-                   background-color 0.2s ease,
-                   box-shadow 0.2s ease,
-                   transform 0.2s ease;
-    }
-`;
-
-const style = document.createElement('style');
-style.textContent = additionalCSS;
-document.head.appendChild(style);
+});
 </script>
 
 {% if success %}
