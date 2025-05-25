@@ -1791,9 +1791,9 @@ from django.conf import settings
 import uuid
 import datetime
 
-def handle_uploaded_file(uploaded_file, category='general'):
+def handle_uploaded_file(uploaded_file, category='news'):
     """
-    Maneja la subida de archivos de forma robusta.
+    Maneja la subida de archivos de forma robusta para desarrollo y producción.
     
     Args:
         uploaded_file: Archivo subido desde el formulario
@@ -1808,17 +1808,18 @@ def handle_uploaded_file(uploaded_file, category='general'):
             print("❌ Archivo vacío o no válido")
             return None
         
-        # Validar tamaño máximo (5MB)
-        if uploaded_file.size > 5 * 1024 * 1024:
-            print(f"❌ Archivo muy grande: {uploaded_file.size} bytes")
+        # Validar tamaño máximo (10MB - aumentado para noticias)
+        if uploaded_file.size > 10 * 1024 * 1024:
+            print(f"❌ Archivo muy grande: {uploaded_file.size} bytes (máximo 10MB)")
             return None
         
         # Obtener extensión del archivo
         name, extension = os.path.splitext(uploaded_file.name)
+        extension = extension.lower()
         
         # Validar extensiones permitidas
         allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
-        if extension.lower() not in allowed_extensions:
+        if extension not in allowed_extensions:
             print(f"❌ Extensión no permitida: {extension}")
             return None
         
@@ -1827,22 +1828,43 @@ def handle_uploaded_file(uploaded_file, category='general'):
         unique_id = str(uuid.uuid4())[:8]
         filename = f"{category}_{timestamp}_{unique_id}{extension}"
         
-        # Determinar la ruta donde guardar
-        category_dir = os.path.join(settings.MEDIA_ROOT, category)
+        # 🔧 DETERMINAR LA RUTA CORRECTA SEGÚN EL ENTORNO
+        if settings.DEBUG:
+            # DESARROLLO: Usar MEDIA_ROOT normal (media/)
+            base_path = settings.MEDIA_ROOT
+            print(f"🏠 Modo desarrollo: guardando en {base_path}")
+        else:
+            # PRODUCCIÓN: Usar STATIC_ROOT/media para WhiteNoise
+            base_path = os.path.join(settings.STATIC_ROOT, 'media')
+            print(f"🚂 Modo producción: guardando en {base_path}")
+        
+        # Crear directorio de categoría
+        category_dir = os.path.join(base_path, category)
         os.makedirs(category_dir, exist_ok=True)
         
+        # Ruta completa del archivo
         file_path = os.path.join(category_dir, filename)
         relative_path = f"{category}/{filename}"  # Para guardar en la BD
         
-        # Guardar el archivo
+        # 🔧 GUARDAR EL ARCHIVO
+        print(f"💾 Guardando archivo: {uploaded_file.name} -> {filename}")
+        print(f"📁 Ruta completa: {file_path}")
+        
         with open(file_path, 'wb+') as destination:
             for chunk in uploaded_file.chunks():
                 destination.write(chunk)
         
-        print(f"✅ Archivo guardado: {file_path}")
-        print(f"✅ Ruta relativa: {relative_path}")
-        
-        return relative_path
+        # 🔧 VERIFICAR QUE SE GUARDÓ CORRECTAMENTE
+        if os.path.exists(file_path):
+            file_size = os.path.getsize(file_path)
+            print(f"✅ Archivo guardado correctamente")
+            print(f"📊 Tamaño: {file_size} bytes")
+            print(f"🔗 Ruta relativa para BD: {relative_path}")
+            print(f"🌐 URL accesible: {settings.MEDIA_URL}{relative_path}")
+            return relative_path
+        else:
+            print(f"❌ Error: El archivo no se guardó en {file_path}")
+            return None
         
     except Exception as e:
         print(f"❌ Error al guardar archivo: {e}")

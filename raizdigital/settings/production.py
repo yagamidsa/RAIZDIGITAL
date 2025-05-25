@@ -160,20 +160,39 @@ STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
 
+# 🔧 CONFIGURACIÓN CRUCIAL: WhiteNoise para servir archivos multimedia
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
-WHITENOISE_USE_FINDERS = True
 
-# ARCHIVOS MULTIMEDIA
+# 🔧 ARCHIVOS MULTIMEDIA - INTEGRADOS CON WHITENOISE
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'staticfiles' / 'media'
-MEDIA_ROOT.mkdir(exist_ok=True, parents=True)
+MEDIA_ROOT = BASE_DIR / 'staticfiles' / 'media'  # ✅ Dentro de staticfiles para WhiteNoise
 
-# Permitir que WhiteNoise sirva archivos multimedia también
+# Crear directorios necesarios
+MEDIA_ROOT.mkdir(exist_ok=True, parents=True)
+(MEDIA_ROOT / 'news').mkdir(exist_ok=True, parents=True)
+
+# 🔧 CONFIGURACIÓN CRÍTICA DE WHITENOISE PARA MULTIMEDIA
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = True
+WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico']
+
+# 🔧 PERMITIR QUE WHITENOISE SIRVA ARCHIVOS MULTIMEDIA
+WHITENOISE_ROOT = STATIC_ROOT
+WHITENOISE_INDEX_FILE = True
 
 print(f"📁 MEDIA_ROOT: {MEDIA_ROOT}")
 print(f"📁 STATIC_ROOT: {STATIC_ROOT}")
+print(f"🌐 MEDIA_URL: {MEDIA_URL}")
+print(f"📦 WhiteNoise configurado para servir multimedia")
+
+# 🔧 VERIFICAR QUE LOS DIRECTORIOS EXISTEN AL INICIO
+try:
+    STATIC_ROOT.mkdir(exist_ok=True)
+    MEDIA_ROOT.mkdir(exist_ok=True, parents=True)
+    (MEDIA_ROOT / 'news').mkdir(exist_ok=True, parents=True)
+    print("✅ Directorios de archivos creados correctamente")
+except Exception as e:
+    print(f"❌ Error creando directorios: {e}")
 
 # 🔧 CSRF MEJORADO PARA RAILWAY
 CSRF_TRUSTED_ORIGINS = [
