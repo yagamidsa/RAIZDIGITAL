@@ -2,7 +2,7 @@ import os
 import sys
 from pathlib import Path
 
-print("🚨 ARCHIVO: production.py - CORREGIDO PARA RAILWAY")
+print("🚨 ARCHIVO: production.py SIENDO USADO")
 print("🚨 SETTINGS MODULE: raizdigital.settings.production")
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -43,25 +43,17 @@ INSTALLED_APPS = [
     'core',
 ]
 
-# 🔧 MIDDLEWARE CORREGIDO
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # DEBE SER SEGUNDO
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.AuthenticationMiddleware',
 ]
-
-# 🔧 AGREGAR MIDDLEWARE PERSONALIZADO SOLO SI EXISTE
-try:
-    import core.middleware
-    MIDDLEWARE.append('core.middleware.AuthenticationMiddleware')
-    print("✅ Middleware personalizado añadido")
-except ImportError:
-    print("⚠️ Middleware personalizado no encontrado - continuando sin él")
 
 ROOT_URLCONF = 'raizdigital.urls'
 
@@ -85,7 +77,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'raizdigital.wsgi.application'
 
 # =================================
-# BASE DE DATOS - RAILWAY CORREGIDA
+# BASE DE DATOS - RAILWAY
 # =================================
 
 print("🗄️  CONFIGURANDO BASE DE DATOS RAILWAY...")
@@ -98,158 +90,36 @@ if DATABASE_URL:
         import dj_database_url
         DATABASES = {'default': dj_database_url.parse(DATABASE_URL)}
         
-        # 🔧 CONFIGURACIÓN CORREGIDA PARA RAILWAY POSTGRESQL
         DATABASES['default']['OPTIONS'] = {
             'sslmode': 'require',
-            # ELIMINADO: parámetros que causan conflicto
         }
         
-        # 🔧 CONFIGURACIÓN DE CONEXIÓN MEJORADA
-        DATABASES['default']['CONN_MAX_AGE'] = 0  # Sin pooling para evitar problemas
-        DATABASES['default']['CONN_HEALTH_CHECKS'] = True
+        DATABASES['default']['CONN_MAX_AGE'] = 600
         
-        # 🔧 ATOMIC_REQUESTS SEGURO
         is_railway = os.environ.get('RAILWAY_ENVIRONMENT_NAME') is not None
         
         if is_railway:
-            # En Railway usar transacciones manuales por seguridad
-            DATABASES['default']['ATOMIC_REQUESTS'] = False
-            print("🚂 RAILWAY detectado: ATOMIC_REQUESTS=False (manual)")
+            DATABASES['default']['ATOMIC_REQUESTS'] = True
+            print("🚂 RAILWAY detectado: ATOMIC_REQUESTS=True")
         else:
             DATABASES['default']['ATOMIC_REQUESTS'] = False
             print("🏠 Entorno local: ATOMIC_REQUESTS=False")
         
-        # 🔧 CONFIGURACIÓN ADICIONAL SEGURA
-        DATABASES['default'].update({
-            'DISABLE_SERVER_SIDE_CURSORS': True,  # Evitar problemas con cursors
+        DATABASES['default']['OPTIONS'].update({
+            'connect_timeout': 10,
         })
         
         db_info = DATABASES['default']
         atomic_status = DATABASES['default']['ATOMIC_REQUESTS']
         print(f"🐘 BD: {db_info['USER']}@{db_info['HOST']}:{db_info['PORT']}/{db_info['NAME']}")
         print(f"📊 ATOMIC_REQUESTS: {atomic_status}")
-        print(f"🔒 SSL: {db_info['OPTIONS'].get('sslmode', 'No configurado')}")
         
     except ImportError:
-        print("❌ dj_database_url no disponible - instalando...")
-        import subprocess
-        import sys
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'dj-database-url'])
-        
-        # Reintentar después de instalar
-        import dj_database_url
-        DATABASES = {'default': dj_database_url.parse(DATABASE_URL)}
-        DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
-        DATABASES['default']['ATOMIC_REQUESTS'] = False
-        
-    except Exception as e:
-        print(f"❌ Error configurando base de datos: {e}")
+        print("❌ dj_database_url no disponible")
         sys.exit(1)
 else:
     print("❌ DATABASE_URL no encontrada")
     sys.exit(1)
-
-# 🔧 CONFIGURACIÓN DE CONEXIÓN ADICIONAL PARA EVITAR TIMEOUTS
-DATABASES['default']['OPTIONS'].update({
-    'connect_timeout': 30,
-    'options': '-c statement_timeout=30000'  # 30 segundos timeout
-})
-
-print("✅ Configuración de base de datos corregida para Railway")
-
-# =================================
-# 🔧 ARCHIVOS ESTÁTICOS - CONFIGURACIÓN CORREGIDA WHITENOISE
-# =================================
-
-print("📁 CONFIGURANDO ARCHIVOS ESTÁTICOS PARA RAILWAY...")
-
-# URLs y directorios básicos
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# 🔧 STATICFILES_DIRS - Solo directorios adicionales necesarios
-STATICFILES_DIRS = []
-
-# Verificar si existe directorio static/ adicional
-project_static_dir = BASE_DIR / 'static'
-if project_static_dir.exists() and str(project_static_dir) != str(STATIC_ROOT):
-    STATICFILES_DIRS.append(str(project_static_dir))
-    print(f"📁 Directorio static/ adicional: {project_static_dir}")
-
-# Finders en orden correcto
-STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-]
-
-# 🔧 WHITENOISE CONFIGURACIÓN CORREGIDA - SIN MANIFEST
-# CAMBIO CRÍTICO: Usar la versión SIN Manifest que no causa errores
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
-
-# 🔧 CONFIGURACIÓN WHITENOISE SIMPLIFICADA Y ESTABLE
-WHITENOISE_USE_FINDERS = True
-WHITENOISE_AUTOREFRESH = False
-WHITENOISE_MAX_AGE = 31536000  # 1 año
-
-# 🔧 ELIMINADAS: Configuraciones que causan el error TypeError
-# NO usar estas líneas que causan problemas:
-# WHITENOISE_ADD_HEADERS_FUNCTION = ...  # ELIMINADO
-# WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ...  # ELIMINADO (problemático)
-
-# Crear STATIC_ROOT
-try:
-    STATIC_ROOT.mkdir(exist_ok=True, parents=True)
-    print(f"✅ STATIC_ROOT: {STATIC_ROOT}")
-except Exception as e:
-    print(f"❌ Error creando STATIC_ROOT: {e}")
-
-# =================================
-# 🔧 ARCHIVOS MULTIMEDIA - RAILWAY CORREGIDO
-# =================================
-
-print("📸 CONFIGURANDO ARCHIVOS MULTIMEDIA...")
-
-# 🔧 DETECTAR RAILWAY VOLUME CORRECTAMENTE
-railway_volume = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH')
-print(f"🔍 RAILWAY_VOLUME_MOUNT_PATH: {railway_volume}")
-
-# Verificar si es un volumen válido (no el de postgres)
-valid_volume = (
-    railway_volume and 
-    railway_volume != '/var/lib/postgresql/data' and
-    railway_volume != '/app/media' and  # ❌ Este era el problema
-    os.path.exists(railway_volume) if railway_volume else False
-)
-
-print(f"🔍 Volume válido: {valid_volume}")
-
-if valid_volume:
-    # ✅ VOLUMEN PERSISTENTE VÁLIDO
-    MEDIA_ROOT = Path(railway_volume) / 'media'
-    MEDIA_URL = '/media/'
-    print(f"💾 ✅ Volume persistente válido: {MEDIA_ROOT}")
-    
-    try:
-        MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
-        (MEDIA_ROOT / 'news').mkdir(exist_ok=True)
-        print(f"✅ Directorios de media creados en volume")
-    except Exception as e:
-        print(f"⚠️ Error creando directorios en volume: {e}")
-        # Fallback a temporal
-        valid_volume = False
-
-if not valid_volume:
-    # ❌ SIN VOLUMEN VÁLIDO - USAR ALMACENAMIENTO TEMPORAL
-    MEDIA_ROOT = STATIC_ROOT / 'temp_media'
-    MEDIA_URL = '/static/temp_media/'
-    print(f"📁 ⚠️ Almacenamiento temporal: {MEDIA_ROOT}")
-    
-    try:
-        MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
-        (MEDIA_ROOT / 'news').mkdir(exist_ok=True)
-        print(f"✅ Directorios de media temporales creados")
-    except Exception as e:
-        print(f"❌ Error creando directorios temporales: {e}")
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -265,14 +135,114 @@ USE_I18N = True
 USE_TZ = True
 
 # =================================
-# 🔧 CONFIGURACIÓN DE SEGURIDAD CORREGIDA
+# ARCHIVOS ESTÁTICOS - TU ESTRUCTURA ORIGINAL
 # =================================
 
-# CSRF Origins
+print("📁 CONFIGURANDO ARCHIVOS ESTÁTICOS...")
+
+# Configuración base
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Verificar estructura actual
+core_static_dir = BASE_DIR / 'core' / 'static'
+print(f"🔍 Verificando: {core_static_dir}")
+
+if core_static_dir.exists():
+    print(f"✅ Directorio core/static/ encontrado: {core_static_dir}")
+    # Verificar archivos específicos
+    css_dir = core_static_dir / 'core' / 'css'
+    js_dir = core_static_dir / 'core' / 'js'
+    
+    if css_dir.exists():
+        css_files = list(css_dir.glob('*.css'))
+        print(f"📄 Archivos CSS encontrados: {len(css_files)}")
+        for css_file in css_files[:5]:  # Mostrar solo los primeros 5
+            print(f"   - {css_file.name}")
+    
+    if js_dir.exists():
+        js_files = list(js_dir.glob('*.js'))
+        print(f"📄 Archivos JS encontrados: {len(js_files)}")
+        for js_file in js_files[:5]:  # Mostrar solo los primeros 5
+            print(f"   - {js_file.name}")
+else:
+    print(f"❌ Directorio core/static/ NO encontrado: {core_static_dir}")
+
+# STATICFILES_DIRS - NO NECESARIO CON AppDirectoriesFinder
+STATICFILES_DIRS = []
+
+# Solo agregar directorios adicionales si existen
+project_static = BASE_DIR / 'static'
+if project_static.exists() and str(project_static) != str(STATIC_ROOT):
+    STATICFILES_DIRS.append(str(project_static))
+    print(f"📁 Directorio static/ adicional encontrado: {project_static}")
+
+# 🔧 CONFIGURACIÓN WHITENOISE - SOLO CAMBIO MÍNIMO
+# CAMBIO CRÍTICO: Sin Manifest para evitar error TypeError
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
+# Configuración WhiteNoise básica
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = False
+WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico']
+WHITENOISE_MAX_AGE = 31536000  # 1 año
+
+# Crear directorios necesarios
+try:
+    STATIC_ROOT.mkdir(exist_ok=True)
+    print(f"✅ STATIC_ROOT creado: {STATIC_ROOT}")
+except Exception as e:
+    print(f"❌ Error creando STATIC_ROOT: {e}")
+
+# =================================
+# ARCHIVOS MULTIMEDIA - TU VOLUMEN RAILWAY
+# =================================
+
+print("📸 CONFIGURANDO ARCHIVOS MULTIMEDIA...")
+
+# TU VOLUMEN RAILWAY EXISTENTE
+railway_volume = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH')  # /app/media
+print(f"🔍 RAILWAY_VOLUME: {railway_volume}")
+
+if railway_volume == '/app/media':
+    # ✅ TU VOLUMEN EXISTENTE
+    MEDIA_ROOT = Path(railway_volume)
+    MEDIA_URL = '/media/'
+    print(f"💾 ✅ Tu volumen Railway: {MEDIA_ROOT}")
+    
+    try:
+        MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+        (MEDIA_ROOT / 'news').mkdir(exist_ok=True)
+        print(f"✅ Directorios en tu volumen verificados")
+    except Exception as e:
+        print(f"⚠️ Aviso en volumen: {e}")
+else:
+    # Fallback temporal si hay problemas
+    MEDIA_ROOT = STATIC_ROOT / 'temp_media'
+    MEDIA_URL = '/static/temp_media/'
+    print(f"📁 ⚠️ Fallback temporal: {MEDIA_ROOT}")
+    
+    try:
+        MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+        (MEDIA_ROOT / 'news').mkdir(exist_ok=True)
+    except Exception as e:
+        print(f"❌ Error: {e}")
+
+# =================================
+# CONFIGURACIÓN ADICIONAL
+# =================================
+
+# CSRF
 CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
     'https://*.up.railway.app',
     'https://raizdigital-production.up.railway.app',
+    'http://raizdigital-production.up.railway.app',
 ]
 
 if railway_host:
@@ -281,47 +251,25 @@ if railway_host:
         f'http://{railway_host}',
     ])
 
-# 🔧 CONFIGURACIÓN DE SEGURIDAD RAILWAY
+# Seguridad
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = False  # Railway maneja SSL automáticamente
+SECURE_SSL_REDIRECT = False
 USE_TZ = True
 
-# 🔧 CONFIGURACIÓN DE SESIONES ESTABLE
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_AGE = 3600  # 1 hora
+# Sesiones
+SESSION_COOKIE_AGE = 3600
 SESSION_SAVE_EVERY_REQUEST = True
-SESSION_COOKIE_SECURE = False  # Railway maneja HTTPS
+SESSION_COOKIE_SECURE = False
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
-# 🔧 CACHE OPTIMIZADO PARA RAILWAY
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'raizdigital-cache',
-        'OPTIONS': {
-            'MAX_ENTRIES': 2000,
-            'CULL_FREQUENCY': 3,
-        },
-        'TIMEOUT': 300,  # 5 minutos
-    }
-}
-
-# =================================
-# 🔧 LOGGING OPTIMIZADO PARA RAILWAY
-# =================================
-
+# Logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {message}',
+            'format': '{levelname} {asctime} {module} {message}',
             'style': '{',
         },
     },
@@ -342,67 +290,29 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
-        'django.db.backends': {
-            'handlers': ['console'],
-            'level': 'WARNING',  # Reducir logs de BD
-            'propagate': False,
-        },
-        'django.contrib.staticfiles': {
-            'handlers': ['console'],
-            'level': 'WARNING',  # Reducir logs de archivos estáticos
-            'propagate': False,
-        },
-        'whitenoise': {
-            'handlers': ['console'],
-            'level': 'WARNING',  # Reducir logs de WhiteNoise
-            'propagate': False,
-        },
         'core': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': False,
         },
     },
 }
 
-# =================================
-# 🔧 CONFIGURACIÓN ADICIONAL RAILWAY
-# =================================
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# 🔧 CONFIGURACIÓN DE EMAIL (si es necesario)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-# 🔧 CONFIGURACIÓN DE ARCHIVOS SUBIDOS
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
-
-# 🔧 TIMEOUT CONFIGURACIONES
-DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
-
 # =================================
-# 🔧 RESUMEN FINAL DE CONFIGURACIÓN
+# RESUMEN DE TU CONFIGURACIÓN
 # =================================
 
-print("\n📊 RESUMEN DE CONFIGURACIÓN RAILWAY:")
-print(f"   DEBUG: {DEBUG}")
+print("\n📊 TU CONFIGURACIÓN ACTUAL:")
 print(f"   STATIC_URL: {STATIC_URL}")
 print(f"   STATIC_ROOT: {STATIC_ROOT}")
-print(f"   MEDIA_URL: {MEDIA_URL}")
+print(f"   STATICFILES_DIRS: {STATICFILES_DIRS}")
 print(f"   MEDIA_ROOT: {MEDIA_ROOT}")
+print(f"   MEDIA_URL: {MEDIA_URL}")
 print(f"   STATICFILES_STORAGE: {STATICFILES_STORAGE}")
-print(f"   RAILWAY_VOLUME: {railway_volume}")
-print(f"   VOLUME_VÁLIDO: {valid_volume}")
+print(f"   DEBUG: {DEBUG}")
+print(f"   TU VOLUMEN: {railway_volume}")
 
-# Verificar archivos críticos
-critical_dirs = [STATIC_ROOT, MEDIA_ROOT]
-for directory in critical_dirs:
-    if directory.exists():
-        print(f"   ✅ {directory.name}: EXISTE")
-    else:
-        print(f"   ❌ {directory.name}: NO EXISTE")
-
-print('\n🚀 PRODUCTION SETTINGS CORREGIDO PARA RAILWAY')
-print('🔧 ERRORES DE WHITENOISE Y BD SOLUCIONADOS')
+print('\n🚀 SOLO ARREGLO WHITENOISE - TU CONFIGURACIÓN INTACTA')
 print('=' * 60)
