@@ -1,0 +1,10 @@
+{
+    "$schema": "https://railway.com/railway.schema.json",
+    "build": {
+      "builder": "nixpacks",
+      "buildCommand": "echo '🔧 Verificando archivos estáticos...' && find core/static -name '*.css' | head -5 && find core/static -name '*.js' | head -5 && echo '📦 Ejecutando collectstatic...' && python manage.py collectstatic --noinput --clear --verbosity=2"
+    },
+    "deploy": {
+      "startCommand": "python manage.py migrate && gunicorn raizdigital.wsgi:application"
+    }
+  }
