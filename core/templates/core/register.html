@@ -137,23 +137,23 @@
         }
     }
 
-    /* 🏗️ LAYOUT PRINCIPAL - FORZADO VERTICAL Y CENTRADO */
+    /* 🏗️ LAYOUT PRINCIPAL - SCROLL ÚNICO */
     .page-container {
         min-height: 100vh;
         width: 100%;
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: center;
-        padding: 1rem;
+        padding: 2rem 1rem;
         position: relative;
         z-index: 10;
         
-        /* 🔧 FORZAR ANCHO MÍNIMO PARA VERTICAL */
+        /* 🔧 SCROLL ÚNICO - NO RESTRINGIR ALTURA */
         max-width: 450px;
         margin: 0 auto;
     }
 
-    /* 🎪 CONTENEDOR PRINCIPAL DEL FORMULARIO - CRYSTAL GLASS VERTICAL */
+    /* 🎪 CONTENEDOR PRINCIPAL DEL FORMULARIO - SIN SCROLL INTERNO */
     .register-container {
         background: rgba(255, 255, 255, 0.08);
         backdrop-filter: blur(25px);
@@ -164,18 +164,17 @@
             0 8px 32px rgba(0, 0, 0, 0.2),
             0 0 0 1px rgba(255, 255, 255, 0.1),
             inset 0 1px 0 rgba(255, 255, 255, 0.15);
-        overflow: hidden;
+        overflow: visible;
         position: relative;
         width: 100%;
         
-        /* 🔧 DISEÑO SUPER VERTICAL Y COMPACTO */
+        /* 🔧 SIN RESTRICCIONES DE ALTURA - SCROLL ÚNICO */
         max-width: 360px;
         margin: 0 auto;
         
-        /* 🔧 ALTURA CONTROLADA PARA EVITAR PROBLEMAS DE SCROLL */
-        max-height: 95vh;
-        overflow-y: auto;
-        overflow-x: hidden;
+        /* 🔧 ELIMINAR SCROLL INTERNO */
+        height: auto;
+        min-height: auto;
     }
 
     /* 🌈 BORDE GRADIENTE ANIMADO - CRYSTAL GLASS EFFECT */
@@ -667,47 +666,43 @@
         transform: scaleX(1);
     }
 
-    /* 📱 RESPONSIVE DESIGN - MÓVIL OPTIMIZADO Y DESKTOP VERTICAL */
+    /* 📱 RESPONSIVE DESIGN - SCROLL ÚNICO EN TODAS LAS PANTALLAS */
     
-    /* Móvil - OPTIMIZADO PARA FLUIDEZ */
+    /* Móvil - SCROLL PRINCIPAL ÚNICAMENTE */
     @media (max-width: 480px) {
         body {
-            /* 🔧 PREVENIR ZOOM Y MOVIMIENTO EN MÓVIL */
+            /* 🔧 SCROLL NORMAL - NO FIXED */
             -webkit-text-size-adjust: 100%;
             -ms-text-size-adjust: 100%;
             touch-action: manipulation;
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
 
         html {
-            /* 🔧 SCROLL CONTROLADO */
-            overflow: hidden;
-            height: 100%;
+            /* 🔧 SCROLL HABILITADO */
+            overflow-y: auto;
+            overflow-x: hidden;
+            height: auto;
             width: 100%;
         }
 
         .page-container {
-            padding: 0.5rem;
-            height: 100vh;
-            max-height: 100vh;
-            overflow-y: auto;
-            overflow-x: hidden;
-            -webkit-overflow-scrolling: touch;
-            /* 🔧 FORZAR ANCHO VERTICAL INCLUSO EN MÓVIL */
-            max-width: 100%;
+            padding: 1rem 0.5rem;
+            min-height: 100vh;
+            height: auto;
+            /* 🔧 PERMITIR EXPANSIÓN NATURAL */
             align-items: flex-start;
-            padding-top: 1rem;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
         }
 
         .register-container {
             max-width: 100%;
             width: 100%;
             border-radius: 16px;
-            max-height: none;
-            overflow: visible;
+            /* 🔧 SIN RESTRICCIONES DE ALTURA */
+            height: auto;
             margin: 0;
         }
 
@@ -737,7 +732,6 @@
         .form-input, .form-select {
             padding: 0.9rem;
             font-size: 16px; /* 🔧 PREVENIR ZOOM EN SAFARI MÓVIL */
-            transform: translateZ(0); /* 🔧 OPTIMIZACIÓN GPU */
         }
 
         .btn-submit {
@@ -751,13 +745,11 @@
             font-size: 0.75rem;
         }
 
-        /* 🔧 PREVENIR MOVIMIENTO AL ESCRIBIR */
+        /* 🔧 OPTIMIZACIÓN DE CAMPOS SIN ANIMACIONES DISRUPTIVAS */
         .form-input:focus, .form-select:focus {
             transform: none;
-            zoom: 1;
         }
 
-        /* 🔧 OPTIMIZACIÓN DE SCROLL EN MÓVIL */
         .register-form {
             gap: 1rem;
         }
@@ -765,34 +757,41 @@
         .verification-info {
             padding: 1rem;
             margin-top: 1rem;
+            margin-bottom: 1rem;
             font-size: 0.8rem;
         }
 
         .login-link {
             margin-top: 1rem;
-            margin-bottom: 1rem;
+            margin-bottom: 2rem;
         }
     }
 
-    /* Tablet y Desktop - FORZAR DISEÑO SUPER VERTICAL */
+    /* Tablet y Desktop - SCROLL ÚNICO */
     @media (min-width: 481px) {
         .page-container {
-            padding: 1.5rem;
-            /* 🔧 SUPER VERTICAL EN TODAS LAS PANTALLAS */
+            padding: 3rem 1.5rem;
+            /* 🔧 SCROLL ÚNICO EN DESKTOP */
+            min-height: 100vh;
+            height: auto;
             max-width: 450px;
             margin: 0 auto;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 4rem;
+            padding-bottom: 4rem;
         }
         
-        /* 🔧 CONTENEDOR MUY COMPACTO Y VERTICAL */
+        /* 🔧 CONTENEDOR SIN RESTRICCIONES */
         .register-container {
             max-width: 360px;
+            height: auto;
         }
         
         .register-content {
             padding: 1.8rem 1.5rem;
         }
 
-        /* Espaciado optimizado para super vertical */
         .register-header {
             margin-bottom: 1.5rem;
         }
@@ -802,16 +801,16 @@
         }
     }
 
-    /* Desktop extra grande - MANTENER SUPER VERTICAL */
+    /* Desktop extra grande - MANTENER SCROLL ÚNICO */
     @media (min-width: 1200px) {
         .page-container {
-            /* 🔧 MÁXIMO 450PX PARA FORZAR VERTICAL */
             max-width: 450px;
-            padding: 2rem;
+            padding: 4rem 2rem;
+            padding-top: 5rem;
+            padding-bottom: 5rem;
         }
 
         .register-container {
-            /* 🔧 MÁXIMO 360PX PARA SER MUY VERTICAL */
             max-width: 360px;
         }
     }
@@ -852,23 +851,8 @@
         }
     }
 
-    /* 🔧 SCROLLBAR PERSONALIZADA PARA MÓVIL */
-    .register-container::-webkit-scrollbar {
-        width: 3px;
-    }
-
-    .register-container::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0.1);
-    }
-
-    .register-container::-webkit-scrollbar-thumb {
-        background: rgba(0, 255, 157, 0.3);
-        border-radius: 2px;
-    }
-
-    .register-container::-webkit-scrollbar-thumb:hover {
-        background: rgba(0, 255, 157, 0.5);
-    }
+    /* 🔧 ELIMINAR SCROLLBAR PERSONALIZADA YA QUE USAMOS SCROLL PRINCIPAL */
+    /* Scrollbar del body principal se mantiene estándar para mejor UX */
 
     /* 🎪 MICRO-INTERACCIONES - OPTIMIZADAS PARA MÓVIL */
     .form-input:focus {
