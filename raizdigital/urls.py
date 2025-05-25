@@ -20,29 +20,35 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.static import serve
 from django.urls import re_path
+import os
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
 ]
 
-# 🔧 CONFIGURACIÓN MEJORADA PARA SERVIR ARCHIVOS
+# 🔧 CONFIGURACIÓN PARA SERVIR ARCHIVOS MULTIMEDIA
 if settings.DEBUG:
-    # DESARROLLO: Servir archivos multimedia normalmente
+    # DESARROLLO: Django sirve archivos multimedia
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    print("🔧 Configuración de desarrollo: Django sirve archivos multimedia")
+    print("🔧 Desarrollo: Django sirve multimedia")
 else:
-    # 🔧 PRODUCCIÓN: WhiteNoise sirve todo, pero agregamos ruta explícita por si acaso
-    try:
-        # Ruta explícita para archivos multimedia en producción
+    # PRODUCCIÓN: Verificar si hay Railway Volume
+    railway_volume = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH')
+    
+    if railway_volume:
+        # ✅ CON RAILWAY VOLUME: WhiteNoise sirve desde el volumen persistente
+        print("💾 Producción: WhiteNoise + Railway Volume (persistente)")
+        # WhiteNoise manejará todo automáticamente gracias a STATICFILES_DIRS
+    else:
+        # ❌ SIN VOLUME: Ruta explícita para archivos temporales
         urlpatterns += [
             re_path(r'^media/(?P<path>.*)$', serve, {
                 'document_root': settings.STATIC_ROOT / 'media',
             }),
         ]
-        print("📦 Configuración de producción: WhiteNoise + ruta explícita para multimedia")
-    except Exception as e:
-        print(f"⚠️ Error configurando multimedia en producción: {e}")
+        print("⚠️ Producción: Almacenamiento temporal")
 
 print(f"🌐 URLs configuradas para {'desarrollo' if settings.DEBUG else 'producción'}")
+print(f"💾 Volume: {'SÍ' if os.environ.get('RAILWAY_VOLUME_MOUNT_PATH') else 'NO'}")

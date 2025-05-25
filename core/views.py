@@ -1793,7 +1793,7 @@ import datetime
 
 def handle_uploaded_file(uploaded_file, category='news'):
     """
-    Maneja la subida de archivos de forma robusta para desarrollo y producción.
+    Maneja la subida de archivos con soporte para Railway Volumes.
     
     Args:
         uploaded_file: Archivo subido desde el formulario
@@ -1808,7 +1808,7 @@ def handle_uploaded_file(uploaded_file, category='news'):
             print("❌ Archivo vacío o no válido")
             return None
         
-        # Validar tamaño máximo (10MB - aumentado para noticias)
+        # Validar tamaño máximo (10MB)
         if uploaded_file.size > 10 * 1024 * 1024:
             print(f"❌ Archivo muy grande: {uploaded_file.size} bytes (máximo 10MB)")
             return None
@@ -1828,15 +1828,22 @@ def handle_uploaded_file(uploaded_file, category='news'):
         unique_id = str(uuid.uuid4())[:8]
         filename = f"{category}_{timestamp}_{unique_id}{extension}"
         
-        # 🔧 DETERMINAR LA RUTA CORRECTA SEGÚN EL ENTORNO
+        # 🔧 DETERMINAR LA RUTA SEGÚN EL ENTORNO Y VOLUMEN
         if settings.DEBUG:
-            # DESARROLLO: Usar MEDIA_ROOT normal (media/)
+            # DESARROLLO: Usar MEDIA_ROOT normal
             base_path = settings.MEDIA_ROOT
-            print(f"🏠 Modo desarrollo: guardando en {base_path}")
+            print(f"🏠 Modo desarrollo: {base_path}")
         else:
-            # PRODUCCIÓN: Usar STATIC_ROOT/media para WhiteNoise
-            base_path = os.path.join(settings.STATIC_ROOT, 'media')
-            print(f"🚂 Modo producción: guardando en {base_path}")
+            # PRODUCCIÓN: Verificar si hay Railway Volume configurado
+            railway_volume = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH')
+            if railway_volume:
+                # ✅ USANDO RAILWAY VOLUME (PERSISTENTE)
+                base_path = settings.MEDIA_ROOT  # Ya apunta al volumen en production.py
+                print(f"💾 Modo producción con Volume: {base_path}")
+            else:
+                # ❌ FALLBACK: Almacenamiento temporal
+                base_path = os.path.join(settings.STATIC_ROOT, 'media')
+                print(f"⚠️ Modo producción temporal: {base_path}")
         
         # Crear directorio de categoría
         category_dir = os.path.join(base_path, category)
@@ -1847,8 +1854,8 @@ def handle_uploaded_file(uploaded_file, category='news'):
         relative_path = f"{category}/{filename}"  # Para guardar en la BD
         
         # 🔧 GUARDAR EL ARCHIVO
-        print(f"💾 Guardando archivo: {uploaded_file.name} -> {filename}")
-        print(f"📁 Ruta completa: {file_path}")
+        print(f"💾 Guardando: {uploaded_file.name} -> {filename}")
+        print(f"📁 Destino: {file_path}")
         
         with open(file_path, 'wb+') as destination:
             for chunk in uploaded_file.chunks():
@@ -1857,10 +1864,15 @@ def handle_uploaded_file(uploaded_file, category='news'):
         # 🔧 VERIFICAR QUE SE GUARDÓ CORRECTAMENTE
         if os.path.exists(file_path):
             file_size = os.path.getsize(file_path)
-            print(f"✅ Archivo guardado correctamente")
-            print(f"📊 Tamaño: {file_size} bytes")
-            print(f"🔗 Ruta relativa para BD: {relative_path}")
-            print(f"🌐 URL accesible: {settings.MEDIA_URL}{relative_path}")
+            print(f"✅ Archivo guardado exitosamente")
+            print(f"📊 Tamaño: {file_size:,} bytes")
+            print(f"🔗 Ruta BD: {relative_path}")
+            print(f"🌐 URL: {settings.MEDIA_URL}{relative_path}")
+            
+            # 🔧 VERIFICAR SI ES PERSISTENTE
+            is_persistent = not settings.DEBUG and os.environ.get('RAILWAY_VOLUME_MOUNT_PATH')
+            print(f"💾 Persistente: {'SÍ ✅' if is_persistent else 'NO ❌'}")
+            
             return relative_path
         else:
             print(f"❌ Error: El archivo no se guardó en {file_path}")

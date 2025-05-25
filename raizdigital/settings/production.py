@@ -143,10 +143,10 @@ USE_I18N = True
 USE_TZ = True
 
 # =================================
-# ARCHIVOS ESTÁTICOS Y MULTIMEDIA
+# ARCHIVOS ESTÁTICOS Y MULTIMEDIA - CON RAILWAY VOLUMES
 # =================================
 
-# Archivos estáticos
+# Archivos estáticos (sin cambios)
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATIC_ROOT.mkdir(exist_ok=True)
@@ -160,30 +160,50 @@ STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
 
-# 🔧 CONFIGURACIÓN CRUCIAL: WhiteNoise para servir archivos multimedia
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
-# 🔧 ARCHIVOS MULTIMEDIA - INTEGRADOS CON WHITENOISE
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'staticfiles' / 'media'  # ✅ Dentro de staticfiles para WhiteNoise
+# 🔧 CONFIGURACIÓN DE ARCHIVOS MULTIMEDIA CON RAILWAY VOLUMES
+RAILWAY_VOLUME_PATH = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH')
 
-# Crear directorios necesarios
-MEDIA_ROOT.mkdir(exist_ok=True, parents=True)
-(MEDIA_ROOT / 'news').mkdir(exist_ok=True, parents=True)
+if RAILWAY_VOLUME_PATH:
+    # ✅ USANDO RAILWAY VOLUME (PERSISTENTE)
+    MEDIA_ROOT = Path(RAILWAY_VOLUME_PATH)
+    MEDIA_URL = '/media/'
+    
+    # Crear directorios necesarios en el volumen persistente
+    MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+    (MEDIA_ROOT / 'news').mkdir(exist_ok=True)
+    (MEDIA_ROOT / 'profiles').mkdir(exist_ok=True)
+    
+    # Configurar WhiteNoise para servir desde el volumen
+    WHITENOISE_USE_FINDERS = True
+    WHITENOISE_AUTOREFRESH = True
+    WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico']
+    
+    # Agregar el volumen a las rutas estáticas para WhiteNoise
+    STATICFILES_DIRS.append(str(MEDIA_ROOT))
+    
+    print(f"💾 ✅ RAILWAY VOLUME CONFIGURADO")
+    print(f"📁 MEDIA_ROOT (persistente): {MEDIA_ROOT}")
+    print(f"🔗 MEDIA_URL: {MEDIA_URL}")
+    
+else:
+    # ❌ FALLBACK: Sistema de archivos temporal (se borra en cada deploy)
+    MEDIA_ROOT = BASE_DIR / 'staticfiles' / 'media'
+    MEDIA_URL = '/media/'
+    
+    MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+    (MEDIA_ROOT / 'news').mkdir(exist_ok=True)
+    
+    WHITENOISE_USE_FINDERS = True
+    WHITENOISE_AUTOREFRESH = True
+    WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico']
+    
+    print(f"⚠️  USANDO ALMACENAMIENTO TEMPORAL")
+    print(f"📁 MEDIA_ROOT (temporal): {MEDIA_ROOT}")
+    print(f"🚨 Las imágenes se borrarán en cada deploy")
 
-# 🔧 CONFIGURACIÓN CRÍTICA DE WHITENOISE PARA MULTIMEDIA
-WHITENOISE_USE_FINDERS = True
-WHITENOISE_AUTOREFRESH = True
-WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico']
-
-# 🔧 PERMITIR QUE WHITENOISE SIRVA ARCHIVOS MULTIMEDIA
-WHITENOISE_ROOT = STATIC_ROOT
-WHITENOISE_INDEX_FILE = True
-
-print(f"📁 MEDIA_ROOT: {MEDIA_ROOT}")
-print(f"📁 STATIC_ROOT: {STATIC_ROOT}")
-print(f"🌐 MEDIA_URL: {MEDIA_URL}")
-print(f"📦 WhiteNoise configurado para servir multimedia")
+print(f"📊 Persistente: {'SÍ ✅' if RAILWAY_VOLUME_PATH else 'NO ❌'}")
 
 # 🔧 VERIFICAR QUE LOS DIRECTORIOS EXISTEN AL INICIO
 try:
