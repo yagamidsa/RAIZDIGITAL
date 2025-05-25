@@ -53,8 +53,15 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'core.middleware.AuthenticationMiddleware',
 ]
+
+# 🔧 AGREGAR MIDDLEWARE PERSONALIZADO SOLO SI EXISTE
+try:
+    import core.middleware
+    MIDDLEWARE.append('core.middleware.AuthenticationMiddleware')
+    print("✅ Middleware personalizado añadido")
+except ImportError:
+    print("⚠️ Middleware personalizado no encontrado - continuando sin él")
 
 ROOT_URLCONF = 'raizdigital.urls'
 
@@ -76,8 +83,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'raizdigital.wsgi.application'
-
-# REEMPLAZAR LA SECCIÓN DE BASE DE DATOS EN raizdigital/settings/production.py
 
 # =================================
 # BASE DE DATOS - RAILWAY CORREGIDA
@@ -119,9 +124,6 @@ if DATABASE_URL:
             'DISABLE_SERVER_SIDE_CURSORS': True,  # Evitar problemas con cursors
         })
         
-        # 🔧 NO agregar opciones de transacción que causen conflicto
-        # ELIMINAMOS cualquier configuración de isolation level
-        
         db_info = DATABASES['default']
         atomic_status = DATABASES['default']['ATOMIC_REQUESTS']
         print(f"🐘 BD: {db_info['USER']}@{db_info['HOST']}:{db_info['PORT']}/{db_info['NAME']}")
@@ -156,7 +158,7 @@ DATABASES['default']['OPTIONS'].update({
 print("✅ Configuración de base de datos corregida para Railway")
 
 # =================================
-# 🔧 ARCHIVOS ESTÁTICOS - RAILWAY CORREGIDO
+# 🔧 ARCHIVOS ESTÁTICOS - CONFIGURACIÓN CORREGIDA WHITENOISE
 # =================================
 
 print("📁 CONFIGURANDO ARCHIVOS ESTÁTICOS PARA RAILWAY...")
@@ -180,30 +182,19 @@ STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
 
-# 🔧 WHITENOISE CONFIGURACIÓN OPTIMIZADA
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# 🔧 WHITENOISE CONFIGURACIÓN CORREGIDA - SIN MANIFEST
+# CAMBIO CRÍTICO: Usar la versión SIN Manifest que no causa errores
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
-# Configuración WhiteNoise específica
+# 🔧 CONFIGURACIÓN WHITENOISE SIMPLIFICADA Y ESTABLE
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = False
-WHITENOISE_SKIP_COMPRESS_EXTENSIONS = [
-    'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico', 
-    'mp4', 'webm', 'mp3', 'wav', 'ogg'
-]
 WHITENOISE_MAX_AGE = 31536000  # 1 año
-WHITENOISE_ADD_HEADERS_FUNCTION = 'raizdigital.settings.production.custom_headers'
 
-def custom_headers(headers, path, url):
-    """Headers personalizados para diferentes tipos de archivos"""
-    if path.endswith('.css'):
-        headers['Content-Type'] = 'text/css; charset=utf-8'
-        headers['Cache-Control'] = 'public, max-age=31536000'
-    elif path.endswith('.js'):
-        headers['Content-Type'] = 'application/javascript; charset=utf-8'
-        headers['Cache-Control'] = 'public, max-age=31536000'
-    elif path.endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp')):
-        headers['Cache-Control'] = 'public, max-age=31536000'
-    return headers
+# 🔧 ELIMINADAS: Configuraciones que causan el error TypeError
+# NO usar estas líneas que causan problemas:
+# WHITENOISE_ADD_HEADERS_FUNCTION = ...  # ELIMINADO
+# WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ...  # ELIMINADO (problemático)
 
 # Crear STATIC_ROOT
 try:
@@ -259,6 +250,19 @@ if not valid_volume:
         print(f"✅ Directorios de media temporales creados")
     except Exception as e:
         print(f"❌ Error creando directorios temporales: {e}")
+
+# Password validation
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+]
+
+LANGUAGE_CODE = 'es-es'
+TIME_ZONE = 'America/Bogota'
+USE_I18N = True
+USE_TZ = True
 
 # =================================
 # 🔧 CONFIGURACIÓN DE SEGURIDAD CORREGIDA
@@ -400,5 +404,5 @@ for directory in critical_dirs:
         print(f"   ❌ {directory.name}: NO EXISTE")
 
 print('\n🚀 PRODUCTION SETTINGS CORREGIDO PARA RAILWAY')
-print('🔧 ERRORES DE VOLUMEN Y BD SOLUCIONADOS')
+print('🔧 ERRORES DE WHITENOISE Y BD SOLUCIONADOS')
 print('=' * 60)
