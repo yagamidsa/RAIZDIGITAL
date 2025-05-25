@@ -2,7 +2,7 @@ import os
 import sys
 from pathlib import Path
 
-print("🚨 ARCHIVO: production.py SIENDO USADO - CORREGIDO PARA MÓVIL")
+print("🚨 ARCHIVO: production.py SIENDO USADO")
 print("🚨 SETTINGS MODULE: raizdigital.settings.production")
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -43,10 +43,9 @@ INSTALLED_APPS = [
     'core',
 ]
 
-# 🔧 MIDDLEWARE CORREGIDO PARA WHITENOISE
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # DEBE SER SEGUNDO
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -136,74 +135,73 @@ USE_I18N = True
 USE_TZ = True
 
 # =================================
-# 🔧 CONFIGURACIÓN ARCHIVOS ESTÁTICOS CORREGIDA PARA MÓVIL
+# ARCHIVOS ESTÁTICOS - CONFIGURACIÓN PARA TU ESTRUCTURA REAL
 # =================================
 
-print("📁 CONFIGURANDO ARCHIVOS ESTÁTICOS PARA MÓVIL...")
+print("📁 CONFIGURANDO ARCHIVOS ESTÁTICOS...")
 
-# URLs y directorios
+# Configuración base
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# 🔧 CONFIGURACIÓN STATICFILES_DIRS CORREGIDA
+# Verificar estructura actual
+core_static_dir = BASE_DIR / 'core' / 'static'
+print(f"🔍 Verificando: {core_static_dir}")
+
+if core_static_dir.exists():
+    print(f"✅ Directorio core/static/ encontrado: {core_static_dir}")
+    # Verificar archivos específicos
+    css_dir = core_static_dir / 'core' / 'css'
+    js_dir = core_static_dir / 'core' / 'js'
+    
+    if css_dir.exists():
+        css_files = list(css_dir.glob('*.css'))
+        print(f"📄 Archivos CSS encontrados: {len(css_files)}")
+        for css_file in css_files[:5]:  # Mostrar solo los primeros 5
+            print(f"   - {css_file.name}")
+    
+    if js_dir.exists():
+        js_files = list(js_dir.glob('*.js'))
+        print(f"📄 Archivos JS encontrados: {len(js_files)}")
+        for js_file in js_files[:5]:  # Mostrar solo los primeros 5
+            print(f"   - {js_file.name}")
+else:
+    print(f"❌ Directorio core/static/ NO encontrado: {core_static_dir}")
+
+# 🔧 STATICFILES_DIRS - NO NECESARIO CON AppDirectoriesFinder
+# Django automáticamente encuentra archivos en core/static/ mediante AppDirectoriesFinder
 STATICFILES_DIRS = []
 
-# Verificar estructura de archivos estáticos
-core_static_dir = BASE_DIR / 'core' / 'static'
-project_static_dir = BASE_DIR / 'static'
+# Solo agregar directorios adicionales si existen
+project_static = BASE_DIR / 'static'
+if project_static.exists() and str(project_static) != str(STATIC_ROOT):
+    STATICFILES_DIRS.append(str(project_static))
+    print(f"📁 Directorio static/ adicional encontrado: {project_static}")
 
-print(f"🔍 Verificando core/static/: {core_static_dir.exists()}")
-print(f"🔍 Verificando project static/: {project_static_dir.exists()}")
+# 🔧 CONFIGURACIÓN WHITENOISE OPTIMIZADA
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Solo agregar a STATICFILES_DIRS si existe y no es el STATIC_ROOT
-if project_static_dir.exists() and str(project_static_dir) != str(STATIC_ROOT):
-    STATICFILES_DIRS.append(str(project_static_dir))
-    print(f"📁 Agregado a STATICFILES_DIRS: {project_static_dir}")
-
-# Finders en orden correcto
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',  # Para STATICFILES_DIRS
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',  # Para core/static/
 ]
 
-# 🔧 CONFIGURACIÓN WHITENOISE OPTIMIZADA PARA MÓVIL
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-# Configuración WhiteNoise específica para móvil
+# Configuración WhiteNoise
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = False
-WHITENOISE_SKIP_COMPRESS_EXTENSIONS = [
-    'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico', 
-    'mp4', 'webm', 'mp3', 'wav', 'ogg'
-]
+WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico']
 WHITENOISE_MAX_AGE = 31536000  # 1 año
-WHITENOISE_ADD_HEADERS_FUNCTION = 'raizdigital.settings.production.custom_headers'
-
-# 🔧 FUNCIÓN PARA HEADERS PERSONALIZADOS
-def custom_headers(headers, path, url):
-    """Agregar headers específicos para diferentes tipos de archivos"""
-    if path.endswith('.css'):
-        headers['Content-Type'] = 'text/css; charset=utf-8'
-        headers['Cache-Control'] = 'public, max-age=31536000'
-    elif path.endswith('.js'):
-        headers['Content-Type'] = 'application/javascript; charset=utf-8'
-        headers['Cache-Control'] = 'public, max-age=31536000'
-    elif path.endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp')):
-        headers['Cache-Control'] = 'public, max-age=31536000'
-    return headers
 
 # Crear directorios necesarios
 try:
-    STATIC_ROOT.mkdir(exist_ok=True, parents=True)
+    STATIC_ROOT.mkdir(exist_ok=True)
     print(f"✅ STATIC_ROOT creado: {STATIC_ROOT}")
 except Exception as e:
     print(f"❌ Error creando STATIC_ROOT: {e}")
 
 # =================================
-# ARCHIVOS MULTIMEDIA - CONFIGURACIÓN CORREGIDA
+# ARCHIVOS MULTIMEDIA - CONFIGURACIÓN TEMPORAL
 # =================================
-
-print("📸 CONFIGURANDO ARCHIVOS MULTIMEDIA...")
 
 railway_volume = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH')
 valid_volume = railway_volume and railway_volume != '/var/lib/postgresql/data'
@@ -213,24 +211,18 @@ if valid_volume:
     MEDIA_URL = '/media/'
     print(f"💾 ✅ Volume persistente: {MEDIA_ROOT}")
 else:
-    # Para archivos temporales, usar un subdirectorio de static
     MEDIA_ROOT = STATIC_ROOT / 'temp_media'
     MEDIA_URL = '/static/temp_media/'
     print(f"📁 ⚠️ Almacenamiento temporal: {MEDIA_ROOT}")
 
-# Crear directorios de media
-try:
-    MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
-    (MEDIA_ROOT / 'news').mkdir(exist_ok=True)
-    print(f"✅ Directorios de media creados: {MEDIA_ROOT}")
-except Exception as e:
-    print(f"❌ Error creando directorios media: {e}")
+MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+(MEDIA_ROOT / 'news').mkdir(exist_ok=True)
 
 # =================================
-# 🔧 CONFIGURACIÓN ADICIONAL PARA MÓVIL
+# CONFIGURACIÓN ADICIONAL
 # =================================
 
-# CSRF - Configuración mejorada
+# CSRF
 CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
     'https://*.up.railway.app',
@@ -244,41 +236,25 @@ if railway_host:
         f'http://{railway_host}',
     ])
 
-# Seguridad optimizada para móvil
+# Seguridad
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = False  # Railway maneja SSL
+SECURE_SSL_REDIRECT = False
 USE_TZ = True
 
-# 🔧 CONFIGURACIÓN DE CACHE PARA ARCHIVOS ESTÁTICOS
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
-        'OPTIONS': {
-            'MAX_ENTRIES': 1000,
-            'CULL_FREQUENCY': 3,
-        }
-    }
-}
-
-# Sesiones optimizadas
+# Sesiones
 SESSION_COOKIE_AGE = 3600
 SESSION_SAVE_EVERY_REQUEST = True
-SESSION_COOKIE_SECURE = False  # Railway maneja HTTPS
+SESSION_COOKIE_SECURE = False
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 
-# 🔧 LOGGING MEJORADO PARA DEBUG DE ARCHIVOS ESTÁTICOS
+# Logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
             'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {message}',
             'style': '{',
         },
     },
@@ -299,16 +275,6 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
-        'django.contrib.staticfiles': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-        'whitenoise': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
         'core': {
             'handlers': ['console'],
             'level': 'DEBUG',
@@ -320,32 +286,17 @@ LOGGING = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # =================================
-# 🔧 VERIFICACIÓN FINAL DE ARCHIVOS ESTÁTICOS
+# RESUMEN DE CONFIGURACIÓN
 # =================================
 
-print("\n📊 RESUMEN DE CONFIGURACIÓN CORREGIDA:")
+print("\n📊 RESUMEN DE CONFIGURACIÓN:")
 print(f"   STATIC_URL: {STATIC_URL}")
 print(f"   STATIC_ROOT: {STATIC_ROOT}")
 print(f"   STATICFILES_DIRS: {STATICFILES_DIRS}")
-print(f"   STATICFILES_STORAGE: {STATICFILES_STORAGE}")
 print(f"   MEDIA_ROOT: {MEDIA_ROOT}")
 print(f"   MEDIA_URL: {MEDIA_URL}")
+print(f"   WHITENOISE_STORAGE: {STATICFILES_STORAGE}")
 print(f"   DEBUG: {DEBUG}")
 
-# Verificar archivos CSS específicos
-css_files_to_check = [
-    'core/css/variables.css',
-    'core/css/login.css',
-    'core/css/news.css',
-]
-
-for css_file in css_files_to_check:
-    file_path = core_static_dir / css_file
-    if file_path.exists():
-        file_size = file_path.stat().st_size
-        print(f"   ✅ CSS encontrado: {css_file} ({file_size} bytes)")
-    else:
-        print(f"   ❌ CSS faltante: {css_file}")
-
-print('\n🚀 PRODUCTION SETTINGS CORREGIDO PARA MÓVIL')
+print('\n🚀 PRODUCTION SETTINGS CONFIGURADO PARA TU ESTRUCTURA')
 print('=' * 60)
