@@ -38,7 +38,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # MIDDLEWARE PERSONALIZADO SOLO SI EXISTE
     'core.middleware.AuthenticationMiddleware',
 ]
 
@@ -55,6 +54,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.media_url',  # ✅ Agregar context processor
             ],
         },
     },
@@ -127,6 +127,10 @@ TIME_ZONE = 'America/Bogota'
 USE_I18N = True
 USE_TZ = True
 
+# =================================
+# ARCHIVOS ESTÁTICOS Y MULTIMEDIA - SOLUCIÓN PARA RAILWAY
+# =================================
+
 # Archivos estáticos
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -143,6 +147,22 @@ STATICFILES_FINDERS = [
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 WHITENOISE_USE_FINDERS = True
+
+# =================================
+# ARCHIVOS MULTIMEDIA - NUEVA CONFIGURACIÓN
+# =================================
+
+# TEMPORAL: Guardar en static hasta configurar almacenamiento externo
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'staticfiles' / 'media'
+MEDIA_ROOT.mkdir(exist_ok=True, parents=True)
+
+# Permitir que WhiteNoise sirva archivos multimedia también
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True
+
+print(f"📁 MEDIA_ROOT: {MEDIA_ROOT}")
+print(f"📁 STATIC_ROOT: {STATIC_ROOT}")
 
 # CSRF
 CSRF_TRUSTED_ORIGINS = [

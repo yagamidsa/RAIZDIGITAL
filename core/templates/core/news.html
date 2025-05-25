@@ -200,8 +200,9 @@
                 </svg>
             </a>
             {% endif %}
+            <!-- 🖼️ CAMBIO: Usar MEDIA_URL en lugar de static para artículos destacados -->
             <div class="featured-image"
-                data-bg-url="{% if noticia.imagen_portada %}{% static 'core/img/news/'|add:noticia.imagen_portada %}{% else %}{% static 'core/img/news/default.jpg' %}{% endif %}">
+                data-bg-url="{% if noticia.imagen_portada %}{{ MEDIA_URL }}{{ noticia.imagen_portada }}{% else %}{% static 'core/img/news/default.jpg' %}{% endif %}">
                 <div class="card-corner corner-top-left"></div>
                 <div class="card-corner corner-top-right"></div>
                 <div class="card-corner corner-bottom-left"></div>
@@ -244,8 +245,9 @@
                     </svg>
                 </a>
                 {% endif %}
+                <!-- 🖼️ CAMBIO: Usar MEDIA_URL en lugar de static para tarjetas normales -->
                 <div class="card-image"
-                    data-bg-url="{% if noticia.imagen_portada %}{% static 'core/img/news/'|add:noticia.imagen_portada %}{% else %}{% static 'core/img/news/default.jpg' %}{% endif %}">
+                    data-bg-url="{% if noticia.imagen_portada %}{{ MEDIA_URL }}{{ noticia.imagen_portada }}{% else %}{% static 'core/img/news/default.jpg' %}{% endif %}">
                     <div class="card-corner corner-top-left"></div>
                     <div class="card-corner corner-top-right"></div>
                     <div class="card-corner corner-bottom-left"></div>
@@ -347,13 +349,31 @@
             disable: window.innerWidth <= 768
         });
 
-        // 2. Configurar imágenes de fondo
-        document.querySelectorAll('[data-bg-url]').forEach(function (element) {
+        // 2. Configurar imágenes de fondo CON DEBUG MEJORADO
+        document.querySelectorAll('[data-bg-url]').forEach(function (element, index) {
             const bgUrl = element.getAttribute('data-bg-url');
+            console.log(`🖼️ Imagen ${index + 1}: ${bgUrl}`);
+            
             if (bgUrl) {
                 element.style.backgroundImage = `url('${bgUrl}')`;
+                
+                // 🔍 NUEVO: Verificar si la imagen se carga correctamente
+                const img = new Image();
+                img.onload = function() {
+                    console.log(`✅ Imagen cargada correctamente: ${bgUrl}`);
+                };
+                img.onerror = function() {
+                    console.log(`❌ Error cargando imagen: ${bgUrl}`);
+                    console.log(`🔄 Intentando cargar imagen por defecto...`);
+                    element.style.backgroundImage = `url('{% static 'core/img/news/default.jpg' %}')`;
+                };
+                img.src = bgUrl;
             }
         });
+
+        // 🔍 NUEVO: Debug de configuración de media
+        console.log('📁 MEDIA_URL:', '{{ MEDIA_URL }}');
+        console.log('📁 STATIC_URL:', '{{ STATIC_URL }}');
 
         // 3. Ya no necesitamos código de menú móvil aquí, está en el archivo include
 

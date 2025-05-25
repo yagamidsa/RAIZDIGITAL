@@ -679,32 +679,17 @@ def is_admin(request):
 
 
 @admin_required
-@session_refresh
+@session_refresh  
 def crear_noticia(request):
-    """Vista para crear noticias - SOLO ADMINS"""
+    """Vista para crear noticias - VERSIÓN CORREGIDA CON MEDIA_ROOT"""
     user_info = get_user_info(request)
-    """
-    Vista para crear noticias con control de concurrencia y seguridad.
-    Maneja la creación de noticias para administradores de diferentes comunidades.
-    """
-    from django.shortcuts import render, redirect
-    from django.utils.text import slugify
-    from django.contrib import messages
-    import os
-    import traceback
-    from django.db import connection, transaction
-    import uuid
-    import datetime
     
-    # PASO 1: Verificación de autenticación y autorización
+    # Verificaciones de autenticación
     if 'user_id' not in request.session:
-        # Redirigir al login si no hay sesión
         return redirect('core:login')
     
     user_id = request.session.get('user_id')
     username = request.session.get('username', 'Usuario')
-    
-    # Verificar que el usuario sea administrador y obtener su comunidad
     comunidad_id = request.session.get('comunidad_id')
     admin_status = is_admin(request)
     
@@ -721,23 +706,19 @@ def crear_noticia(request):
     error_message = None
     success_message = None
     
-    # PASO 2: Verificar y obtener información de la comunidad del usuario
+    # Verificar comunidad
     try:
         with connection.cursor() as cursor:
             if comunidad_id:
-                # Convertir a entero si es posible
                 try:
                     comunidad_id = int(comunidad_id)
                 except (ValueError, TypeError):
                     print(f"Error al convertir ID de comunidad: {comunidad_id}")
                     comunidad_id = None
                 
-                # Verificar si la comunidad existe
                 if comunidad_id:
                     cursor.execute("""
-                        SELECT id, nombre 
-                        FROM raiz.comunidades 
-                        WHERE id = %s
+                        SELECT id, nombre FROM raiz.comunidades WHERE id = %s
                     """, [comunidad_id])
                     
                     comunidad = cursor.fetchone()
@@ -750,9 +731,8 @@ def crear_noticia(request):
         print(f"Error al verificar comunidad: {e}")
         comunidad_id = None
     
-    # PASO 3: Procesar el formulario si es POST
+    # Procesar formulario
     if request.method == 'POST':
-        # Obtener datos del formulario
         titulo = request.POST.get('titulo', '').strip()
         resumen = request.POST.get('resumen', '').strip()
         contenido = request.POST.get('contenido', '').strip()
@@ -767,112 +747,111 @@ def crear_noticia(request):
         elif not contenido:
             error_message = "El contenido es obligatorio."
         else:
-            # PASO 4: Crear la noticia con control de concurrencia
             try:
-                # Usar transacción para garantizar atomicidad
                 with transaction.atomic():
-                    # Generar un slug único
+                    # Generar slug único
                     base_slug = slugify(titulo)
                     slug = base_slug
                     
                     with connection.cursor() as cursor:
-                        # Verificar si ya existe un slug igual
                         cursor.execute(
                             "SELECT COUNT(*) FROM raiz.noticias WHERE slug = %s",
                             [slug]
                         )
                         
                         if cursor.fetchone()[0] > 0:
-                            # Si existe, añadir timestamp único para evitar colisiones
                             timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
                             random_suffix = str(uuid.uuid4())[:8]
                             slug = f"{base_slug}-{timestamp}-{random_suffix}"
                         
-                        # IMPORTANTE: Usar una secuencia correctamente
-                        # Primero verificar la secuencia
-                        cursor.execute("""
-                            SELECT pg_get_serial_sequence('raiz.noticias', 'id') as sequence_name
-                        """)
-                        
-                        sequence_name = cursor.fetchone()[0]
-                        if sequence_name:
-                            # Resetear la secuencia si es necesario
-                            cursor.execute("""
-                                SELECT SETVAL(%s, COALESCE((SELECT MAX(id) FROM raiz.noticias), 0) + 1, false)
-                            """, [sequence_name])
-                        
-                        # Insertar la noticia con FOR UPDATE para bloquear la tabla durante la inserción
-                        cursor.execute("LOCK TABLE raiz.noticias IN EXCLUSIVE MODE")
-                        
-                        # Insertar con variables bien definidas
+                        # Insertar noticia SIN imagen primero
                         cursor.execute("""
                             INSERT INTO raiz.noticias (
-                                titulo, 
-                                resumen, 
-                                contenido, 
-                                slug,
-                                estado, 
-                                destacado,
-                                fecha_creacion, 
-                                fecha_actualizacion,
-                                fecha_publicacion,
-                                imagen_portada,
-                                vistas,
-                                id_autor,
-                                id_comunidad
+                                titulo, resumen, contenido, slug, estado, destacado,
+                                fecha_creacion, fecha_actualizacion, fecha_publicacion,
+                                imagen_portada, vistas, id_autor, id_comunidad
                             ) VALUES (
                                 %s, %s, %s, %s, %s, %s,
-                                CURRENT_TIMESTAMP, 
-                                CURRENT_TIMESTAMP,
+                                CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
                                 CASE WHEN %s = 'publicado' THEN CURRENT_TIMESTAMP ELSE NULL END,
-                                NULL,
-                                0,
-                                %s,
-                                %s
+                                NULL, 0, %s, %s
                             ) RETURNING id
                         """, [
-                            titulo, 
-                            resumen, 
-                            contenido, 
-                            slug,
-                            estado, 
-                            destacado,
-                            estado,
-                            user_id,
-                            comunidad_id  # Incluye comunidad_id (puede ser NULL)
+                            titulo, resumen, contenido, slug, estado, destacado,
+                            estado, user_id, comunidad_id
                         ])
                         
                         noticia_id = cursor.fetchone()[0]
-                        print(f"✅ Noticia creada con ID={noticia_id}, Slug={slug}, Comunidad={comunidad_id}")
+                        print(f"✅ Noticia creada con ID={noticia_id}, Slug={slug}")
                 
-                # PASO 5: Procesar imagen si existe (fuera de la transacción para no bloquear)
-                if 'imagen_portada' in request.FILES:
+                # 🔧 MANEJO CORREGIDO DE IMAGEN CON MEDIA_ROOT
+                imagen_guardada = None
+                imagen_error = None
+                
+                if 'imagen_portada' in request.FILES and request.FILES['imagen_portada']:
                     imagen = request.FILES['imagen_portada']
-                    _, extension = os.path.splitext(imagen.name)
+                    print(f"📸 Procesando imagen: {imagen.name} ({imagen.size} bytes)")
                     
-                    # Usar una combinación de slug y timestamp para el nombre del archivo
-                    nombre_archivo = f"{slug}{extension}"
-                    ruta_guardado = os.path.join('core/static/core/img/news', nombre_archivo)
-                    
-                    # Asegurarse de que el directorio existe
-                    os.makedirs(os.path.dirname(ruta_guardado), exist_ok=True)
-                    
-                    # Guardar la imagen
-                    with open(ruta_guardado, 'wb+') as destino:
-                        for chunk in imagen.chunks():
-                            destino.write(chunk)
-                    
-                    # Actualizar el campo imagen_portada de la noticia
-                    with connection.cursor() as cursor:
-                        cursor.execute("""
-                            UPDATE raiz.noticias 
-                            SET imagen_portada = %s 
-                            WHERE id = %s
-                        """, [nombre_archivo, noticia_id])
+                    try:
+                        # Validar la imagen
+                        if imagen.size > 10 * 1024 * 1024:  # 10MB max
+                            imagen_error = "La imagen es demasiado grande (máximo 10MB)"
+                        else:
+                            _, extension = os.path.splitext(imagen.name)
+                            extension = extension.lower()
+                            
+                            # Validar extensión
+                            if extension not in ['.jpg', '.jpeg', '.png', '.gif', '.webp']:
+                                imagen_error = "Formato de imagen no válido. Use JPG, PNG, GIF o WebP"
+                            else:
+                                # Generar nombre único para la imagen
+                                timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+                                nombre_archivo = f"{slug}-{timestamp}{extension}"
+                                
+                                # 🔧 USAR MEDIA_ROOT en lugar de static
+                                from django.conf import settings
+                                ruta_guardado = os.path.join(settings.MEDIA_ROOT, 'news', nombre_archivo)
+                                
+                                # Crear directorio si no existe
+                                os.makedirs(os.path.dirname(ruta_guardado), exist_ok=True)
+                                
+                                # Guardar la imagen físicamente
+                                print(f"💾 Guardando imagen en: {ruta_guardado}")
+                                with open(ruta_guardado, 'wb+') as destino:
+                                    for chunk in imagen.chunks():
+                                        destino.write(chunk)
+                                
+                                # 🔧 GUARDAR PATH RELATIVO EN BD (news/imagen.jpg)
+                                imagen_path_bd = f"news/{nombre_archivo}"
+                                
+                                # Actualizar la noticia con la ruta de la imagen
+                                with connection.cursor() as cursor:
+                                    cursor.execute("""
+                                        UPDATE raiz.noticias 
+                                        SET imagen_portada = %s 
+                                        WHERE id = %s
+                                    """, [imagen_path_bd, noticia_id])
+                                
+                                imagen_guardada = imagen_path_bd
+                                print(f"✅ Imagen guardada y asociada: {imagen_path_bd}")
+                                print(f"📁 Archivo físico en: {ruta_guardado}")
+                                
+                    except Exception as e:
+                        imagen_error = f"Error al guardar imagen: {str(e)}"
+                        print(f"❌ Error procesando imagen: {e}")
+                        import traceback
+                        traceback.print_exc()
                 
-                # Mensaje de éxito que incluye la comunidad
+                # Preparar mensaje de éxito
                 comunidad_texto = f" para la comunidad {comunidad_id}" if comunidad_id else ""
                 success_message = f"Noticia '{titulo}' creada con éxito{comunidad_texto}."
+                
+                if imagen_guardada:
+                    success_message += f" Imagen guardada correctamente en {imagen_guardada}."
+                elif imagen_error:
+                    success_message += f" Advertencia con imagen: {imagen_error}"
+                elif 'imagen_portada' in request.FILES:
+                    success_message += " Sin imagen seleccionada."
                 
                 # Limpiar formulario en caso de éxito
                 titulo = ""
@@ -882,13 +861,12 @@ def crear_noticia(request):
                 destacado = False
                 
             except Exception as e:
-                print(f"\n=== ERROR AL CREAR NOTICIA ===")
-                print(f"Error: {str(e)}")
-                print(traceback.format_exc())
+                print(f"❌ Error al crear noticia: {str(e)}")
+                import traceback
+                traceback.print_exc()
                 error_message = f"Error al crear la noticia: {str(e)}"
     
-    # PASO 6: Preparar información contextual para la plantilla
-    # Obtener comunidad del usuario para mostrar en la interfaz
+    # Preparar contexto
     comunidad_nombre = "Sin comunidad asignada"
     if comunidad_id:
         try:
@@ -902,7 +880,6 @@ def crear_noticia(request):
         except Exception as e:
             print(f"Error al obtener nombre de comunidad: {e}")
     
-    # Preparar contexto para la plantilla
     context = {
         'error': error_message,
         'success': success_message,
@@ -924,18 +901,15 @@ def crear_noticia(request):
         }
     }
     
-    # Renderizar la plantilla
     return render(request, 'core/create_news.html', context)
 
 
 @admin_required
 @session_refresh
 def editar_noticia(request, slug):
-    """Vista para editar noticias - SOLO ADMINS"""
+    """Vista para editar noticias - VERSIÓN CORREGIDA CON MEDIA_ROOT"""
     user_info = get_user_info(request)
-    """
-    Vista para editar una noticia existente.
-    """
+    
     # Verificar si el usuario es admin
     if not is_admin(request):
         messages.error(request, "No tienes permisos para editar noticias.")
@@ -943,7 +917,6 @@ def editar_noticia(request, slug):
     
     # Obtener la noticia a editar
     try:
-        # Usar SQL para obtener la noticia
         from django.db import connection
         with connection.cursor() as cursor:
             cursor.execute("""
@@ -1009,7 +982,6 @@ def editar_noticia(request, slug):
                 # Generar nuevo slug si cambió el título
                 new_slug = slug
                 if titulo != noticia['titulo']:
-                    import datetime
                     base_slug = slugify(titulo)
                     timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
                     random_suffix = str(uuid.uuid4())[:8]
@@ -1027,7 +999,7 @@ def editar_noticia(request, slug):
                             slug = %s,
                             fecha_actualizacion = CURRENT_TIMESTAMP,
                             fecha_publicacion = CASE 
-                                WHEN estado = 'publicado' AND fecha_publicacion IS NULL 
+                                WHEN %s = 'publicado' AND fecha_publicacion IS NULL 
                                 THEN CURRENT_TIMESTAMP 
                                 ELSE fecha_publicacion 
                             END
@@ -1039,36 +1011,85 @@ def editar_noticia(request, slug):
                         estado, 
                         destacado,
                         new_slug,
+                        estado,  # Para el CASE WHEN
                         noticia['id']
                     ])
                 
-                # Procesar imagen si existe
-                if 'imagen_portada' in request.FILES:
+                # 🔧 PROCESAR IMAGEN CORREGIDO CON MEDIA_ROOT
+                imagen_actualizada = False
+                imagen_error = None
+                
+                if 'imagen_portada' in request.FILES and request.FILES['imagen_portada']:
                     imagen = request.FILES['imagen_portada']
-                    _, extension = os.path.splitext(imagen.name)
+                    print(f"📸 Procesando nueva imagen: {imagen.name} ({imagen.size} bytes)")
                     
-                    # Generar nombre de archivo único
-                    nombre_archivo = f"{new_slug}{extension}"
-                    ruta_guardado = os.path.join('core/static/core/img/news', nombre_archivo)
-                    
-                    # Asegurarse de que el directorio existe
-                    os.makedirs(os.path.dirname(ruta_guardado), exist_ok=True)
-                    
-                    # Guardar la imagen
-                    with open(ruta_guardado, 'wb+') as destino:
-                        for chunk in imagen.chunks():
-                            destino.write(chunk)
-                    
-                    # Actualizar el campo imagen_portada
-                    with connection.cursor() as cursor:
-                        cursor.execute("""
-                            UPDATE raiz.noticias 
-                            SET imagen_portada = %s 
-                            WHERE id = %s
-                        """, [nombre_archivo, noticia['id']])
+                    try:
+                        # Validar la imagen
+                        if imagen.size > 10 * 1024 * 1024:  # 10MB max
+                            imagen_error = "La imagen es demasiado grande (máximo 10MB)"
+                        else:
+                            _, extension = os.path.splitext(imagen.name)
+                            extension = extension.lower()
+                            
+                            # Validar extensión
+                            if extension not in ['.jpg', '.jpeg', '.png', '.gif', '.webp']:
+                                imagen_error = "Formato de imagen no válido. Use JPG, PNG, GIF o WebP"
+                            else:
+                                # Generar nombre único para la imagen
+                                timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+                                nombre_archivo = f"{new_slug}-{timestamp}{extension}"
+                                
+                                # 🔧 USAR MEDIA_ROOT en lugar de static
+                                from django.conf import settings
+                                ruta_guardado = os.path.join(settings.MEDIA_ROOT, 'news', nombre_archivo)
+                                
+                                # Crear directorio si no existe
+                                os.makedirs(os.path.dirname(ruta_guardado), exist_ok=True)
+                                
+                                # 🔧 ELIMINAR IMAGEN ANTERIOR SI EXISTE
+                                if noticia['imagen_portada']:
+                                    try:
+                                        ruta_anterior = os.path.join(settings.MEDIA_ROOT, noticia['imagen_portada'])
+                                        if os.path.exists(ruta_anterior):
+                                            os.remove(ruta_anterior)
+                                            print(f"🗑️ Imagen anterior eliminada: {ruta_anterior}")
+                                    except Exception as e:
+                                        print(f"⚠️ No se pudo eliminar imagen anterior: {e}")
+                                
+                                # Guardar la nueva imagen
+                                print(f"💾 Guardando nueva imagen en: {ruta_guardado}")
+                                with open(ruta_guardado, 'wb+') as destino:
+                                    for chunk in imagen.chunks():
+                                        destino.write(chunk)
+                                
+                                # 🔧 GUARDAR PATH RELATIVO EN BD (news/imagen.jpg)
+                                imagen_path_bd = f"news/{nombre_archivo}"
+                                
+                                # Actualizar el campo imagen_portada
+                                with connection.cursor() as cursor:
+                                    cursor.execute("""
+                                        UPDATE raiz.noticias 
+                                        SET imagen_portada = %s 
+                                        WHERE id = %s
+                                    """, [imagen_path_bd, noticia['id']])
+                                
+                                imagen_actualizada = True
+                                print(f"✅ Nueva imagen guardada y asociada: {imagen_path_bd}")
+                                print(f"📁 Archivo físico en: {ruta_guardado}")
+                                
+                    except Exception as e:
+                        imagen_error = f"Error al actualizar imagen: {str(e)}"
+                        print(f"❌ Error procesando imagen: {e}")
+                        import traceback
+                        traceback.print_exc()
                 
                 # Mensaje de éxito
                 success_message = f"Noticia '{titulo}' actualizada con éxito."
+                
+                if imagen_actualizada:
+                    success_message += " Imagen actualizada correctamente."
+                elif imagen_error:
+                    success_message += f" Advertencia con imagen: {imagen_error}"
                 
                 # Redireccionar a la página de noticias en caso de éxito
                 if new_slug != slug:
@@ -1077,6 +1098,8 @@ def editar_noticia(request, slug):
                 
             except Exception as e:
                 print(f"Error al actualizar noticia: {e}")
+                import traceback
+                traceback.print_exc()
                 error_message = f"Error al actualizar la noticia: {e}"
     
     # Preparar contexto para la plantilla
@@ -1106,8 +1129,6 @@ def editar_noticia(request, slug):
     return render(request, 'core/edit_news.html', context)
 
 
-
-# Actualizar la función like_noticia en core/views.py
 
 @ajax_login_required
 def like_noticia(request, noticia_id):
@@ -1763,3 +1784,68 @@ def send_verification_email(user_id, email, username):
     # Por ahora solo log
     logger.info(f"Email de verificación debe enviarse a {email} para usuario {username}")
     pass
+
+
+import os
+from django.conf import settings
+import uuid
+import datetime
+
+def handle_uploaded_file(uploaded_file, category='general'):
+    """
+    Maneja la subida de archivos de forma robusta.
+    
+    Args:
+        uploaded_file: Archivo subido desde el formulario
+        category: Categoría del archivo ('news', 'profiles', etc.)
+    
+    Returns:
+        str: Ruta relativa del archivo guardado o None si hay error
+    """
+    try:
+        # Validar que el archivo no esté vacío
+        if not uploaded_file or uploaded_file.size == 0:
+            print("❌ Archivo vacío o no válido")
+            return None
+        
+        # Validar tamaño máximo (5MB)
+        if uploaded_file.size > 5 * 1024 * 1024:
+            print(f"❌ Archivo muy grande: {uploaded_file.size} bytes")
+            return None
+        
+        # Obtener extensión del archivo
+        name, extension = os.path.splitext(uploaded_file.name)
+        
+        # Validar extensiones permitidas
+        allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+        if extension.lower() not in allowed_extensions:
+            print(f"❌ Extensión no permitida: {extension}")
+            return None
+        
+        # Generar nombre único para evitar colisiones
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        unique_id = str(uuid.uuid4())[:8]
+        filename = f"{category}_{timestamp}_{unique_id}{extension}"
+        
+        # Determinar la ruta donde guardar
+        category_dir = os.path.join(settings.MEDIA_ROOT, category)
+        os.makedirs(category_dir, exist_ok=True)
+        
+        file_path = os.path.join(category_dir, filename)
+        relative_path = f"{category}/{filename}"  # Para guardar en la BD
+        
+        # Guardar el archivo
+        with open(file_path, 'wb+') as destination:
+            for chunk in uploaded_file.chunks():
+                destination.write(chunk)
+        
+        print(f"✅ Archivo guardado: {file_path}")
+        print(f"✅ Ruta relativa: {relative_path}")
+        
+        return relative_path
+        
+    except Exception as e:
+        print(f"❌ Error al guardar archivo: {e}")
+        import traceback
+        traceback.print_exc()
+        return None

@@ -520,7 +520,7 @@
 
             <!-- Imagen destacada -->
             <div class="article-featured-image"
-                data-bg-url="{% if noticia.imagen_portada %}{% static 'core/img/news/'|add:noticia.imagen_portada %}{% else %}{% static 'core/img/news/default.jpg' %}{% endif %}">
+                data-bg-url="{% if noticia.imagen_portada %}{{ MEDIA_URL }}{{ noticia.imagen_portada }}{% else %}{% static 'core/img/news/default.jpg' %}{% endif %}">
             </div>
 
             <!-- Contenido del artículo -->
@@ -559,8 +559,9 @@
                 <div class="related-grid">
                     {% for noticia_rel in noticias_relacionadas %}
                     <a href="{% url 'core:noticia_detalle' noticia_rel.slug %}" class="related-card">
+                        <!-- 🔧 CAMBIO: Usar MEDIA_URL también para noticias relacionadas -->
                         <div class="related-image"
-                            data-bg-url="{% if noticia_rel.imagen_portada %}{% static 'core/img/news/'|add:noticia_rel.imagen_portada %}{% else %}{% static 'core/img/news/default.jpg' %}{% endif %}">
+                            data-bg-url="{% if noticia_rel.imagen_portada %}{{ MEDIA_URL }}{{ noticia_rel.imagen_portada }}{% else %}{% static 'core/img/news/default.jpg' %}{% endif %}">
                         </div>
                         <div class="related-content">
                             <h4 class="related-card-title">{{ noticia_rel.titulo }}</h4>

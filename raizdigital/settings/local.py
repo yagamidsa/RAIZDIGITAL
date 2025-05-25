@@ -18,7 +18,7 @@ def load_env_file():
 
 load_env_file()
 
-# Configuración de PostgreSQL local COMPATIBLE
+# SOBREESCRIBIR configuración de PostgreSQL local
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -36,7 +36,7 @@ DATABASES = {
     }
 }
 
-# MIDDLEWARE COMPATIBLE (incluir el personalizado si existe)
+# SOBREESCRIBIR MIDDLEWARE para local (sin middleware personalizado por ahora)
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -55,6 +55,19 @@ try:
 except ImportError:
     print("⚠️ Middleware personalizado no encontrado, usando solo middlewares estándar")
 
+# CONFIGURACIÓN DE DESARROLLO PARA ARCHIVOS MULTIMEDIA
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Crear directorios necesarios
+MEDIA_ROOT.mkdir(exist_ok=True)
+(MEDIA_ROOT / 'news').mkdir(exist_ok=True)
+
+# CONFIGURACIÓN DE SESIONES MENOS RESTRICTIVA PARA DESARROLLO
+SESSION_COOKIE_SECURE = False  # HTTP está bien en desarrollo
+CSRF_COOKIE_SECURE = False  # HTTP está bien en desarrollo
+
 print(f'🐘 Conectando a PostgreSQL local: {DATABASES["default"]["USER"]}@{DATABASES["default"]["HOST"]}:{DATABASES["default"]["PORT"]}/{DATABASES["default"]["NAME"]}')
 print(f'🔧 ATOMIC_REQUESTS: {DATABASES["default"]["ATOMIC_REQUESTS"]}')
 print(f'🔧 DEBUG: {DEBUG}')
+print(f'📁 MEDIA configurado: {MEDIA_URL} -> {MEDIA_ROOT}')
