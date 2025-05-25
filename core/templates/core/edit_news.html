@@ -20,19 +20,22 @@
             <div class="organic-shape shape2"></div>
         </div>
     </div>
-    
+
     <!-- Barra de navegación superior -->
     <header class="news-header">
         <a href="{% url 'core:index' %}" class="news-logo">
             <svg viewBox="0 0 24 24">
-                <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/>
-                <path d="M12 4.5c-4.136 0-7.5 3.364-7.5 7.5s3.364 7.5 7.5 7.5 7.5-3.364 7.5-7.5-3.364-7.5-7.5-7.5zm0 14c-3.584 0-6.5-2.916-6.5-6.5s2.916-6.5 6.5-6.5 6.5 2.916 6.5 6.5-2.916 6.5-6.5 6.5z"/>
-                <path d="M12 7c-2.757 0-5 2.243-5 5s2.243 5 5 5 5-2.243 5-5-2.243-5-5-5zm0 9c-2.206 0-4-1.794-4-4s1.794-4 4-4 4 1.794 4 4-1.794 4-4 4z"/>
-                <circle cx="12" cy="12" r="2.5"/>
+                <path
+                    d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z" />
+                <path
+                    d="M12 4.5c-4.136 0-7.5 3.364-7.5 7.5s3.364 7.5 7.5 7.5 7.5-3.364 7.5-7.5-3.364-7.5-7.5-7.5zm0 14c-3.584 0-6.5-2.916-6.5-6.5s2.916-6.5 6.5-6.5 6.5 2.916 6.5 6.5-2.916 6.5-6.5 6.5z" />
+                <path
+                    d="M12 7c-2.757 0-5 2.243-5 5s2.243 5 5 5 5-2.243 5-5-2.243-5-5-5zm0 9c-2.206 0-4-1.794-4-4s1.794-4 4-4 4 1.794 4 4-1.794 4-4 4z" />
+                <circle cx="12" cy="12" r="2.5" />
             </svg>
             <span class="news-logo-text">Raíz Digital</span>
         </a>
-        
+
         <nav class="news-nav">
             <a href="/marketplace/" class="nav-link">Inicio</a>
             <a href="{% url 'core:noticias' %}" class="nav-link active">Noticias</a>
@@ -41,68 +44,76 @@
             <a href="#" class="nav-link">Comunidades</a>
         </nav>
     </header>
-    
+
     <!-- Contenido principal -->
     <main class="news-content">
         <!-- Botón para volver -->
         <a href="{% url 'core:noticias' %}" class="back-button">
             <svg viewBox="0 0 24 24">
-                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
             </svg>
             <span>Volver a Noticias</span>
         </a>
-        
+
         <!-- Formulario de edición de noticias -->
         <div class="create-news-container" data-aos="fade-up">
             <div class="create-news-border"></div>
-            
+
             <h2 class="form-title">Editar Noticia</h2>
-            
+
             {% if error %}
             <div class="error-message">
                 <svg class="error-icon" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
                 </svg>
                 <span>{{ error }}</span>
             </div>
             {% endif %}
-            
+
             {% if success %}
             <div class="success-message">
                 <svg class="success-icon" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                 </svg>
                 <span>{{ success }}</span>
                 <a href="{% url 'core:noticias' %}" class="btn-view-news">Ver Noticias</a>
             </div>
             {% else %}
-            <form method="post" action="{% url 'core:editar_noticia' noticia.slug %}" enctype="multipart/form-data" id="newsForm">
+            <form method="post" action="{% url 'core:editar_noticia' noticia.slug %}" enctype="multipart/form-data"
+                id="newsForm">
                 {% csrf_token %}
-                
+
                 <!-- Campo oculto para la comunidad -->
                 <input type="hidden" name="id_comunidad" value="{{ noticia.id_comunidad }}">
-                
+
                 <div class="form-group">
                     <label for="titulo" class="form-label">Título *</label>
-                    <input type="text" id="titulo" name="titulo" class="form-input" value="{{ noticia.titulo }}" placeholder="Escribe un título atractivo" required>
+                    <input type="text" id="titulo" name="titulo" class="form-input" value="{{ noticia.titulo }}"
+                        placeholder="Escribe un título atractivo" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="resumen" class="form-label">Resumen *</label>
-                    <textarea id="resumen" name="resumen" class="form-textarea" placeholder="Breve resumen de la noticia (máximo 200 caracteres)" required maxlength="200">{{ noticia.resumen }}</textarea>
+                    <textarea id="resumen" name="resumen" class="form-textarea"
+                        placeholder="Breve resumen de la noticia (máximo 200 caracteres)" required
+                        maxlength="200">{{ noticia.resumen }}</textarea>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="contenido" class="form-label">Contenido *</label>
-                    <textarea id="contenido" name="contenido" class="form-textarea" placeholder="Contenido detallado de la noticia" required rows="10">{{ noticia.contenido }}</textarea>
+                    <textarea id="contenido" name="contenido" class="form-textarea"
+                        placeholder="Contenido detallado de la noticia" required
+                        rows="10">{{ noticia.contenido }}</textarea>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="estado" class="form-label">Estado</label>
                     <select id="estado" name="estado" class="form-select">
-                        <option value="borrador" {% if noticia.estado == 'borrador' %}selected{% endif %}>Borrador</option>
-                        <option value="publicado" {% if noticia.estado == 'publicado' %}selected{% endif %}>Publicado</option>
-                        <option value="archivado" {% if noticia.estado == 'archivado' %}selected{% endif %}>Archivado</option>
+                        <option value="borrador" {% if noticia.estado == "borrador" %}selected{% endif %}>Borrador</option>
+                        <option value="publicado" {% if noticia.estado == "publicado" %}selected{% endif %}>Publicado</option>
+                        <option value="archivado" {% if noticia.estado == "archivado" %}selected{% endif %}>Archivado</option>
                     </select>
                 </div>
                 
@@ -114,19 +125,28 @@
                         <span class="toggle-text">{% if noticia.destacado %}Sí{% else %}No{% endif %}</span>
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label">Imagen de Portada</label>
                     <div class="image-upload-container" id="imageUploadContainer">
                         {% if noticia.imagen_portada %}
                         <div class="current-image">
                             <p>Imagen actual:</p>
-                            <img src="img src="{{ MEDIA_URL }}{{ noticia.imagen_portada }}" alt="{{ noticia.titulo }}" style="max-width: 100%; max-height: 200px; border-radius: 8px; margin-bottom: 20px;">
+                            <img src="{{ MEDIA_URL }}{{ noticia.imagen_portada }}" alt="{{ noticia.titulo }}"
+                                style="max-width: 100%; max-height: 200px; border-radius: 8px; margin-bottom: 20px;"
+                                onerror="this.style.display='none'; this.parentElement.querySelector('.error-fallback').style.display='block';">
+                            <div class="error-fallback"
+                                style="display: none; padding: 15px; background: rgba(255, 0, 0, 0.1); border: 1px solid #ff4444; border-radius: 8px; color: #ff4444; text-align: center;">
+                                <p><strong>⚠️ Imagen no encontrada</strong></p>
+                                <p>{{ noticia.imagen_portada }}</p>
+                                <p><small>Sube una nueva imagen para reemplazarla</small></p>
+                            </div>
                         </div>
                         {% endif %}
-                        
+
                         <svg class="image-upload-icon" viewBox="0 0 24 24">
-                            <path d="M19 7v2.99s-1.99.01-2 0V7h-3s.01-1.99 0-2h3V2h2v3h3v2h-3zm-3 4V8h-3V5H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-8h-5zM5 19l3-4 2 3 3-4 4 5H5z"/>
+                            <path
+                                d="M19 7v2.99s-1.99.01-2 0V7h-3s.01-1.99 0-2h3V2h2v3h3v2h-3zm-3 4V8h-3V5H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-8h-5zM5 19l3-4 2 3 3-4 4 5H5z" />
                         </svg>
                         <p class="image-upload-text">Arrastra una nueva imagen o haz clic aquí para cambiarla</p>
                         <p class="image-upload-help">Tamaño recomendado: 1200 x 630 píxeles (16:9)</p>
@@ -136,16 +156,18 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label">Información adicional</label>
-                    <div style="background: rgba(10, 25, 47, 0.3); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <div
+                        style="background: rgba(10, 25, 47, 0.3); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                         <p><strong>Autor:</strong> {{ noticia.autor_nombre }} {{ noticia.autor_apellido }}</p>
-                        <p><strong>Comunidad:</strong> {{ noticia.comunidad_nombre|default:"Global (sin comunidad específica)" }}</p>
+                        <p><strong>Comunidad:</strong> {{ noticia.comunidad_nombre|default:"Global (sin comunidad
+                            específica)" }}</p>
                         <p><strong>Slug:</strong> {{ noticia.slug }}</p>
                     </div>
                 </div>
-                
+
                 <div class="form-actions">
                     <a href="{% url 'core:noticias' %}" class="btn-cancel">Cancelar</a>
                     <button type="submit" class="btn-submit-news">
@@ -156,11 +178,11 @@
             {% endif %}
         </div>
     </main>
-    
+
     <!-- Botón para volver arriba -->
     <div class="back-to-top" id="backToTop">
         <svg viewBox="0 0 24 24">
-            <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/>
+            <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z" />
         </svg>
     </div>
 </div>
@@ -169,138 +191,138 @@
 {% block extra_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar AOS para animaciones de scroll
-    AOS.init({
-        duration: 800,
-        easing: 'ease-out-cubic',
-        once: true,
-        mirror: false
-    });
-    
-    // Vista previa de imagen
-    const imageInput = document.getElementById('imageInput');
-    const imagePreview = document.getElementById('imagePreview');
-    const previewImg = document.getElementById('previewImg');
-    
-    if (imageInput && imagePreview && previewImg) {
-        imageInput.addEventListener('change', function() {
-            if (this.files && this.files[0]) {
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    imagePreview.style.display = 'block';
-                    
-                    // Ocultar la imagen actual cuando se selecciona una nueva
-                    const currentImage = document.querySelector('.current-image');
-                    if (currentImage) {
-                        currentImage.style.display = 'none';
+    document.addEventListener('DOMContentLoaded', function () {
+        // Inicializar AOS para animaciones de scroll
+        AOS.init({
+            duration: 800,
+            easing: 'ease-out-cubic',
+            once: true,
+            mirror: false
+        });
+
+        // Vista previa de imagen
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+
+        if (imageInput && imagePreview && previewImg) {
+            imageInput.addEventListener('change', function () {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        previewImg.src = e.target.result;
+                        imagePreview.style.display = 'block';
+
+                        // Ocultar la imagen actual cuando se selecciona una nueva
+                        const currentImage = document.querySelector('.current-image');
+                        if (currentImage) {
+                            currentImage.style.display = 'none';
+                        }
                     }
+
+                    reader.readAsDataURL(this.files[0]);
                 }
-                
-                reader.readAsDataURL(this.files[0]);
-            }
-        });
-    }
-    
-    // Función para hacer drag and drop de imágenes
-    const imageUploadContainer = document.getElementById('imageUploadContainer');
-    
-    if (imageUploadContainer) {
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            imageUploadContainer.addEventListener(eventName, preventDefaults, false);
-        });
-        
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        
-        ['dragenter', 'dragover'].forEach(eventName => {
-            imageUploadContainer.addEventListener(eventName, highlight, false);
-        });
-        
-        ['dragleave', 'drop'].forEach(eventName => {
-            imageUploadContainer.addEventListener(eventName, unhighlight, false);
-        });
-        
-        function highlight() {
-            imageUploadContainer.classList.add('highlight');
-        }
-        
-        function unhighlight() {
-            imageUploadContainer.classList.remove('highlight');
-        }
-        
-        imageUploadContainer.addEventListener('drop', handleDrop, false);
-        
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            
-            if (files && files[0]) {
-                imageInput.files = files;
-                
-                // Disparar el evento change para actualizar la vista previa
-                const event = new Event('change');
-                imageInput.dispatchEvent(event);
-            }
-        }
-    }
-    
-    // Toggle destacado
-    const toggleInput = document.getElementById('destacado');
-    const toggleText = document.querySelector('.toggle-text');
-    
-    if (toggleInput && toggleText) {
-        toggleInput.addEventListener('change', function() {
-            toggleText.textContent = this.checked ? 'Sí' : 'No';
-        });
-    }
-    
-    // Botón volver arriba
-    const backToTopButton = document.getElementById('backToTop');
-    
-    if (backToTopButton) {
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) {
-                backToTopButton.classList.add('visible');
-            } else {
-                backToTopButton.classList.remove('visible');
-            }
-        });
-        
-        backToTopButton.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
             });
-        });
-    }
-    
-    // Contador de caracteres para el resumen
-    const resumenTextarea = document.getElementById('resumen');
-    if (resumenTextarea) {
-        // Crear contador
-        const counterSpan = document.createElement('span');
-        counterSpan.className = 'char-counter';
-        counterSpan.textContent = `${resumenTextarea.value.length}/200 caracteres`;
-        resumenTextarea.parentNode.appendChild(counterSpan);
-        
-        // Actualizar contador en cada cambio
-        resumenTextarea.addEventListener('input', function() {
-            const currentLength = this.value.length;
-            counterSpan.textContent = `${currentLength}/200 caracteres`;
-            
-            // Cambiar color si excede el límite
-            if (currentLength > 200) {
-                counterSpan.classList.add('counter-exceeded');
-            } else {
-                counterSpan.classList.remove('counter-exceeded');
+        }
+
+        // Función para hacer drag and drop de imágenes
+        const imageUploadContainer = document.getElementById('imageUploadContainer');
+
+        if (imageUploadContainer) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                imageUploadContainer.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
             }
-        });
-    }
-});
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                imageUploadContainer.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                imageUploadContainer.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                imageUploadContainer.classList.add('highlight');
+            }
+
+            function unhighlight() {
+                imageUploadContainer.classList.remove('highlight');
+            }
+
+            imageUploadContainer.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+
+                if (files && files[0]) {
+                    imageInput.files = files;
+
+                    // Disparar el evento change para actualizar la vista previa
+                    const event = new Event('change');
+                    imageInput.dispatchEvent(event);
+                }
+            }
+        }
+
+        // Toggle destacado
+        const toggleInput = document.getElementById('destacado');
+        const toggleText = document.querySelector('.toggle-text');
+
+        if (toggleInput && toggleText) {
+            toggleInput.addEventListener('change', function () {
+                toggleText.textContent = this.checked ? 'Sí' : 'No';
+            });
+        }
+
+        // Botón volver arriba
+        const backToTopButton = document.getElementById('backToTop');
+
+        if (backToTopButton) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    backToTopButton.classList.add('visible');
+                } else {
+                    backToTopButton.classList.remove('visible');
+                }
+            });
+
+            backToTopButton.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        }
+
+        // Contador de caracteres para el resumen
+        const resumenTextarea = document.getElementById('resumen');
+        if (resumenTextarea) {
+            // Crear contador
+            const counterSpan = document.createElement('span');
+            counterSpan.className = 'char-counter';
+            counterSpan.textContent = `${resumenTextarea.value.length}/200 caracteres`;
+            resumenTextarea.parentNode.appendChild(counterSpan);
+
+            // Actualizar contador en cada cambio
+            resumenTextarea.addEventListener('input', function () {
+                const currentLength = this.value.length;
+                counterSpan.textContent = `${currentLength}/200 caracteres`;
+
+                // Cambiar color si excede el límite
+                if (currentLength > 200) {
+                    counterSpan.classList.add('counter-exceeded');
+                } else {
+                    counterSpan.classList.remove('counter-exceeded');
+                }
+            });
+        }
+    });
 </script>
 {% endblock %}
