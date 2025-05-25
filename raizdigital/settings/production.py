@@ -16,7 +16,22 @@ if not SECRET_KEY:
 DEBUG = False
 print(f"🔧 DEBUG mode: {DEBUG}")
 
-ALLOWED_HOSTS = ['*']
+# 🔧 CONFIGURACIÓN MEJORADA DE ALLOWED_HOSTS PARA RAILWAY
+ALLOWED_HOSTS = [
+    '*',  # Permitir todos los hosts (para desarrollo)
+    '.railway.app',  # Todos los subdominios de railway.app
+    '.up.railway.app',  # Todos los subdominios de up.railway.app
+    'raizdigital-production.up.railway.app',  # Tu dominio específico
+    'localhost',
+    '127.0.0.1',
+]
+
+# 🔧 DETECTAR Y AGREGAR EL HOST DINÁMICAMENTE
+railway_host = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+if railway_host:
+    ALLOWED_HOSTS.append(railway_host)
+    print(f"🌐 Railway host detectado: {railway_host}")
+
 print(f"🌐 ALLOWED_HOSTS: {ALLOWED_HOSTS}")
 
 INSTALLED_APPS = [
@@ -54,7 +69,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'core.context_processors.media_url',  # ✅ Agregar context processor
+                'core.context_processors.media_url',
             ],
         },
     },
@@ -128,7 +143,7 @@ USE_I18N = True
 USE_TZ = True
 
 # =================================
-# ARCHIVOS ESTÁTICOS Y MULTIMEDIA - SOLUCIÓN PARA RAILWAY
+# ARCHIVOS ESTÁTICOS Y MULTIMEDIA
 # =================================
 
 # Archivos estáticos
@@ -148,11 +163,7 @@ STATICFILES_FINDERS = [
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 WHITENOISE_USE_FINDERS = True
 
-# =================================
-# ARCHIVOS MULTIMEDIA - NUEVA CONFIGURACIÓN
-# =================================
-
-# TEMPORAL: Guardar en static hasta configurar almacenamiento externo
+# ARCHIVOS MULTIMEDIA
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'staticfiles' / 'media'
 MEDIA_ROOT.mkdir(exist_ok=True, parents=True)
@@ -164,21 +175,78 @@ WHITENOISE_AUTOREFRESH = True
 print(f"📁 MEDIA_ROOT: {MEDIA_ROOT}")
 print(f"📁 STATIC_ROOT: {STATIC_ROOT}")
 
-# CSRF
+# 🔧 CSRF MEJORADO PARA RAILWAY
 CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
     'https://*.up.railway.app',
+    'https://raizdigital-production.up.railway.app',
+    'http://raizdigital-production.up.railway.app',  # Para HTTP también
 ]
 
-# Security
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = False
+# Agregar dinámicamente si hay variables de Railway
+if railway_host:
+    CSRF_TRUSTED_ORIGINS.extend([
+        f'https://{railway_host}',
+        f'http://{railway_host}',
+    ])
 
-# Sessions
-SESSION_COOKIE_AGE = 3600
+print(f"🔒 CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}")
+
+# 🔧 CONFIGURACIÓN DE SEGURIDAD AJUSTADA PARA RAILWAY
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = False  # Railway maneja esto
+USE_TZ = True
+
+# 🔧 CONFIGURACIÓN DE SESIONES OPTIMIZADA
+SESSION_COOKIE_AGE = 3600  # 1 hora
 SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_SECURE = False  # Railway puede usar HTTP en algunos casos
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+# 🔧 LOGGING MEJORADO PARA DEBUGGING
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'core': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-print('🚀 PRODUCTION SETTINGS CARGADOS CORRECTAMENTE - CONFIGURACIÓN HÍBRIDA')
+# 🔧 CONFIGURACIÓN ADICIONAL PARA DEBUGGING
+print('🚀 PRODUCTION SETTINGS CARGADOS CORRECTAMENTE')
+print(f'🌐 HOST ESPERADO: raizdigital-production.up.railway.app')
+print(f'🔒 CSRF configurado para Railway')
 print('=' * 60)
