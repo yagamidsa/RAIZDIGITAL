@@ -54,10 +54,19 @@ else:
                 }),
             ]
 
-print(f"🌐 URLs configuradas para {'desarrollo' if settings.DEBUG else 'producción'}")
-print(f"💾 Volume válido: {'SÍ' if valid_volume else 'NO'}")
-print(f"📁 MEDIA_ROOT: {settings.MEDIA_ROOT}")
-print(f"🔗 MEDIA_URL: {settings.MEDIA_URL}")
+# 🔧 INFORMACIÓN DE DEBUG SOLO CUANDO CORRESPONDE
+if settings.DEBUG:
+    print(f"🌐 URLs configuradas para {'desarrollo' if settings.DEBUG else 'producción'}")
+    print(f"📁 MEDIA_ROOT: {settings.MEDIA_ROOT}")
+    print(f"🔗 MEDIA_URL: {settings.MEDIA_URL}")
+else:
+    railway_volume = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH')
+    valid_volume = railway_volume and railway_volume != '/var/lib/postgresql/data'
+    
+    print(f"🌐 URLs configuradas para {'desarrollo' if settings.DEBUG else 'producción'}")
+    print(f"💾 Volume válido: {'SÍ' if valid_volume else 'NO'}")
+    print(f"📁 MEDIA_ROOT: {settings.MEDIA_ROOT}")
+    print(f"🔗 MEDIA_URL: {settings.MEDIA_URL}")
 
 # Debug: Verificar rutas configuradas
 print(f"🛣️ URLs totales configuradas: {len(urlpatterns)}")
