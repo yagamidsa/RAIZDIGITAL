@@ -26,29 +26,26 @@
         {% block content %}{% endblock %}
     </div>
 
-    <!-- Scripts base SÚPER OPTIMIZADOS PARA MÓVIL -->
+    <!-- Scripts base OPTIMIZADOS CONSERVADORES PARA MÓVIL -->
     <script>
         // ==================================================
-        // 🚀 OPTIMIZACIONES CRÍTICAS PARA MÓVIL
+        // 🚀 OPTIMIZACIONES MÓVIL CONSERVADORAS - CORREGIDO
         // ==================================================
         
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('📱 Iniciando optimizaciones súper móvil...');
+            console.log('📱 Iniciando optimizaciones móvil conservadoras...');
             
             // 1. DETECTAR DISPOSITIVO
             const isMobile = window.innerWidth <= 768;
             const isLowEnd = isMobile && (
                 navigator.hardwareConcurrency <= 2 || 
-                navigator.deviceMemory <= 2 ||
-                /Android.*4\.|iPhone.*OS [5-9]_/.test(navigator.userAgent)
+                navigator.deviceMemory <= 2
             );
             
             console.log(`📱 Móvil: ${isMobile}, Dispositivo básico: ${isLowEnd}`);
             
             if (isMobile) {
-                // APLICAR TODAS LAS OPTIMIZACIONES MÓVIL
-                disableHeavyElements();
-                optimizeMobileScroll();
+                applyMobileOptimizations();
                 
                 if (isLowEnd) {
                     applyLowEndOptimizations();
@@ -56,7 +53,7 @@
                     setupLightweightCanvas();
                 }
                 
-                // Indicador visual temporal
+                // Indicador temporal
                 showMobileOptimizationIndicator();
             } else {
                 // DESKTOP: Configuración normal
@@ -65,81 +62,47 @@
         });
 
         // ==================================================
-        // FUNCIONES DE OPTIMIZACIÓN MÓVIL
+        // FUNCIONES DE OPTIMIZACIÓN CONSERVADORAS
         // ==================================================
 
-        function disableHeavyElements() {
-            console.log('🚫 Desactivando elementos pesados...');
+        function applyMobileOptimizations() {
+            console.log('📱 Aplicando optimizaciones móvil conservadoras...');
             
-            // Lista de elementos pesados
-            const heavySelectors = [
-                '.cyber-grid',
-                '.organic-shapes', 
-                '.particles-container',
-                '.floating-elements',
-                '.energy-wave-epic',
-                '.ambient-light-epic',
-                '.organic-shape',
-                '.floating-circle'
-            ];
+            // SOLO desactivar elementos realmente pesados
+            const heavyElements = document.querySelectorAll(
+                '.cyber-grid, .organic-shapes, .particles-container, .floating-elements'
+            );
             
-            heavySelectors.forEach(selector => {
-                const elements = document.querySelectorAll(selector);
-                elements.forEach(element => {
-                    element.style.display = 'none';
-                    element.style.opacity = '0';
-                    element.style.visibility = 'hidden';
-                });
+            heavyElements.forEach(element => {
+                element.style.display = 'none';
             });
             
-            // Desactivar animaciones CSS
-            const style = document.createElement('style');
-            style.textContent = `
-                @media (max-width: 768px) {
-                    *, *::before, *::after {
-                        animation: none !important;
-                        transition-duration: 0.1s !important;
+            // Optimizar scroll SIN forzar dimensiones
+            if (document.body) {
+                document.body.style.webkitOverflowScrolling = 'touch';
+                document.body.style.overscrollBehavior = 'none';
+            }
+            
+            // Prevenir zoom doble-tap SOLO cuando sea necesario
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(event) {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    const target = event.target;
+                    if (!target.closest('button, a, input, textarea, select')) {
+                        event.preventDefault();
                     }
                 }
-            `;
-            document.head.appendChild(style);
+                lastTouchEnd = now;
+            }, false);
             
-            console.log('✅ Elementos pesados desactivados');
-        }
-
-        function optimizeMobileScroll() {
-            console.log('📜 Optimizando scroll móvil...');
-            
-            // Configuración óptima
-            document.documentElement.style.scrollBehavior = 'auto';
-            document.body.style.webkitOverflowScrolling = 'touch';
-            document.body.style.overscrollBehavior = 'none';
-            
-            // Prevenir rebote solo en extremos
-            let startY = 0;
-            
-            document.addEventListener('touchstart', function(e) {
-                startY = e.touches[0].clientY;
-            }, { passive: true });
-            
-            document.addEventListener('touchmove', function(e) {
-                const currentY = e.touches[0].clientY;
-                const scrollTop = window.scrollY;
-                const maxScroll = document.body.scrollHeight - window.innerHeight;
-                
-                if ((scrollTop <= 0 && currentY > startY) || 
-                    (scrollTop >= maxScroll && currentY < startY)) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
-            
-            console.log('✅ Scroll móvil optimizado');
+            console.log('✅ Optimizaciones móvil aplicadas');
         }
 
         function applyLowEndOptimizations() {
-            console.log('🔧 Aplicando optimizaciones para dispositivos básicos...');
+            console.log('🔧 Optimizaciones para dispositivos básicos...');
             
-            // Desactivar canvas completamente
+            // Canvas completamente oculto
             const canvas = document.getElementById('backgroundCanvas');
             if (canvas) {
                 canvas.style.display = 'none';
@@ -147,18 +110,6 @@
             
             // Background sólido
             document.body.style.background = '#041222';
-            
-            // Eliminar todos los efectos
-            const style = document.createElement('style');
-            style.textContent = `
-                * {
-                    filter: none !important;
-                    backdrop-filter: none !important;
-                    box-shadow: none !important;
-                    border-radius: 4px !important;
-                }
-            `;
-            document.head.appendChild(style);
             
             console.log('✅ Optimizaciones dispositivos básicos aplicadas');
         }
@@ -170,10 +121,16 @@
             if (!canvas) return;
             
             const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
             
-            // Solo 3 partículas
+            // Función para redimensionar canvas
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            
+            resizeCanvas();
+            
+            // Solo 3 partículas ligeras
             const particles = [];
             for (let i = 0; i < 3; i++) {
                 particles.push({
@@ -186,7 +143,7 @@
             }
             
             let lastTime = 0;
-            const targetFPS = 20; // 20fps máximo
+            const targetFPS = 20;
             const frameTime = 1000 / targetFPS;
             
             function animate(currentTime) {
@@ -215,15 +172,18 @@
             }
             
             animate(0);
+            
+            // Redimensionar en resize
+            window.addEventListener('resize', resizeCanvas);
+            
             console.log('✅ Canvas ligero configurado');
         }
 
         function setupDesktopCanvas() {
-            // Para desktop usar el canvas normal pero optimizado
+            // Para desktop usar canvas normal si existe
             const canvas = document.getElementById('backgroundCanvas');
             if (!canvas) return;
             
-            // Usar OptimizedCanvasEffect si existe
             if (typeof OptimizedCanvasEffect !== 'undefined') {
                 new OptimizedCanvasEffect(canvas);
             }
@@ -242,12 +202,11 @@
             }, 3000);
         }
 
-        // Variables globales optimizadas
+        // Variables globales simples
         window.userSessionData = {
             isLoggedIn: !!(
                 document.querySelector('.user-info') || 
                 document.querySelector('.mobile-nav-link.logout') ||
-                document.body.classList.contains('has-menu') ||
                 '{{ request.session.user_id }}'
             ),
             userId: '{{ request.session.user_id|default:"" }}',
@@ -255,42 +214,22 @@
             startTime: Date.now()
         };
 
-        // Prevenir zoom accidental optimizado
-        if (window.innerWidth <= 768) {
-            let lastTouchEnd = 0;
-            
-            document.addEventListener('touchend', function(event) {
-                const now = Date.now();
-                if (now - lastTouchEnd <= 300) {
-                    const target = event.target;
-                    if (!target.closest('button, a, input, textarea, select, [onclick], [role="button"]')) {
-                        event.preventDefault();
-                    }
-                }
-                lastTouchEnd = now;
-            }, false);
-        }
-
-        // Resize throttling súper optimizado
+        // Resize throttling simple
         let resizeTimeout;
         window.addEventListener('resize', function() {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(function() {
-                if (window.innerWidth <= 768) {
-                    document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
-                    
-                    // Re-optimizar si es necesario
-                    const canvas = document.getElementById('backgroundCanvas');
-                    if (canvas && canvas.style.display !== 'none') {
-                        canvas.width = window.innerWidth;
-                        canvas.height = window.innerHeight;
-                    }
+                // Solo ajustar canvas si existe y está visible
+                const canvas = document.getElementById('backgroundCanvas');
+                if (canvas && canvas.style.display !== 'none') {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
                 }
             }, 250);
         });
 
         console.log('🔐 Estado de sesión:', window.userSessionData);
-        console.log('✅ Optimizaciones móvil aplicadas');
+        console.log('✅ Optimizaciones móvil conservadoras aplicadas');
     </script>
 
     <!-- Sistema de auto-logout simplificado -->
@@ -304,9 +243,9 @@
                         timeout: 3 * 60 * 1000,
                         warningTime: 30 * 1000,
                         logoutUrl: '{% url "core:login" %}',
-                        checkInterval: 2000 // Menos frecuente para ahorrar recursos
+                        checkInterval: 2000
                     });
-                }, 1000); // Cargar después para no afectar rendimiento inicial
+                }, 1000);
             }
         });
     </script>

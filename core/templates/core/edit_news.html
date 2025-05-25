@@ -121,7 +121,7 @@
                         {% if noticia.imagen_portada %}
                         <div class="current-image">
                             <p>Imagen actual:</p>
-                            <img src="{% static 'core/img/news/'|add:noticia.imagen_portada %}" alt="{{ noticia.titulo }}" style="max-width: 100%; max-height: 200px; border-radius: 8px; margin-bottom: 20px;">
+                            <img src="img src="{{ MEDIA_URL }}{{ noticia.imagen_portada }}" alt="{{ noticia.titulo }}" style="max-width: 100%; max-height: 200px; border-radius: 8px; margin-bottom: 20px;">
                         </div>
                         {% endif %}
                         
