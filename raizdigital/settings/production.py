@@ -143,7 +143,7 @@ USE_I18N = True
 USE_TZ = True
 
 # =================================
-# ARCHIVOS ESTÁTICOS Y MULTIMEDIA - CON RAILWAY VOLUMES
+# ARCHIVOS ESTÁTICOS Y MULTIMEDIA - CONFIGURACIÓN CORREGIDA
 # =================================
 
 # Archivos estáticos (sin cambios)
@@ -162,12 +162,30 @@ STATICFILES_FINDERS = [
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
-# 🔧 CONFIGURACIÓN DE ARCHIVOS MULTIMEDIA CON RAILWAY VOLUMES
-RAILWAY_VOLUME_PATH = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH')
+# 🔧 CONFIGURACIÓN CORREGIDA DE ARCHIVOS MULTIMEDIA CON RAILWAY VOLUMES
+# Verificar todas las variables de volumen posibles
+RAILWAY_VOLUME_PATHS = [
+    os.environ.get('RAILWAY_VOLUME_MOUNT_PATH'),
+    os.environ.get('VOLUME_MOUNT_PATH'),
+    os.environ.get('RAILWAY_MEDIA_VOLUME'),
+    os.environ.get('MEDIA_VOLUME'),
+]
 
-if RAILWAY_VOLUME_PATH:
-    # ✅ USANDO RAILWAY VOLUME (PERSISTENTE)
-    MEDIA_ROOT = Path(RAILWAY_VOLUME_PATH)
+# Encontrar el primer path válido
+RAILWAY_VOLUME_PATH = None
+for path in RAILWAY_VOLUME_PATHS:
+    if path:
+        RAILWAY_VOLUME_PATH = path
+        break
+
+print(f"🔍 VARIABLES DE VOLUMEN VERIFICADAS:")
+for i, path in enumerate(RAILWAY_VOLUME_PATHS):
+    var_names = ['RAILWAY_VOLUME_MOUNT_PATH', 'VOLUME_MOUNT_PATH', 'RAILWAY_MEDIA_VOLUME', 'MEDIA_VOLUME']
+    print(f"   {var_names[i]}: {path or 'NO CONFIGURADA'}")
+
+if RAILWAY_VOLUME_PATH and RAILWAY_VOLUME_PATH != '/var/lib/postgresql/data':
+    # ✅ USANDO RAILWAY VOLUME CORRECTO (NO DE POSTGRES)
+    MEDIA_ROOT = Path(RAILWAY_VOLUME_PATH) / 'media'
     MEDIA_URL = '/media/'
     
     # Crear directorios necesarios en el volumen persistente
@@ -175,22 +193,43 @@ if RAILWAY_VOLUME_PATH:
     (MEDIA_ROOT / 'news').mkdir(exist_ok=True)
     (MEDIA_ROOT / 'profiles').mkdir(exist_ok=True)
     
-    # Configurar WhiteNoise para servir desde el volumen
+    # Configurar WhiteNoise CORRECTAMENTE para servir archivos multimedia
     WHITENOISE_USE_FINDERS = True
     WHITENOISE_AUTOREFRESH = True
     WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico']
+    WHITENOISE_ROOT = str(MEDIA_ROOT.parent)  # Raíz del volumen
     
-    # Agregar el volumen a las rutas estáticas para WhiteNoise
-    STATICFILES_DIRS.append(str(MEDIA_ROOT))
+    # CRÍTICO: Configurar las rutas estáticas para WhiteNoise
+    STATICFILES_DIRS.append((MEDIA_URL, str(MEDIA_ROOT)))
     
-    print(f"💾 ✅ RAILWAY VOLUME CONFIGURADO")
+    print(f"💾 ✅ RAILWAY VOLUME CONFIGURADO CORRECTAMENTE")
     print(f"📁 MEDIA_ROOT (persistente): {MEDIA_ROOT}")
+    print(f"🔗 MEDIA_URL: {MEDIA_URL}")
+    print(f"🗂️ WHITENOISE_ROOT: {WHITENOISE_ROOT}")
+    
+elif RAILWAY_VOLUME_PATH == '/var/lib/postgresql/data':
+    # ❌ DETECTADO VOLUMEN DE POSTGRES - USAR ALTERNATIVA
+    print(f"⚠️ DETECTADO VOLUMEN DE POSTGRES - USANDO SISTEMA TEMPORAL")
+    
+    MEDIA_ROOT = BASE_DIR / 'staticfiles' / 'media'
+    MEDIA_URL = '/static/media/'
+    
+    MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+    (MEDIA_ROOT / 'news').mkdir(exist_ok=True)
+    
+    # Configurar como archivos estáticos normales
+    STATICFILES_DIRS.append(str(MEDIA_ROOT.parent))
+    
+    print(f"📁 MEDIA_ROOT (temporal): {MEDIA_ROOT}")
+    print(f"🚨 Las imágenes se borrarán en cada deploy")
     print(f"🔗 MEDIA_URL: {MEDIA_URL}")
     
 else:
-    # ❌ FALLBACK: Sistema de archivos temporal (se borra en cada deploy)
+    # ❌ NO HAY VOLUMEN - USAR FALLBACK TEMPORAL
+    print(f"⚠️ NO SE DETECTÓ VOLUMEN VÁLIDO - USANDO ALMACENAMIENTO TEMPORAL")
+    
     MEDIA_ROOT = BASE_DIR / 'staticfiles' / 'media'
-    MEDIA_URL = '/media/'
+    MEDIA_URL = '/static/media/'
     
     MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
     (MEDIA_ROOT / 'news').mkdir(exist_ok=True)
@@ -199,11 +238,10 @@ else:
     WHITENOISE_AUTOREFRESH = True
     WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico']
     
-    print(f"⚠️  USANDO ALMACENAMIENTO TEMPORAL")
     print(f"📁 MEDIA_ROOT (temporal): {MEDIA_ROOT}")
     print(f"🚨 Las imágenes se borrarán en cada deploy")
 
-print(f"📊 Persistente: {'SÍ ✅' if RAILWAY_VOLUME_PATH else 'NO ❌'}")
+print(f"📊 Persistente: {'SÍ ✅' if RAILWAY_VOLUME_PATH and RAILWAY_VOLUME_PATH != '/var/lib/postgresql/data' else 'NO ❌'}")
 
 # 🔧 VERIFICAR QUE LOS DIRECTORIOS EXISTEN AL INICIO
 try:
