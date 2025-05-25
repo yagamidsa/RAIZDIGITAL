@@ -13,25 +13,23 @@ urlpatterns = [
 
 # 🔧 CONFIGURACIÓN CORREGIDA PARA SERVIR ARCHIVOS MULTIMEDIA
 if settings.DEBUG:
-    # DESARROLLO: Django sirve archivos multimedia
+    # DESARROLLO: Django sirve archivos multimedia y estáticos
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    print("🔧 Desarrollo: Django sirve multimedia")
+    print("🔧 Desarrollo: Django sirve archivos multimedia")
 else:
     # PRODUCCIÓN: Configuración según el tipo de almacenamiento
     railway_volume = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH')
     
-    # Verificar si es el volumen de postgres (incorrecto)
-    if railway_volume == '/var/lib/postgresql/data':
-        railway_volume = None
-        print("⚠️ Volumen de Postgres detectado - usando almacenamiento temporal")
+    # Verificar si es el volumen de postgres (incorrecto) o no existe
+    valid_volume = railway_volume and railway_volume != '/var/lib/postgresql/data'
     
-    if railway_volume and railway_volume != '/var/lib/postgresql/data':
-        # ✅ CON RAILWAY VOLUME CORRECTO: WhiteNoise maneja todo
-        print("💾 Producción: WhiteNoise + Railway Volume (persistente)")
+    if valid_volume:
+        # ✅ CON RAILWAY VOLUME CORRECTO: Servir archivos multimedia directamente
+        print("💾 Producción: Archivos multimedia en Railway Volume (persistente)")
         print(f"📁 Volumen en: {railway_volume}")
         
-        # Agregar ruta explícita para multimedia si es necesario
+        # Agregar ruta para servir archivos multimedia desde el volumen
         urlpatterns += [
             re_path(r'^media/(?P<path>.*)$', serve, {
                 'document_root': settings.MEDIA_ROOT,
@@ -39,17 +37,32 @@ else:
         ]
         
     else:
-        # ❌ SIN VOLUME O TEMPORAL: Ruta explícita desde archivos estáticos
-        print("⚠️ Producción: Almacenamiento temporal en static/media/")
+        # ❌ SIN VOLUME O TEMPORAL: Los archivos están en staticfiles
+        print("⚠️ Producción: Archivos multimedia temporales")
+        print(f"📁 MEDIA_ROOT: {settings.MEDIA_ROOT}")
+        print(f"🔗 MEDIA_URL: {settings.MEDIA_URL}")
         
-        # Media se sirve como archivos estáticos
-        urlpatterns += [
-            re_path(r'^static/media/(?P<path>.*)$', serve, {
-                'document_root': settings.MEDIA_ROOT,
-            }),
-        ]
+        # En este caso, WhiteNoise ya manejará los archivos como estáticos
+        # No necesitamos rutas adicionales porque están en STATIC_ROOT
+        if settings.MEDIA_URL.startswith('/static/'):
+            print("📦 WhiteNoise manejará los archivos multimedia como estáticos")
+        else:
+            # Fallback: servir desde MEDIA_ROOT si es necesario
+            urlpatterns += [
+                re_path(r'^media/(?P<path>.*)$', serve, {
+                    'document_root': settings.MEDIA_ROOT,
+                }),
+            ]
 
 print(f"🌐 URLs configuradas para {'desarrollo' if settings.DEBUG else 'producción'}")
-print(f"💾 Volume válido: {'SÍ' if railway_volume and railway_volume != '/var/lib/postgresql/data' else 'NO'}")
+print(f"💾 Volume válido: {'SÍ' if valid_volume else 'NO'}")
 print(f"📁 MEDIA_ROOT: {settings.MEDIA_ROOT}")
 print(f"🔗 MEDIA_URL: {settings.MEDIA_URL}")
+
+# Debug: Verificar rutas configuradas
+print(f"🛣️ URLs totales configuradas: {len(urlpatterns)}")
+for i, url_pattern in enumerate(urlpatterns):
+    if hasattr(url_pattern, 'pattern'):
+        print(f"   {i+1}. {url_pattern.pattern}")
+    else:
+        print(f"   {i+1}. {type(url_pattern).__name__}")

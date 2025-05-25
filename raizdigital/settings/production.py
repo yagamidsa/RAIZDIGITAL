@@ -143,26 +143,25 @@ USE_I18N = True
 USE_TZ = True
 
 # =================================
-# ARCHIVOS ESTÁTICOS Y MULTIMEDIA - CONFIGURACIÓN CORREGIDA
+# ARCHIVOS ESTÁTICOS Y MULTIMEDIA - CONFIGURACIÓN CORREGIDA PARA EVITAR CONFLICTOS
 # =================================
 
-# Archivos estáticos (sin cambios)
+# 🔧 CONFIGURACIÓN BASE DE ARCHIVOS ESTÁTICOS
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# 🔧 CREAR DIRECTORIOS BASE
 STATIC_ROOT.mkdir(exist_ok=True)
 
+# 🔧 STATICFILES_DIRS INICIAL (vacío para evitar conflictos)
 STATICFILES_DIRS = []
-if (BASE_DIR / 'static').exists():
-    STATICFILES_DIRS.append(BASE_DIR / 'static')
 
-STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-]
+# Agregar directorio static del proyecto si existe (pero no conflictúe)
+project_static = BASE_DIR / 'static'
+if project_static.exists() and project_static != STATIC_ROOT:
+    STATICFILES_DIRS.append(str(project_static))
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
-
-# 🔧 CONFIGURACIÓN CORREGIDA DE ARCHIVOS MULTIMEDIA CON RAILWAY VOLUMES
+# 🔧 CONFIGURACIÓN DE ARCHIVOS MULTIMEDIA CORREGIDA
 # Verificar todas las variables de volumen posibles
 RAILWAY_VOLUME_PATHS = [
     os.environ.get('RAILWAY_VOLUME_MOUNT_PATH'),
@@ -174,17 +173,18 @@ RAILWAY_VOLUME_PATHS = [
 # Encontrar el primer path válido
 RAILWAY_VOLUME_PATH = None
 for path in RAILWAY_VOLUME_PATHS:
-    if path:
+    if path and path != '/var/lib/postgresql/data':  # Excluir volumen de postgres
         RAILWAY_VOLUME_PATH = path
         break
 
 print(f"🔍 VARIABLES DE VOLUMEN VERIFICADAS:")
 for i, path in enumerate(RAILWAY_VOLUME_PATHS):
     var_names = ['RAILWAY_VOLUME_MOUNT_PATH', 'VOLUME_MOUNT_PATH', 'RAILWAY_MEDIA_VOLUME', 'MEDIA_VOLUME']
-    print(f"   {var_names[i]}: {path or 'NO CONFIGURADA'}")
+    valid = path and path != '/var/lib/postgresql/data'
+    print(f"   {var_names[i]}: {path or 'NO CONFIGURADA'} {'✅' if valid else '❌'}")
 
-if RAILWAY_VOLUME_PATH and RAILWAY_VOLUME_PATH != '/var/lib/postgresql/data':
-    # ✅ USANDO RAILWAY VOLUME CORRECTO (NO DE POSTGRES)
+if RAILWAY_VOLUME_PATH:
+    # ✅ USANDO RAILWAY VOLUME CORRECTO
     MEDIA_ROOT = Path(RAILWAY_VOLUME_PATH) / 'media'
     MEDIA_URL = '/media/'
     
@@ -193,64 +193,56 @@ if RAILWAY_VOLUME_PATH and RAILWAY_VOLUME_PATH != '/var/lib/postgresql/data':
     (MEDIA_ROOT / 'news').mkdir(exist_ok=True)
     (MEDIA_ROOT / 'profiles').mkdir(exist_ok=True)
     
-    # Configurar WhiteNoise CORRECTAMENTE para servir archivos multimedia
+    # 🔧 CONFIGURACIÓN WHITENOISE CORREGIDA
     WHITENOISE_USE_FINDERS = True
     WHITENOISE_AUTOREFRESH = True
     WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico']
-    WHITENOISE_ROOT = str(MEDIA_ROOT.parent)  # Raíz del volumen
     
-    # CRÍTICO: Configurar las rutas estáticas para WhiteNoise
-    STATICFILES_DIRS.append((MEDIA_URL, str(MEDIA_ROOT)))
+    # 🔧 CRITICAL FIX: NO agregar MEDIA_ROOT a STATICFILES_DIRS para evitar conflictos
+    # En su lugar, Django servirá archivos multimedia de forma separada
     
     print(f"💾 ✅ RAILWAY VOLUME CONFIGURADO CORRECTAMENTE")
     print(f"📁 MEDIA_ROOT (persistente): {MEDIA_ROOT}")
     print(f"🔗 MEDIA_URL: {MEDIA_URL}")
-    print(f"🗂️ WHITENOISE_ROOT: {WHITENOISE_ROOT}")
     
-elif RAILWAY_VOLUME_PATH == '/var/lib/postgresql/data':
-    # ❌ DETECTADO VOLUMEN DE POSTGRES - USAR ALTERNATIVA
-    print(f"⚠️ DETECTADO VOLUMEN DE POSTGRES - USANDO SISTEMA TEMPORAL")
+else:
+    # ❌ NO HAY VOLUMEN VÁLIDO - USAR FALLBACK TEMPORAL CORREGIDO
+    print(f"⚠️ NO SE DETECTÓ VOLUMEN VÁLIDO - USANDO ALMACENAMIENTO TEMPORAL")
     
-    MEDIA_ROOT = BASE_DIR / 'staticfiles' / 'media'
-    MEDIA_URL = '/static/media/'
+    # 🔧 CREAR DIRECTORIO SEPARADO PARA MEDIA DENTRO DE STATICFILES
+    media_temp_dir = STATIC_ROOT / 'temp_media'
+    media_temp_dir.mkdir(parents=True, exist_ok=True)
+    (media_temp_dir / 'news').mkdir(exist_ok=True)
     
-    MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
-    (MEDIA_ROOT / 'news').mkdir(exist_ok=True)
-    
-    # Configurar como archivos estáticos normales
-    STATICFILES_DIRS.append(str(MEDIA_ROOT.parent))
+    MEDIA_ROOT = media_temp_dir
+    MEDIA_URL = '/static/temp_media/'
     
     print(f"📁 MEDIA_ROOT (temporal): {MEDIA_ROOT}")
     print(f"🚨 Las imágenes se borrarán en cada deploy")
     print(f"🔗 MEDIA_URL: {MEDIA_URL}")
-    
+
+# 🔧 CONFIGURACIÓN STATICFILES FINAL
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
+# 🔧 VERIFICAR CONFIGURACIÓN FINAL
+print(f"\n📊 CONFIGURACIÓN FINAL DE ARCHIVOS:")
+print(f"   STATIC_ROOT: {STATIC_ROOT}")
+print(f"   STATICFILES_DIRS: {STATICFILES_DIRS}")
+print(f"   MEDIA_ROOT: {MEDIA_ROOT}")
+print(f"   MEDIA_URL: {MEDIA_URL}")
+print(f"   Persistente: {'SÍ ✅' if RAILWAY_VOLUME_PATH else 'NO ❌'}")
+
+# Verificar que no hay conflictos
+conflict_check = str(MEDIA_ROOT) in [str(STATIC_ROOT)] + [str(d) for d in STATICFILES_DIRS]
+if conflict_check:
+    print(f"⚠️ ADVERTENCIA: Posible conflicto en configuración de archivos")
 else:
-    # ❌ NO HAY VOLUMEN - USAR FALLBACK TEMPORAL
-    print(f"⚠️ NO SE DETECTÓ VOLUMEN VÁLIDO - USANDO ALMACENAMIENTO TEMPORAL")
-    
-    MEDIA_ROOT = BASE_DIR / 'staticfiles' / 'media'
-    MEDIA_URL = '/static/media/'
-    
-    MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
-    (MEDIA_ROOT / 'news').mkdir(exist_ok=True)
-    
-    WHITENOISE_USE_FINDERS = True
-    WHITENOISE_AUTOREFRESH = True
-    WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico']
-    
-    print(f"📁 MEDIA_ROOT (temporal): {MEDIA_ROOT}")
-    print(f"🚨 Las imágenes se borrarán en cada deploy")
-
-print(f"📊 Persistente: {'SÍ ✅' if RAILWAY_VOLUME_PATH and RAILWAY_VOLUME_PATH != '/var/lib/postgresql/data' else 'NO ❌'}")
-
-# 🔧 VERIFICAR QUE LOS DIRECTORIOS EXISTEN AL INICIO
-try:
-    STATIC_ROOT.mkdir(exist_ok=True)
-    MEDIA_ROOT.mkdir(exist_ok=True, parents=True)
-    (MEDIA_ROOT / 'news').mkdir(exist_ok=True, parents=True)
-    print("✅ Directorios de archivos creados correctamente")
-except Exception as e:
-    print(f"❌ Error creando directorios: {e}")
+    print(f"✅ No hay conflictos en configuración de archivos")
 
 # 🔧 CSRF MEJORADO PARA RAILWAY
 CSRF_TRUSTED_ORIGINS = [
@@ -322,7 +314,15 @@ LOGGING = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# 🔧 CONFIGURACIÓN ADICIONAL PARA DEBUGGING
+# 🔧 CREAR DIRECTORIOS AL FINAL PARA ASEGURAR QUE EXISTEN
+try:
+    STATIC_ROOT.mkdir(exist_ok=True)
+    MEDIA_ROOT.mkdir(exist_ok=True, parents=True)
+    (MEDIA_ROOT / 'news').mkdir(exist_ok=True, parents=True)
+    print("✅ Directorios creados correctamente")
+except Exception as e:
+    print(f"❌ Error creando directorios: {e}")
+
 print('🚀 PRODUCTION SETTINGS CARGADOS CORRECTAMENTE')
 print(f'🌐 HOST ESPERADO: raizdigital-production.up.railway.app')
 print(f'🔒 CSRF configurado para Railway')
