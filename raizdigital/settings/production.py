@@ -77,6 +77,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'raizdigital.wsgi.application'
 
+# REEMPLAZAR LA SECCIÓN DE BASE DE DATOS EN raizdigital/settings/production.py
+
 # =================================
 # BASE DE DATOS - RAILWAY CORREGIDA
 # =================================
@@ -91,28 +93,53 @@ if DATABASE_URL:
         import dj_database_url
         DATABASES = {'default': dj_database_url.parse(DATABASE_URL)}
         
-        # 🔧 CONFIGURACIÓN CORREGIDA PARA RAILWAY
+        # 🔧 CONFIGURACIÓN CORREGIDA PARA RAILWAY POSTGRESQL
         DATABASES['default']['OPTIONS'] = {
             'sslmode': 'require',
-            'connect_timeout': 10,
-            'options': '-c default_transaction_isolation=read_committed'
+            # ELIMINADO: parámetros que causan conflicto
         }
         
-        DATABASES['default']['CONN_MAX_AGE'] = 600
-        DATABASES['default']['ATOMIC_REQUESTS'] = True
-        
-        # 🔧 CONFIGURACIÓN ADICIONAL PARA ESTABILIDAD
+        # 🔧 CONFIGURACIÓN DE CONEXIÓN MEJORADA
+        DATABASES['default']['CONN_MAX_AGE'] = 0  # Sin pooling para evitar problemas
         DATABASES['default']['CONN_HEALTH_CHECKS'] = True
         
-        print("🚂 RAILWAY: Configuración de BD optimizada")
+        # 🔧 ATOMIC_REQUESTS SEGURO
+        is_railway = os.environ.get('RAILWAY_ENVIRONMENT_NAME') is not None
+        
+        if is_railway:
+            # En Railway usar transacciones manuales por seguridad
+            DATABASES['default']['ATOMIC_REQUESTS'] = False
+            print("🚂 RAILWAY detectado: ATOMIC_REQUESTS=False (manual)")
+        else:
+            DATABASES['default']['ATOMIC_REQUESTS'] = False
+            print("🏠 Entorno local: ATOMIC_REQUESTS=False")
+        
+        # 🔧 CONFIGURACIÓN ADICIONAL SEGURA
+        DATABASES['default'].update({
+            'DISABLE_SERVER_SIDE_CURSORS': True,  # Evitar problemas con cursors
+        })
+        
+        # 🔧 NO agregar opciones de transacción que causen conflicto
+        # ELIMINAMOS cualquier configuración de isolation level
         
         db_info = DATABASES['default']
+        atomic_status = DATABASES['default']['ATOMIC_REQUESTS']
         print(f"🐘 BD: {db_info['USER']}@{db_info['HOST']}:{db_info['PORT']}/{db_info['NAME']}")
-        print(f"📊 ATOMIC_REQUESTS: {DATABASES['default']['ATOMIC_REQUESTS']}")
+        print(f"📊 ATOMIC_REQUESTS: {atomic_status}")
+        print(f"🔒 SSL: {db_info['OPTIONS'].get('sslmode', 'No configurado')}")
         
     except ImportError:
-        print("❌ dj_database_url no disponible")
-        sys.exit(1)
+        print("❌ dj_database_url no disponible - instalando...")
+        import subprocess
+        import sys
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'dj-database-url'])
+        
+        # Reintentar después de instalar
+        import dj_database_url
+        DATABASES = {'default': dj_database_url.parse(DATABASE_URL)}
+        DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
+        DATABASES['default']['ATOMIC_REQUESTS'] = False
+        
     except Exception as e:
         print(f"❌ Error configurando base de datos: {e}")
         sys.exit(1)
@@ -120,18 +147,13 @@ else:
     print("❌ DATABASE_URL no encontrada")
     sys.exit(1)
 
-# Password validation
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
+# 🔧 CONFIGURACIÓN DE CONEXIÓN ADICIONAL PARA EVITAR TIMEOUTS
+DATABASES['default']['OPTIONS'].update({
+    'connect_timeout': 30,
+    'options': '-c statement_timeout=30000'  # 30 segundos timeout
+})
 
-LANGUAGE_CODE = 'es-es'
-TIME_ZONE = 'America/Bogota'
-USE_I18N = True
-USE_TZ = True
+print("✅ Configuración de base de datos corregida para Railway")
 
 # =================================
 # 🔧 ARCHIVOS ESTÁTICOS - RAILWAY CORREGIDO
