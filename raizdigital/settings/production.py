@@ -16,17 +16,16 @@ if not SECRET_KEY:
 DEBUG = False
 print(f"🔧 DEBUG mode: {DEBUG}")
 
-# 🔧 CONFIGURACIÓN MEJORADA DE ALLOWED_HOSTS PARA RAILWAY
+# ALLOWED_HOSTS
 ALLOWED_HOSTS = [
-    '*',  # Permitir todos los hosts (para desarrollo)
-    '.railway.app',  # Todos los subdominios de railway.app
-    '.up.railway.app',  # Todos los subdominios de up.railway.app
-    'raizdigital-production.up.railway.app',  # Tu dominio específico
+    '*',
+    '.railway.app',
+    '.up.railway.app',
+    'raizdigital-production.up.railway.app',
     'localhost',
     '127.0.0.1',
 ]
 
-# 🔧 DETECTAR Y AGREGAR EL HOST DINÁMICAMENTE
 railway_host = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
 if railway_host:
     ALLOWED_HOSTS.append(railway_host)
@@ -78,7 +77,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'raizdigital.wsgi.application'
 
 # =================================
-# BASE DE DATOS - CONFIGURACIÓN HÍBRIDA
+# BASE DE DATOS - RAILWAY
 # =================================
 
 print("🗄️  CONFIGURANDO BASE DE DATOS RAILWAY...")
@@ -91,32 +90,25 @@ if DATABASE_URL:
         import dj_database_url
         DATABASES = {'default': dj_database_url.parse(DATABASE_URL)}
         
-        # Configuración básica
         DATABASES['default']['OPTIONS'] = {
             'sslmode': 'require',
         }
         
-        # Configuración de conexión
         DATABASES['default']['CONN_MAX_AGE'] = 600
         
-        # CONFIGURACIÓN HÍBRIDA: Detectar si estamos en Railway
         is_railway = os.environ.get('RAILWAY_ENVIRONMENT_NAME') is not None
         
         if is_railway:
-            # EN RAILWAY: Usar transacciones automáticas
             DATABASES['default']['ATOMIC_REQUESTS'] = True
             print("🚂 RAILWAY detectado: ATOMIC_REQUESTS=True")
         else:
-            # LOCAL/OTROS: Transacciones manuales
             DATABASES['default']['ATOMIC_REQUESTS'] = False
             print("🏠 Entorno local: ATOMIC_REQUESTS=False")
         
-        # Timeouts básicos
         DATABASES['default']['OPTIONS'].update({
             'connect_timeout': 10,
         })
         
-        # Mostrar info de conexión
         db_info = DATABASES['default']
         atomic_status = DATABASES['default']['ATOMIC_REQUESTS']
         print(f"🐘 BD: {db_info['USER']}@{db_info['HOST']}:{db_info['PORT']}/{db_info['NAME']}")
@@ -129,7 +121,7 @@ else:
     print("❌ DATABASE_URL no encontrada")
     sys.exit(1)
 
-# Resto de configuración...
+# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -143,147 +135,126 @@ USE_I18N = True
 USE_TZ = True
 
 # =================================
-# ARCHIVOS ESTÁTICOS Y MULTIMEDIA - CONFIGURACIÓN CORREGIDA PARA EVITAR CONFLICTOS
+# ARCHIVOS ESTÁTICOS - CONFIGURACIÓN PARA TU ESTRUCTURA REAL
 # =================================
 
-# 🔧 CONFIGURACIÓN BASE DE ARCHIVOS ESTÁTICOS
+print("📁 CONFIGURANDO ARCHIVOS ESTÁTICOS...")
+
+# Configuración base
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# 🔧 CREAR DIRECTORIOS BASE
-STATIC_ROOT.mkdir(exist_ok=True)
+# Verificar estructura actual
+core_static_dir = BASE_DIR / 'core' / 'static'
+print(f"🔍 Verificando: {core_static_dir}")
 
-# 🔧 STATICFILES_DIRS INICIAL (vacío para evitar conflictos)
+if core_static_dir.exists():
+    print(f"✅ Directorio core/static/ encontrado: {core_static_dir}")
+    # Verificar archivos específicos
+    css_dir = core_static_dir / 'core' / 'css'
+    js_dir = core_static_dir / 'core' / 'js'
+    
+    if css_dir.exists():
+        css_files = list(css_dir.glob('*.css'))
+        print(f"📄 Archivos CSS encontrados: {len(css_files)}")
+        for css_file in css_files[:5]:  # Mostrar solo los primeros 5
+            print(f"   - {css_file.name}")
+    
+    if js_dir.exists():
+        js_files = list(js_dir.glob('*.js'))
+        print(f"📄 Archivos JS encontrados: {len(js_files)}")
+        for js_file in js_files[:5]:  # Mostrar solo los primeros 5
+            print(f"   - {js_file.name}")
+else:
+    print(f"❌ Directorio core/static/ NO encontrado: {core_static_dir}")
+
+# 🔧 STATICFILES_DIRS - NO NECESARIO CON AppDirectoriesFinder
+# Django automáticamente encuentra archivos en core/static/ mediante AppDirectoriesFinder
 STATICFILES_DIRS = []
 
-# Agregar directorio static del proyecto si existe (pero no conflictúe)
+# Solo agregar directorios adicionales si existen
 project_static = BASE_DIR / 'static'
-if project_static.exists() and project_static != STATIC_ROOT:
+if project_static.exists() and str(project_static) != str(STATIC_ROOT):
     STATICFILES_DIRS.append(str(project_static))
+    print(f"📁 Directorio static/ adicional encontrado: {project_static}")
 
-# 🔧 CONFIGURACIÓN DE ARCHIVOS MULTIMEDIA CORREGIDA
-# Verificar todas las variables de volumen posibles
-RAILWAY_VOLUME_PATHS = [
-    os.environ.get('RAILWAY_VOLUME_MOUNT_PATH'),
-    os.environ.get('VOLUME_MOUNT_PATH'),
-    os.environ.get('RAILWAY_MEDIA_VOLUME'),
-    os.environ.get('MEDIA_VOLUME'),
-]
+# 🔧 CONFIGURACIÓN WHITENOISE OPTIMIZADA
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Encontrar el primer path válido
-RAILWAY_VOLUME_PATH = None
-for path in RAILWAY_VOLUME_PATHS:
-    if path and path != '/var/lib/postgresql/data':  # Excluir volumen de postgres
-        RAILWAY_VOLUME_PATH = path
-        break
-
-print(f"🔍 VARIABLES DE VOLUMEN VERIFICADAS:")
-for i, path in enumerate(RAILWAY_VOLUME_PATHS):
-    var_names = ['RAILWAY_VOLUME_MOUNT_PATH', 'VOLUME_MOUNT_PATH', 'RAILWAY_MEDIA_VOLUME', 'MEDIA_VOLUME']
-    valid = path and path != '/var/lib/postgresql/data'
-    print(f"   {var_names[i]}: {path or 'NO CONFIGURADA'} {'✅' if valid else '❌'}")
-
-if RAILWAY_VOLUME_PATH:
-    # ✅ USANDO RAILWAY VOLUME CORRECTO
-    MEDIA_ROOT = Path(RAILWAY_VOLUME_PATH) / 'media'
-    MEDIA_URL = '/media/'
-    
-    # Crear directorios necesarios en el volumen persistente
-    MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
-    (MEDIA_ROOT / 'news').mkdir(exist_ok=True)
-    (MEDIA_ROOT / 'profiles').mkdir(exist_ok=True)
-    
-    # 🔧 CONFIGURACIÓN WHITENOISE CORREGIDA
-    WHITENOISE_USE_FINDERS = True
-    WHITENOISE_AUTOREFRESH = True
-    WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico']
-    
-    # 🔧 CRITICAL FIX: NO agregar MEDIA_ROOT a STATICFILES_DIRS para evitar conflictos
-    # En su lugar, Django servirá archivos multimedia de forma separada
-    
-    print(f"💾 ✅ RAILWAY VOLUME CONFIGURADO CORRECTAMENTE")
-    print(f"📁 MEDIA_ROOT (persistente): {MEDIA_ROOT}")
-    print(f"🔗 MEDIA_URL: {MEDIA_URL}")
-    
-else:
-    # ❌ NO HAY VOLUMEN VÁLIDO - USAR FALLBACK TEMPORAL CORREGIDO
-    print(f"⚠️ NO SE DETECTÓ VOLUMEN VÁLIDO - USANDO ALMACENAMIENTO TEMPORAL")
-    
-    # 🔧 CREAR DIRECTORIO SEPARADO PARA MEDIA DENTRO DE STATICFILES
-    media_temp_dir = STATIC_ROOT / 'temp_media'
-    media_temp_dir.mkdir(parents=True, exist_ok=True)
-    (media_temp_dir / 'news').mkdir(exist_ok=True)
-    
-    MEDIA_ROOT = media_temp_dir
-    MEDIA_URL = '/static/temp_media/'
-    
-    print(f"📁 MEDIA_ROOT (temporal): {MEDIA_ROOT}")
-    print(f"🚨 Las imágenes se borrarán en cada deploy")
-    print(f"🔗 MEDIA_URL: {MEDIA_URL}")
-
-# 🔧 CONFIGURACIÓN STATICFILES FINAL
 STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'django.contrib.staticfiles.finders.FileSystemFinder',  # Para STATICFILES_DIRS
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',  # Para core/static/
 ]
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+# Configuración WhiteNoise
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = False
+WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico']
+WHITENOISE_MAX_AGE = 31536000  # 1 año
 
-# 🔧 VERIFICAR CONFIGURACIÓN FINAL
-print(f"\n📊 CONFIGURACIÓN FINAL DE ARCHIVOS:")
-print(f"   STATIC_ROOT: {STATIC_ROOT}")
-print(f"   STATICFILES_DIRS: {STATICFILES_DIRS}")
-print(f"   MEDIA_ROOT: {MEDIA_ROOT}")
-print(f"   MEDIA_URL: {MEDIA_URL}")
-print(f"   Persistente: {'SÍ ✅' if RAILWAY_VOLUME_PATH else 'NO ❌'}")
+# Crear directorios necesarios
+try:
+    STATIC_ROOT.mkdir(exist_ok=True)
+    print(f"✅ STATIC_ROOT creado: {STATIC_ROOT}")
+except Exception as e:
+    print(f"❌ Error creando STATIC_ROOT: {e}")
 
-# Verificar que no hay conflictos
-conflict_check = str(MEDIA_ROOT) in [str(STATIC_ROOT)] + [str(d) for d in STATICFILES_DIRS]
-if conflict_check:
-    print(f"⚠️ ADVERTENCIA: Posible conflicto en configuración de archivos")
+# =================================
+# ARCHIVOS MULTIMEDIA - CONFIGURACIÓN TEMPORAL
+# =================================
+
+railway_volume = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH')
+valid_volume = railway_volume and railway_volume != '/var/lib/postgresql/data'
+
+if valid_volume:
+    MEDIA_ROOT = Path(railway_volume) / 'media'
+    MEDIA_URL = '/media/'
+    print(f"💾 ✅ Volume persistente: {MEDIA_ROOT}")
 else:
-    print(f"✅ No hay conflictos en configuración de archivos")
+    MEDIA_ROOT = STATIC_ROOT / 'temp_media'
+    MEDIA_URL = '/static/temp_media/'
+    print(f"📁 ⚠️ Almacenamiento temporal: {MEDIA_ROOT}")
 
-# 🔧 CSRF MEJORADO PARA RAILWAY
+MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+(MEDIA_ROOT / 'news').mkdir(exist_ok=True)
+
+# =================================
+# CONFIGURACIÓN ADICIONAL
+# =================================
+
+# CSRF
 CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
     'https://*.up.railway.app',
     'https://raizdigital-production.up.railway.app',
-    'http://raizdigital-production.up.railway.app',  # Para HTTP también
+    'http://raizdigital-production.up.railway.app',
 ]
 
-# Agregar dinámicamente si hay variables de Railway
 if railway_host:
     CSRF_TRUSTED_ORIGINS.extend([
         f'https://{railway_host}',
         f'http://{railway_host}',
     ])
 
-print(f"🔒 CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}")
-
-# 🔧 CONFIGURACIÓN DE SEGURIDAD AJUSTADA PARA RAILWAY
+# Seguridad
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = False  # Railway maneja esto
+SECURE_SSL_REDIRECT = False
 USE_TZ = True
 
-# 🔧 CONFIGURACIÓN DE SESIONES OPTIMIZADA
-SESSION_COOKIE_AGE = 3600  # 1 hora
+# Sesiones
+SESSION_COOKIE_AGE = 3600
 SESSION_SAVE_EVERY_REQUEST = True
-SESSION_COOKIE_SECURE = False  # Railway puede usar HTTP en algunos casos
+SESSION_COOKIE_SECURE = False
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 
-# 🔧 LOGGING MEJORADO PARA DEBUGGING
+# Logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
             'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {message}',
             'style': '{',
         },
     },
@@ -314,16 +285,18 @@ LOGGING = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# 🔧 CREAR DIRECTORIOS AL FINAL PARA ASEGURAR QUE EXISTEN
-try:
-    STATIC_ROOT.mkdir(exist_ok=True)
-    MEDIA_ROOT.mkdir(exist_ok=True, parents=True)
-    (MEDIA_ROOT / 'news').mkdir(exist_ok=True, parents=True)
-    print("✅ Directorios creados correctamente")
-except Exception as e:
-    print(f"❌ Error creando directorios: {e}")
+# =================================
+# RESUMEN DE CONFIGURACIÓN
+# =================================
 
-print('🚀 PRODUCTION SETTINGS CARGADOS CORRECTAMENTE')
-print(f'🌐 HOST ESPERADO: raizdigital-production.up.railway.app')
-print(f'🔒 CSRF configurado para Railway')
+print("\n📊 RESUMEN DE CONFIGURACIÓN:")
+print(f"   STATIC_URL: {STATIC_URL}")
+print(f"   STATIC_ROOT: {STATIC_ROOT}")
+print(f"   STATICFILES_DIRS: {STATICFILES_DIRS}")
+print(f"   MEDIA_ROOT: {MEDIA_ROOT}")
+print(f"   MEDIA_URL: {MEDIA_URL}")
+print(f"   WHITENOISE_STORAGE: {STATICFILES_STORAGE}")
+print(f"   DEBUG: {DEBUG}")
+
+print('\n🚀 PRODUCTION SETTINGS CONFIGURADO PARA TU ESTRUCTURA')
 print('=' * 60)
