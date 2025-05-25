@@ -20,7 +20,6 @@
 html {
     height: 100%;
     scroll-behavior: smooth;
-    /* REMOVIDO: width y max-width forzados */
 }
 
 body {
@@ -34,21 +33,22 @@ body {
     
     /* SOLO prevenir scroll horizontal cuando sea necesario */
     overflow-x: hidden;
-    /* REMOVIDO: width y max-width forzados */
+    /* CORREGIDO: Asegurar scroll vertical */
+    overflow-y: auto;
 }
 
-/* 3. CANVAS OPTIMIZADO */
+/* 3. CANVAS OPTIMIZADO - CORREGIDO */
 canvas {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw; /* CAMBIADO: usar vw en lugar de % */
+    height: 100vh; /* CAMBIADO: usar vh en lugar de % */
     z-index: 1;
     pointer-events: none;
 }
 
-/* 4. ELEMENTOS DE FONDO */
+/* 4. ELEMENTOS DE FONDO - CORREGIDO */
 .cyber-grid,
 .organic-shapes,
 .particles-container,
@@ -56,13 +56,39 @@ canvas {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw; /* CAMBIADO: usar vw en lugar de % */
+    height: 100vh; /* CAMBIADO: usar vh en lugar de % */
     pointer-events: none;
     z-index: 1;
 }
 
-/* 5. ESPACIADO DEL MENÚ - SIN CAMBIOS AGRESIVOS */
+/* 5. CONTENEDORES PRINCIPALES - CORREGIDO */
+.page-container,
+.news-container,
+.welcome-container {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    min-height: 100vh;
+    /* CRÍTICO: Nunca fijar altura */
+    height: auto;
+    /* CRÍTICO: Sin restricciones */
+    max-height: none;
+    overflow: visible;
+}
+
+/* 6. CONTENT WRAPPER - CORREGIDO */
+.content-wrapper {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    min-height: 100vh;
+    height: auto;
+    /* CORREGIDO: Sin padding-top por defecto */
+    padding-top: 0;
+}
+
+/* 7. ESPACIADO DEL MENÚ - CORREGIDO */
 .has-menu .content-wrapper {
     padding-top: 70px;
 }
@@ -71,7 +97,7 @@ canvas {
     padding-top: 0;
 }
 
-/* 6. OPTIMIZACIONES MÓVIL CONSERVADORAS */
+/* 8. OPTIMIZACIONES MÓVIL CONSERVADORAS */
 @media (max-width: 768px) {
     /* Desactivar elementos pesados solo con display: none */
     .cyber-grid,
@@ -121,7 +147,7 @@ canvas {
     }
 }
 
-/* 7. DISPOSITIVOS MUY LENTOS */
+/* 9. DISPOSITIVOS MUY LENTOS */
 @media (max-width: 480px) {
     /* Canvas oculto completamente */
     canvas {
@@ -134,7 +160,7 @@ canvas {
     }
 }
 
-/* 8. SCROLLBAR LIGERA */
+/* 10. SCROLLBAR LIGERA */
 ::-webkit-scrollbar {
     width: 6px;
     background: transparent;
@@ -145,38 +171,70 @@ canvas {
     border-radius: 3px;
 }
 
-/* 9. CONTENEDORES RESPONSIVE - SIN FORZAR DIMENSIONES */
+/* 11. CONTENEDORES RESPONSIVE - CORREGIDOS */
 .news-content,
 .main-content {
+    position: relative;
+    z-index: 10;
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 24px;
+    /* CRÍTICO: Sin restricciones de altura */
+    height: auto;
+    min-height: auto;
 }
 
 .featured-article {
+    position: relative;
+    z-index: 10;
     max-width: 1200px;
     margin: 0 auto 30px auto;
 }
 
 .news-section-header {
+    position: relative;
+    z-index: 10;
     max-width: 1200px;
     margin: 0 auto;
     padding: 30px 24px 60px 24px;
 }
 
+/* CONTENEDORES DE FORMULARIOS - CORREGIDOS */
 .create-news-container,
 .login-container,
-.recovery-container {
+.recovery-container,
+.register-container {
+    position: relative;
+    z-index: 10;
     max-width: 450px;
     margin: 0 auto;
     padding: 2rem;
+    /* CRÍTICO: Sin restricciones de altura */
+    height: auto;
+    min-height: auto;
+    /* CRÍTICO: Sin centrado vertical problemático */
+    top: auto;
+    transform: none;
 }
 
 .create-news-container {
     max-width: 900px;
 }
 
-/* 10. MÓVIL RESPONSIVE - PADDING CONSERVADOR */
+.article-container {
+    position: relative;
+    z-index: 10;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    /* CRÍTICO: Sin restricciones de altura */
+    height: auto;
+    min-height: auto;
+    top: auto;
+    transform: none;
+}
+
+/* 12. MÓVIL RESPONSIVE - PADDING CONSERVADOR */
 @media (max-width: 768px) {
     .news-content,
     .main-content {
@@ -189,14 +247,33 @@ canvas {
     
     .create-news-container,
     .login-container,
-    .recovery-container {
+    .recovery-container,
+    .register-container {
         padding: 1.5rem 15px;
-        margin: 0 15px;
+        margin: 20px auto;
         max-width: calc(100% - 30px);
+        width: 100%;
+    }
+    
+    .article-container {
+        margin: 20px auto;
+        padding: 15px;
+        max-width: calc(100% - 30px);
+    }
+    
+    /* CORRECCIÓN CRÍTICA PARA PÁGINAS CON FORMULARIOS */
+    .page-container {
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        min-height: 100vh;
+        padding-top: 20px;
     }
 }
 
-/* 11. TOUCH OPTIMIZATIONS */
+/* 13. TOUCH OPTIMIZATIONS */
 @media (pointer: coarse) {
     button, a {
         min-height: 44px;
@@ -204,20 +281,79 @@ canvas {
     }
 }
 
-/* 12. MENÚ MÓVIL */
+/* 14. MENÚ MÓVIL */
 .mobile-menu-content {
     max-height: 85vh;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 }
 
-/* 13. IMÁGENES RESPONSIVE */
+/* 15. IMÁGENES RESPONSIVE */
 img, video {
     max-width: 100%;
     height: auto;
 }
 
-/* 14. PERFORMANCE DEBUG (temporal) */
+/* 16. CORRECCIONES ESPECÍFICAS PARA EVITAR SALTOS */
+
+/* BACK BUTTON - POSICIONAMIENTO CORREGIDO */
+.back-button {
+    position: relative;
+    z-index: 100;
+    display: inline-flex;
+    margin: 10px 0 20px 0;
+    /* CRÍTICO: No usar position absolute */
+}
+
+/* FORZAR VISIBILIDAD INMEDIATA DE CONTENEDORES */
+.register-content,
+.login-content,
+.recovery-content,
+.create-news-container,
+.article-container,
+.main-content,
+.news-content {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    transform: none !important;
+}
+
+/* ELIMINAR TRANSICIONES PROBLEMÁTICAS EN CARGA */
+.register-container,
+.login-container,
+.recovery-container,
+.create-news-container,
+.article-container {
+    transition: none !important;
+    animation: none !important;
+}
+
+/* PREVENIR CONFLICTOS CON LIBRERÍAS DE ANIMACIÓN */
+[data-aos] {
+    transform: none !important;
+    opacity: 1 !important;
+}
+
+.gsap-element {
+    transform: none !important;
+}
+
+/* 17. CORRECCIONES PARA CENTRADO VERTICAL PROBLEMÁTICO */
+@media (max-width: 768px) {
+    /* Eliminar centrado vertical que causa problemas en móvil */
+    .register-container,
+    .login-container,
+    .recovery-container {
+        position: static !important;
+        top: auto !important;
+        transform: none !important;
+        margin-top: 20px !important;
+        margin-bottom: 20px !important;
+    }
+}
+
+/* 18. PERFORMANCE DEBUG (temporal) */
 @media (max-width: 768px) {
     .debug-mobile-performance {
         position: fixed;
@@ -233,35 +369,61 @@ img, video {
     }
 }
 
-/* ==================================================
-   🔧 CORRECCIONES ESPECÍFICAS PARA FORMULARIOS
-   ================================================== */
+/* 19. VIEWPORT META FIXES PARA MÓVIL */
+@media screen and (max-width: 768px) {
+    /* Prevenir zoom en inputs */
+    input, select, textarea {
+        font-size: 16px !important;
+        transform-origin: left top !important;
+    }
+    
+    /* Asegurar scroll suave */
+    html {
+        -webkit-text-size-adjust: 100% !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    body {
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior: none !important;
+    }
+}
 
-/* Asegurar que los formularios no se vean cortados */
-.page-container,
-.register-container,
-.login-container {
+/* 20. CORRECCIÓN FINAL PARA ELEMENTOS PRINCIPALES */
+.welcome-container .main-content {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    height: auto;
+    min-height: auto;
+}
+
+/* MARKETPLACE ESPECÍFICO */
+.marketplace-container {
+    position: relative;
+    z-index: 10;
+    width: 100%;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    height: auto;
     padding: 20px;
 }
 
-@media (max-width: 768px) {
-    .page-container {
-        min-height: 100vh;
-        padding: 10px;
-        justify-content: flex-start;
-        padding-top: 20px;
-    }
-    
-    .register-container,
-    .login-container {
-        width: 100%;
-        max-width: 100%;
-        margin: 0;
-        padding: 20px 15px;
-    }
+/* NEWS GRID CORREGIDO */
+.news-grid {
+    position: relative;
+    z-index: 10;
+    display: grid;
+    gap: 24px;
+    margin-top: 20px;
+}
+
+/* 21. ÚLTIMO RECURSO - FORZAR POSICIONAMIENTO CORRECTO */
+.page-container > *,
+.news-container > *,
+.welcome-container > * {
+    position: relative;
+    z-index: 10;
 }

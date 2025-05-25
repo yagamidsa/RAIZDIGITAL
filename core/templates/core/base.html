@@ -11,11 +11,165 @@
     <link rel="stylesheet" href="{% static 'core/css/variables.css' %}">
     <link rel="stylesheet" href="{% static 'core/css/menu_nav.css' %}">
     <link rel="stylesheet" href="{% static 'core/css/mobile-performance.css' %}">
+    
+    <!-- 🔧 CORRECCIÓN CRÍTICA PARA EL SALTO VERTICAL -->
+    <style>
+        /* CORRECCIÓN INMEDIATA PARA EL SALTO VERTICAL */
+        canvas#backgroundCanvas {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 1 !important;
+            pointer-events: none !important;
+        }
+
+        .cyber-grid, .organic-shapes, .particles-container, .news-background {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            pointer-events: none !important;
+            z-index: 1 !important;
+        }
+
+        .page-container, .news-container, .welcome-container {
+            min-height: 100vh !important;
+            height: auto !important;
+            width: 100% !important;
+            position: relative !important;
+            z-index: 10 !important;
+            max-height: none !important;
+            overflow: visible !important;
+        }
+
+        .content-wrapper {
+            position: relative !important;
+            z-index: 10 !important;
+            width: 100% !important;
+            min-height: 100vh !important;
+            height: auto !important;
+            padding-top: 0 !important;
+        }
+
+        .has-menu .content-wrapper {
+            padding-top: 70px !important;
+        }
+
+        .no-menu .content-wrapper {
+            padding-top: 0 !important;
+        }
+
+        /* CORRECCIÓN ESPECÍFICA PARA CONTENEDORES PRINCIPALES */
+        .register-container, .login-container, .recovery-container {
+            position: relative !important;
+            z-index: 10 !important;
+            width: 90% !important;
+            max-width: 450px !important;
+            margin: 50px auto !important;
+            height: auto !important;
+            min-height: auto !important;
+            max-height: none !important;
+            top: 0 !important;
+            transform: none !important;
+        }
+
+        .main-content, .news-content {
+            position: relative !important;
+            z-index: 10 !important;
+            width: 100% !important;
+            max-width: 1200px !important;
+            margin: 0 auto !important;
+            padding: 20px !important;
+            height: auto !important;
+            min-height: auto !important;
+        }
+
+        .article-container, .create-news-container {
+            position: relative !important;
+            z-index: 10 !important;
+            width: 100% !important;
+            max-width: 900px !important;
+            margin: 20px auto !important;
+            top: 0 !important;
+            transform: none !important;
+        }
+
+        /* FORZAR VISIBILIDAD INMEDIATA */
+        .register-content, .login-content, .article-container, 
+        .create-news-container, .main-content, .news-content {
+            opacity: 1 !important;
+            visibility: visible !important;
+            display: block !important;
+            transform: none !important;
+        }
+
+        /* CORRECCIONES MÓVIL */
+        @media (max-width: 768px) {
+            .page-container {
+                padding: 10px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: flex-start !important;
+                align-items: center !important;
+                min-height: 100vh !important;
+                padding-top: 20px !important;
+            }
+            
+            .register-container, .login-container {
+                position: static !important;
+                top: auto !important;
+                transform: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+            }
+            
+            .has-menu .content-wrapper {
+                padding-top: 60px !important;
+            }
+            
+            .news-content, .main-content {
+                padding: 10px 15px !important;
+                margin-top: 0 !important;
+            }
+            
+            .article-container, .create-news-container {
+                margin: 10px auto !important;
+                padding: 15px !important;
+            }
+        }
+
+        /* ELIMINAR ANIMACIONES PROBLEMÁTICAS EN CARGA */
+        .register-container, .login-container, .article-container, .create-news-container {
+            transition: none !important;
+            animation: none !important;
+        }
+
+        /* DEBUG TEMPORAL */
+        .debug-layout {
+            position: fixed !important;
+            top: 10px !important;
+            right: 10px !important;
+            background: rgba(0, 255, 157, 0.9) !important;
+            color: black !important;
+            padding: 5px 10px !important;
+            font-size: 11px !important;
+            z-index: 9999 !important;
+            border-radius: 4px !important;
+            font-weight: bold !important;
+        }
+    </style>
 
     {% block extra_css %}{% endblock %}
 </head>
 
 <body class="{% if request.resolver_match.url_name == 'index' %}no-menu{% else %}has-menu{% endif %}">
+    <!-- DEBUG TEMPORAL -->
+    <div class="debug-layout">LAYOUT FIX ACTIVO</div>
+    
     <!-- Incluir el menú de navegación solo para páginas que no sean las seleccionadas-->
     {% if request.resolver_match.url_name not in 'index,login,password_recovery,register,marketplace' %}
     {% include 'core/includes/menu_nav.html' %}
@@ -28,14 +182,35 @@
 
     <!-- Scripts base OPTIMIZADOS CONSERVADORES PARA MÓVIL -->
     <script>
-        // ==================================================
-        // 🚀 OPTIMIZACIONES MÓVIL CONSERVADORAS - CORREGIDO
-        // ==================================================
-        
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('📱 Iniciando optimizaciones móvil conservadoras...');
+            console.log('🔧 LAYOUT FIX: Iniciando correcciones...');
             
-            // 1. DETECTAR DISPOSITIVO
+            // FORZAR VISIBILIDAD INMEDIATA
+            const containers = document.querySelectorAll(
+                '.register-container, .login-container, .article-container, ' +
+                '.create-news-container, .main-content, .news-content'
+            );
+            
+            containers.forEach(container => {
+                if (container) {
+                    container.style.opacity = '1';
+                    container.style.visibility = 'visible';
+                    container.style.display = 'block';
+                    container.style.transform = 'none';
+                    container.style.transition = 'none';
+                    container.style.animation = 'none';
+                }
+            });
+            
+            // ELIMINAR CUALQUIER AOS/GSAP QUE CAUSE PROBLEMAS
+            const aosElements = document.querySelectorAll('[data-aos]');
+            aosElements.forEach(el => {
+                el.removeAttribute('data-aos');
+                el.style.transform = 'none';
+                el.style.opacity = '1';
+            });
+            
+            // DETECTAR DISPOSITIVO
             const isMobile = window.innerWidth <= 768;
             const isLowEnd = isMobile && (
                 navigator.hardwareConcurrency <= 2 || 
@@ -52,23 +227,17 @@
                 } else {
                     setupLightweightCanvas();
                 }
-                
-                // Indicador temporal
-                showMobileOptimizationIndicator();
             } else {
-                // DESKTOP: Configuración normal
                 setupDesktopCanvas();
             }
+            
+            console.log('✅ LAYOUT FIX: Correcciones aplicadas');
         });
 
-        // ==================================================
-        // FUNCIONES DE OPTIMIZACIÓN CONSERVADORAS
-        // ==================================================
-
         function applyMobileOptimizations() {
-            console.log('📱 Aplicando optimizaciones móvil conservadoras...');
+            console.log('📱 Aplicando optimizaciones móvil...');
             
-            // SOLO desactivar elementos realmente pesados
+            // Desactivar elementos pesados
             const heavyElements = document.querySelectorAll(
                 '.cyber-grid, .organic-shapes, .particles-container, .floating-elements'
             );
@@ -77,24 +246,11 @@
                 element.style.display = 'none';
             });
             
-            // Optimizar scroll SIN forzar dimensiones
+            // Optimizar scroll
             if (document.body) {
                 document.body.style.webkitOverflowScrolling = 'touch';
                 document.body.style.overscrollBehavior = 'none';
             }
-            
-            // Prevenir zoom doble-tap SOLO cuando sea necesario
-            let lastTouchEnd = 0;
-            document.addEventListener('touchend', function(event) {
-                const now = Date.now();
-                if (now - lastTouchEnd <= 300) {
-                    const target = event.target;
-                    if (!target.closest('button, a, input, textarea, select')) {
-                        event.preventDefault();
-                    }
-                }
-                lastTouchEnd = now;
-            }, false);
             
             console.log('✅ Optimizaciones móvil aplicadas');
         }
@@ -122,7 +278,6 @@
             
             const ctx = canvas.getContext('2d');
             
-            // Función para redimensionar canvas
             function resizeCanvas() {
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
@@ -130,20 +285,20 @@
             
             resizeCanvas();
             
-            // Solo 3 partículas ligeras
+            // Solo 2 partículas muy ligeras
             const particles = [];
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < 2; i++) {
                 particles.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
-                    vx: (Math.random() - 0.5) * 0.3,
-                    vy: (Math.random() - 0.5) * 0.3,
-                    opacity: Math.random() * 0.2 + 0.05
+                    vx: (Math.random() - 0.5) * 0.2,
+                    vy: (Math.random() - 0.5) * 0.2,
+                    opacity: Math.random() * 0.1 + 0.03
                 });
             }
             
             let lastTime = 0;
-            const targetFPS = 20;
+            const targetFPS = 15;
             const frameTime = 1000 / targetFPS;
             
             function animate(currentTime) {
@@ -173,33 +328,18 @@
             
             animate(0);
             
-            // Redimensionar en resize
             window.addEventListener('resize', resizeCanvas);
             
             console.log('✅ Canvas ligero configurado');
         }
 
         function setupDesktopCanvas() {
-            // Para desktop usar canvas normal si existe
             const canvas = document.getElementById('backgroundCanvas');
             if (!canvas) return;
             
             if (typeof OptimizedCanvasEffect !== 'undefined') {
                 new OptimizedCanvasEffect(canvas);
             }
-        }
-
-        function showMobileOptimizationIndicator() {
-            const indicator = document.createElement('div');
-            indicator.className = 'debug-mobile-performance';
-            indicator.textContent = 'MÓVIL OPTIMIZADO';
-            document.body.appendChild(indicator);
-            
-            setTimeout(() => {
-                if (indicator.parentNode) {
-                    indicator.remove();
-                }
-            }, 3000);
         }
 
         // Variables globales simples
@@ -219,7 +359,6 @@
         window.addEventListener('resize', function() {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(function() {
-                // Solo ajustar canvas si existe y está visible
                 const canvas = document.getElementById('backgroundCanvas');
                 if (canvas && canvas.style.display !== 'none') {
                     canvas.width = window.innerWidth;
@@ -229,7 +368,7 @@
         });
 
         console.log('🔐 Estado de sesión:', window.userSessionData);
-        console.log('✅ Optimizaciones móvil conservadoras aplicadas');
+        console.log('✅ LAYOUT FIX: Sistema inicializado');
     </script>
 
     <!-- Sistema de auto-logout simplificado -->
