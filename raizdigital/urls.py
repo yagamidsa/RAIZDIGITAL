@@ -5,10 +5,17 @@ from django.conf.urls.static import static
 from django.views.static import serve
 from django.urls import re_path
 import os
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
+
+     # Manejar favicon
+    path('favicon.ico', RedirectView.as_view(
+        url=settings.STATIC_URL + 'core/img/favicon.ico',
+        permanent=True
+    )),
 ]
 
 # 🔧 CONFIGURACIÓN CORREGIDA PARA SERVIR ARCHIVOS MULTIMEDIA
