@@ -19,4 +19,6 @@ urlpatterns = [
     # Rutas AJAX para manejo de sesión
     path('api/session/extend/', views.session_extend, name='session_extend'),
     path('api/session/status/', views.check_session_status, name='session_status'),
+    path('api/update-avatar/', views.update_avatar, name='update_avatar'),
+    path('api/delete-avatar/', views.delete_avatar, name='delete_avatar'),
 ]

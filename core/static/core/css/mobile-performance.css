@@ -540,34 +540,75 @@ img, video {
 /* 3. AGREGAR AL FINAL DE mobile-performance.css */
 
 /* ===================================
-   🎨 CORRECCIÓN CRÍTICA PARA AVATARES EN MÓVIL
+   🎨 CORRECCIÓN CRÍTICA USER-INFO AVATAR
    =================================== */
 
-/* FORZAR VISIBILIDAD DE TODOS LOS ELEMENTOS DE AVATAR */
-.user-info,
-.user-avatar,
-.user-avatar img,
-.welcome-avatar-container,
-.welcome-avatar,
-.welcome-avatar img,
-.avatar-status,
-.welcome-user-name,
-.welcome-community,
-.welcome-section,
-.avatar-preview,
-.avatar-preview img,
-.avatar-container {
-    display: block !important;
+/* ELIMINAR EL BORDE DE DEBUG ROJO */
+.user-avatar::after {
+    /* REMOVER COMPLETAMENTE ESTE DEBUG */
+    display: none !important;
+    content: none !important;
+    border: none !important;
+}
+
+/* ===================================
+   🎨 USER-INFO RESPONSIVE MEJORADO
+   =================================== */
+
+/* User info component base */
+.user-info {
+    position: fixed !important;
+    top: 15px !important;
+    left: 15px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    background: rgba(10, 25, 47, 0.9) !important;
+    padding: 8px 15px !important;
+    border-radius: 25px !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    z-index: 1001 !important;
+    border: 1px solid rgba(0, 255, 157, 0.4) !important;
+    box-shadow: 0 4px 20px rgba(0, 255, 157, 0.2) !important;
+    transition: all 0.3s ease !important;
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: auto !important;
-    z-index: 1000 !important;
 }
 
-/* ESPECÍFICO PARA IMÁGENES DE AVATAR */
-.user-avatar img,
-.welcome-avatar img,
-.avatar-preview img {
+.user-info:hover {
+    background: rgba(10, 25, 47, 0.95) !important;
+    box-shadow: 0 6px 25px rgba(0, 255, 157, 0.3) !important;
+    transform: translateY(-2px) !important;
+    border-color: rgba(0, 255, 157, 0.6) !important;
+}
+
+/* Avatar dentro del user-info */
+.user-avatar {
+    width: 36px !important;
+    height: 36px !important;
+    background: rgba(0, 255, 157, 0.1) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1.5px solid rgba(0, 255, 157, 0.5) !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+    transition: all 0.3s ease !important;
+    /* IMPORTANTE: SIN BORDES DE DEBUG */
+    position: relative !important;
+}
+
+.user-avatar:hover {
+    border-color: var(--neon-green) !important;
+    box-shadow: 0 0 10px rgba(0, 255, 157, 0.4) !important;
+    transform: scale(1.05) !important;
+}
+
+/* Imagen del avatar */
+.user-avatar img {
     width: 100% !important;
     height: 100% !important;
     object-fit: cover !important;
@@ -577,84 +618,116 @@ img, video {
     visibility: visible !important;
 }
 
-/* CONTENEDORES DE AVATAR CON ALTA PRIORIDAD */
-@media (max-width: 768px) {
+/* Icono de fallback cuando no hay imagen */
+.user-avatar svg {
+    width: 20px !important;
+    height: 20px !important;
+    fill: rgba(0, 255, 157, 0.8) !important;
+    filter: drop-shadow(0 0 3px rgba(0, 255, 157, 0.4)) !important;
+}
+
+/* Nombre del usuario */
+.user-name {
+    color: #ffffff !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.3px !important;
+    white-space: nowrap !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* ===================================
+   🎨 RESPONSIVE MÓVIL OPTIMIZADO
+   =================================== */
+
+/* Tablet */
+@media (max-width: 1024px) {
     .user-info {
-        position: fixed !important;
-        top: 10px !important;
-        left: 10px !important;
-        z-index: 1001 !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 10px !important;
-        background: rgba(10, 25, 47, 0.9) !important;
-        padding: 8px 12px !important;
-        border-radius: 25px !important;
-        border: 1px solid rgba(0, 255, 157, 0.3) !important;
-        backdrop-filter: blur(10px) !important;
-        opacity: 1 !important;
-        visibility: visible !important;
+        top: 12px !important;
+        left: 12px !important;
+        padding: 6px 12px !important;
     }
     
     .user-avatar {
-        width: 30px !important;
-        height: 30px !important;
-        border-radius: 50% !important;
-        overflow: hidden !important;
-        background: rgba(0, 255, 157, 0.1) !important;
-        border: 1px solid var(--neon-green) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-        flex-shrink: 0 !important;
+        width: 34px !important;
+        height: 34px !important;
+    }
+    
+    .user-avatar svg {
+        width: 18px !important;
+        height: 18px !important;
     }
     
     .user-name {
-        color: #ffffff !important;
         font-size: 0.85rem !important;
-        font-weight: 500 !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-        white-space: nowrap !important;
-    }
-    
-    /* AVATAR PRINCIPAL EN MARKETPLACE */
-    .welcome-avatar-container {
-        width: 140px !important;
-        height: 140px !important;
-        margin: 0 auto 1.5rem !important;
-        position: relative !important;
-        cursor: pointer !important;
-        display: block !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-    
-    .welcome-avatar {
-        width: 100% !important;
-        height: 100% !important;
-        border-radius: 50% !important;
-        background: linear-gradient(135deg, rgba(0, 255, 157, 0.1) 0%, rgba(0, 246, 255, 0.05) 100%) !important;
-        border: 3px solid rgba(0, 255, 157, 0.4) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        overflow: hidden !important;
-        position: relative !important;
-        box-shadow: 0 0 20px rgba(0, 255, 157, 0.3) !important;
-        opacity: 1 !important;
-        visibility: visible !important;
     }
 }
 
-/* PARA PANTALLAS MUY PEQUEÑAS */
+/* Móvil Grande */
+@media (max-width: 768px) {
+    .user-info {
+        top: 10px !important;
+        left: 10px !important;
+        padding: 6px 10px !important;
+        gap: 8px !important;
+        border-radius: 20px !important;
+    }
+    
+    .user-avatar {
+        width: 32px !important;
+        height: 32px !important;
+        border-width: 1.5px !important;
+    }
+    
+    .user-avatar svg {
+        width: 16px !important;
+        height: 16px !important;
+    }
+    
+    .user-name {
+        font-size: 0.8rem !important;
+    }
+}
+
+/* Móvil Mediano */
 @media (max-width: 480px) {
     .user-info {
         top: 8px !important;
         left: 8px !important;
-        padding: 6px 10px !important;
+        padding: 5px 8px !important;
+        gap: 6px !important;
+        max-width: calc(100vw - 120px) !important; /* Evitar overflow */
+    }
+    
+    .user-avatar {
+        width: 28px !important;
+        height: 28px !important;
+        border-width: 1px !important;
+    }
+    
+    .user-avatar svg {
+        width: 14px !important;
+        height: 14px !important;
+    }
+    
+    .user-name {
+        font-size: 0.75rem !important;
+        max-width: 120px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+}
+
+/* Móvil Pequeño */
+@media (max-width: 360px) {
+    .user-info {
+        top: 5px !important;
+        left: 5px !important;
+        padding: 4px 6px !important;
+        gap: 5px !important;
+        max-width: calc(100vw - 100px) !important;
     }
     
     .user-avatar {
@@ -662,37 +735,143 @@ img, video {
         height: 26px !important;
     }
     
-    .user-name {
-        font-size: 0.8rem !important;
+    .user-avatar svg {
+        width: 12px !important;
+        height: 12px !important;
     }
     
-    .welcome-avatar-container {
-        width: 120px !important;
-        height: 120px !important;
+    .user-name {
+        font-size: 0.7rem !important;
+        max-width: 100px !important;
     }
 }
 
-/* DEBUG TEMPORAL - AGREGAR PARA VERIFICAR */
-.user-avatar::after {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    border: 2px solid red;
-    border-radius: 50%;
-    z-index: 10000;
-    pointer-events: none;
-    /* QUITAR ESTO DESPUÉS DE VERIFICAR QUE FUNCIONA */
+/* ===================================
+   🎨 ESTADOS ESPECIALES
+   =================================== */
+
+/* Cuando el usuario está activo */
+.user-info.active {
+    border-color: var(--neon-green) !important;
+    box-shadow: 0 4px 20px rgba(0, 255, 157, 0.4) !important;
 }
 
-/* ASEGURAR QUE NO HAY CONFLICTOS CON OTROS ESTILOS */
+.user-info.active .user-avatar {
+    border-color: var(--neon-green) !important;
+}
+
+/* Animación de entrada suave */
+.user-info {
+    animation: userInfoFadeIn 0.5s ease-out forwards !important;
+}
+
+@keyframes userInfoFadeIn {
+    0% {
+        opacity: 0 !important;
+        transform: translateX(-100%) scale(0.8) !important;
+    }
+    100% {
+        opacity: 1 !important;
+        transform: translateX(0) scale(1) !important;
+    }
+}
+
+/* ===================================
+   🎨 MODO OSCURO Y CONTRASTE
+   =================================== */
+
+/* Mejorar contraste en pantallas OLED */
+@media (prefers-contrast: high) {
+    .user-info {
+        background: rgba(0, 0, 0, 0.9) !important;
+        border-color: var(--neon-green) !important;
+    }
+    
+    .user-name {
+        color: #ffffff !important;
+        text-shadow: 0 0 5px rgba(0, 255, 157, 0.5) !important;
+    }
+}
+
+/* Reducir movimiento para usuarios sensibles */
+@media (prefers-reduced-motion: reduce) {
+    .user-info,
+    .user-avatar {
+        transition: none !important;
+        animation: none !important;
+    }
+    
+    .user-info:hover {
+        transform: none !important;
+    }
+    
+    .user-avatar:hover {
+        transform: none !important;
+    }
+}
+
+/* ===================================
+   🎨 ASEGURAR VISIBILIDAD MÁXIMA
+   =================================== */
+
+/* Forzar visibilidad en todos los breakpoints */
 .user-info,
 .user-avatar,
-.welcome-avatar-container,
-.welcome-avatar {
-    animation: none !important;
-    transform: none !important;
-    transition: all 0.3s ease !important;
+.user-avatar img,
+.user-name {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+.user-info {
+    display: flex !important;
+}
+
+/* Evitar que otros elementos lo oculten */
+.user-info {
+    z-index: 1001 !important;
+    position: fixed !important;
+}
+
+/* ===================================
+   🎨 FALLBACKS PARA NAVEGADORES VIEJOS
+   =================================== */
+
+/* Fallback para navegadores sin backdrop-filter */
+@supports not (backdrop-filter: blur(15px)) {
+    .user-info {
+        background: rgba(10, 25, 47, 0.95) !important;
+    }
+}
+
+/* Fallback para navegadores sin CSS Grid */
+.user-info {
+    display: -webkit-flex !important;
+    display: flex !important;
+    -webkit-align-items: center !important;
+    align-items: center !important;
+}
+
+/* ===================================
+   🎨 ORIENTACIÓN LANDSCAPE EN MÓVIL
+   =================================== */
+
+@media (max-width: 768px) and (orientation: landscape) {
+    .user-info {
+        top: 5px !important;
+        left: 5px !important;
+        padding: 4px 8px !important;
+        gap: 6px !important;
+    }
+    
+    .user-avatar {
+        width: 28px !important;
+        height: 28px !important;
+    }
+    
+    .user-name {
+        font-size: 0.75rem !important;
+    }
 }

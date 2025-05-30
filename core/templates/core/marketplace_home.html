@@ -246,64 +246,7 @@
         }
     }
 
-    /* Terminal-style info display */
-    .user-terminal-info {
-        background: rgba(0, 0, 0, 0.6);
-        border: 1px solid var(--neon-green);
-        border-radius: 8px;
-        padding: 1rem;
-        margin-top: 1rem;
-        font-family: 'Courier New', monospace;
-        font-size: 0.85rem;
-        color: var(--neon-green);
-        text-align: left;
-        max-width: 400px;
-        margin-left: auto;
-        margin-right: auto;
-        display: none;
-        opacity: 0;
-        transform: translateY(-10px);
-        transition: all 0.3s ease;
-    }
-
-    .user-terminal-info.show {
-        display: block;
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    .terminal-line {
-        margin: 0.3rem 0;
-        opacity: 0.9;
-    }
-
-    .terminal-line::before {
-        content: '> ';
-        opacity: 0.6;
-    }
-
-    .terminal-key {
-        color: var(--cyber-blue);
-        margin-right: 0.5rem;
-    }
-
-    /* Avatar edit hint */
-    .avatar-edit-hint {
-        position: absolute;
-        bottom: -30px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0, 0, 0, 0.8);
-        color: rgba(255, 255, 255, 0.7);
-        padding: 0.3rem 0.8rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        pointer-events: none;
-        white-space: nowrap;
-    }
-
+    
     .welcome-avatar-container:hover .avatar-edit-hint {
         opacity: 1;
     }
@@ -378,29 +321,11 @@
                     {% endif %}
                 </div>
                 <div class="avatar-status"></div>
-                <div class="avatar-edit-hint">Click para ver perfil</div>
             </div>
             
             <h2 class="welcome-user-name">{{ nombre }} {{ apellido }}</h2>
             <p class="welcome-community">{{ community_name|default:"Comunidad Digital" }}</p>
             
-            <!-- Terminal info (hidden by default) -->
-            <div class="user-terminal-info" id="userTerminalInfo">
-                <div class="terminal-line">
-                    <span class="terminal-key">user:</span>{{ username }}
-                </div>
-                <div class="terminal-line">
-                    <span class="terminal-key">role:</span>{% if is_admin %}administrator{% else %}member{% endif %}
-                </div>
-                <div class="terminal-line">
-                    <span class="terminal-key">community:</span>{{ community_name|default:"global" }}
-                </div>
-                <div class="terminal-line">
-                    <span class="terminal-key">status:</span>active
-                </div>
-            </div>
-        </div>
-        
         <p class="welcome-subtitle">Conectando ancestralidad con el mundo moderno</p>
 
         <!-- Start button -->
@@ -473,6 +398,8 @@
         </div>
     </div>
 </div>
+<!-- 🎨 SISTEMA DE GESTIÓN DE AVATAR -->
+{% include 'core/includes/avatar_management.html' %}
 {% endblock %}
 
 {% block extra_js %}
@@ -490,58 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // SISTEMA DE AVATAR
     // =============================
     const avatarContainer = document.getElementById('welcomeAvatarContainer');
-    const terminalInfo = document.getElementById('userTerminalInfo');
-    let terminalVisible = false;
     
-    // Avatar click to show terminal info
-    if (avatarContainer) {
-        avatarContainer.addEventListener('click', function() {
-            terminalVisible = !terminalVisible;
-            
-            if (terminalVisible) {
-                terminalInfo.classList.add('show');
-                
-                // Typewriter effect for terminal
-                const lines = terminalInfo.querySelectorAll('.terminal-line');
-                lines.forEach((line, index) => {
-                    line.style.opacity = '0';
-                    line.style.transform = 'translateX(-10px)';
-                    
-                    setTimeout(() => {
-                        line.style.transition = 'all 0.3s ease';
-                        line.style.opacity = '0.9';
-                        line.style.transform = 'translateX(0)';
-                    }, index * 100);
-                });
-            } else {
-                terminalInfo.classList.remove('show');
-            }
-        });
-        
-        // Animate avatar on load
-        if (typeof gsap !== 'undefined') {
-            gsap.fromTo('.welcome-avatar-container',
-                { scale: 0, rotation: -180 },
-                { 
-                    scale: 1, 
-                    rotation: 0, 
-                    duration: 1, 
-                    ease: "back.out(1.7)",
-                    delay: 0.5
-                }
-            );
-            
-            // Glow effect
-            gsap.to('.welcome-avatar', {
-                boxShadow: '0 0 50px rgba(0, 255, 157, 0.5)',
-                duration: 2,
-                repeat: -1,
-                yoyo: true,
-                ease: "sine.inOut"
-            });
-        }
-    }
-
     // =============================
     // FORZAR SCROLL SI ES NECESARIO
     // =============================
