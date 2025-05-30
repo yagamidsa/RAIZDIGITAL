@@ -218,6 +218,7 @@ if railway_volume == '/app/media':
     try:
         MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
         (MEDIA_ROOT / 'news').mkdir(exist_ok=True)
+        (MEDIA_ROOT / 'avatars').mkdir(exist_ok=True)
         print(f"✅ Directorios en tu volumen verificados")
     except Exception as e:
         print(f"⚠️ Aviso en volumen: {e}")
@@ -230,6 +231,7 @@ else:
     try:
         MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
         (MEDIA_ROOT / 'news').mkdir(exist_ok=True)
+        (MEDIA_ROOT / 'avatars').mkdir(exist_ok=True)
     except Exception as e:
         print(f"❌ Error: {e}")
 
