@@ -42,7 +42,144 @@ def index(request):
     """Página de inicio - pública"""
     return render(request, 'core/index.html')
 
+import os
+from django.conf import settings
+import uuid
+import datetime
 
+def handle_uploaded_file(uploaded_file, category='news'):
+    """
+    Maneja la subida de archivos con soporte para Railway Volumes.
+    Actualizada para manejar avatares y otros tipos de archivos.
+    
+    Args:
+        uploaded_file: Archivo subido desde el formulario
+        category: Categoría del archivo ('news', 'profiles', 'avatars', etc.)
+    
+    Returns:
+        str: Ruta relativa del archivo guardado o None si hay error
+    """
+    try:
+        # Validar que el archivo no esté vacío
+        if not uploaded_file or uploaded_file.size == 0:
+            print("❌ Archivo vacío o no válido")
+            return None
+        
+        # Validar tamaño máximo según categoría
+        max_size = 10 * 1024 * 1024  # 10MB por defecto
+        if category == 'avatars':
+            max_size = 5 * 1024 * 1024  # 5MB para avatares
+            
+        if uploaded_file.size > max_size:
+            print(f"❌ Archivo muy grande: {uploaded_file.size} bytes (máximo {max_size/1024/1024}MB)")
+            return None
+        
+        # Obtener extensión del archivo
+        name, extension = os.path.splitext(uploaded_file.name)
+        extension = extension.lower()
+        
+        # Validar extensiones permitidas según categoría
+        if category == 'avatars':
+            allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+        else:
+            allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.pdf', '.doc', '.docx']
+            
+        if extension not in allowed_extensions:
+            print(f"❌ Extensión no permitida: {extension}")
+            return None
+        
+        # Generar nombre único para evitar colisiones
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        unique_id = str(uuid.uuid4())[:8]
+        
+        # Para avatares, usar un formato más limpio
+        if category == 'avatars':
+            filename = f"avatar_{unique_id}{extension}"
+        else:
+            filename = f"{category}_{timestamp}_{unique_id}{extension}"
+        
+        # 🔧 DETERMINAR LA RUTA SEGÚN EL ENTORNO Y VOLUMEN
+        if settings.DEBUG:
+            # DESARROLLO: Usar MEDIA_ROOT normal
+            base_path = settings.MEDIA_ROOT
+            print(f"🏠 Modo desarrollo: {base_path}")
+        else:
+            # PRODUCCIÓN: Verificar si hay Railway Volume configurado
+            railway_volume = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH')
+            if railway_volume:
+                # ✅ USANDO RAILWAY VOLUME (PERSISTENTE)
+                base_path = settings.MEDIA_ROOT  # Ya apunta al volumen en production.py
+                print(f"💾 Modo producción con Volume: {base_path}")
+            else:
+                # ❌ FALLBACK: Almacenamiento temporal
+                base_path = os.path.join(settings.STATIC_ROOT, 'media')
+                print(f"⚠️ Modo producción temporal: {base_path}")
+        
+        # Crear directorio de categoría
+        category_dir = os.path.join(base_path, category)
+        os.makedirs(category_dir, exist_ok=True)
+        
+        # Ruta completa del archivo
+        file_path = os.path.join(category_dir, filename)
+        relative_path = f"{category}/{filename}"  # Para guardar en la BD
+        
+        # 🔧 GUARDAR EL ARCHIVO
+        print(f"💾 Guardando: {uploaded_file.name} -> {filename}")
+        print(f"📁 Destino: {file_path}")
+        
+        with open(file_path, 'wb+') as destination:
+            for chunk in uploaded_file.chunks():
+                destination.write(chunk)
+        
+        # 🔧 VERIFICAR QUE SE GUARDÓ CORRECTAMENTE
+        if os.path.exists(file_path):
+            file_size = os.path.getsize(file_path)
+            print(f"✅ Archivo guardado exitosamente")
+            print(f"📊 Tamaño: {file_size:,} bytes")
+            print(f"🔗 Ruta BD: {relative_path}")
+            print(f"🌐 URL: {settings.MEDIA_URL}{relative_path}")
+            
+            # 🔧 VERIFICAR SI ES PERSISTENTE
+            is_persistent = not settings.DEBUG and os.environ.get('RAILWAY_VOLUME_MOUNT_PATH')
+            print(f"💾 Persistente: {'SÍ ✅' if is_persistent else 'NO ❌'}")
+            
+            # Para avatares, opcionalmente redimensionar la imagen
+            if category == 'avatars':
+                try:
+                    from PIL import Image
+                    
+                    # Abrir y redimensionar la imagen
+                    with Image.open(file_path) as img:
+                        # Convertir a RGB si es necesario (para PNG con transparencia)
+                        if img.mode in ('RGBA', 'LA'):
+                            rgb_img = Image.new('RGB', img.size, (255, 255, 255))
+                            rgb_img.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                            img = rgb_img
+                        
+                        # Redimensionar manteniendo aspecto
+                        max_size = (400, 400)
+                        img.thumbnail(max_size, Image.Resampling.LANCZOS)
+                        
+                        # Guardar con calidad optimizada
+                        img.save(file_path, 'JPEG', quality=85, optimize=True)
+                        
+                    print(f"✅ Avatar redimensionado y optimizado")
+                except ImportError:
+                    print("⚠️ Pillow no instalado, avatar guardado sin optimizar")
+                except Exception as e:
+                    print(f"⚠️ Error optimizando avatar: {e}")
+                    # El archivo ya está guardado, continuar sin optimización
+            
+            return relative_path
+        else:
+            print(f"❌ Error: El archivo no se guardó en {file_path}")
+            return None
+        
+    except Exception as e:
+        print(f"❌ Error al guardar archivo: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
 
 def login_view(request):
     """Vista de login mejorada con manejo de foto de perfil"""
@@ -1890,100 +2027,3 @@ def send_verification_email(user_id, email, username):
     pass
 
 
-import os
-from django.conf import settings
-import uuid
-import datetime
-
-def handle_uploaded_file(uploaded_file, category='news'):
-    """
-    Maneja la subida de archivos con soporte para Railway Volumes.
-    
-    Args:
-        uploaded_file: Archivo subido desde el formulario
-        category: Categoría del archivo ('news', 'profiles', etc.)
-    
-    Returns:
-        str: Ruta relativa del archivo guardado o None si hay error
-    """
-    try:
-        # Validar que el archivo no esté vacío
-        if not uploaded_file or uploaded_file.size == 0:
-            print("❌ Archivo vacío o no válido")
-            return None
-        
-        # Validar tamaño máximo (10MB)
-        if uploaded_file.size > 10 * 1024 * 1024:
-            print(f"❌ Archivo muy grande: {uploaded_file.size} bytes (máximo 10MB)")
-            return None
-        
-        # Obtener extensión del archivo
-        name, extension = os.path.splitext(uploaded_file.name)
-        extension = extension.lower()
-        
-        # Validar extensiones permitidas
-        allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
-        if extension not in allowed_extensions:
-            print(f"❌ Extensión no permitida: {extension}")
-            return None
-        
-        # Generar nombre único para evitar colisiones
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        unique_id = str(uuid.uuid4())[:8]
-        filename = f"{category}_{timestamp}_{unique_id}{extension}"
-        
-        # 🔧 DETERMINAR LA RUTA SEGÚN EL ENTORNO Y VOLUMEN
-        if settings.DEBUG:
-            # DESARROLLO: Usar MEDIA_ROOT normal
-            base_path = settings.MEDIA_ROOT
-            print(f"🏠 Modo desarrollo: {base_path}")
-        else:
-            # PRODUCCIÓN: Verificar si hay Railway Volume configurado
-            railway_volume = os.environ.get('RAILWAY_VOLUME_MOUNT_PATH')
-            if railway_volume:
-                # ✅ USANDO RAILWAY VOLUME (PERSISTENTE)
-                base_path = settings.MEDIA_ROOT  # Ya apunta al volumen en production.py
-                print(f"💾 Modo producción con Volume: {base_path}")
-            else:
-                # ❌ FALLBACK: Almacenamiento temporal
-                base_path = os.path.join(settings.STATIC_ROOT, 'media')
-                print(f"⚠️ Modo producción temporal: {base_path}")
-        
-        # Crear directorio de categoría
-        category_dir = os.path.join(base_path, category)
-        os.makedirs(category_dir, exist_ok=True)
-        
-        # Ruta completa del archivo
-        file_path = os.path.join(category_dir, filename)
-        relative_path = f"{category}/{filename}"  # Para guardar en la BD
-        
-        # 🔧 GUARDAR EL ARCHIVO
-        print(f"💾 Guardando: {uploaded_file.name} -> {filename}")
-        print(f"📁 Destino: {file_path}")
-        
-        with open(file_path, 'wb+') as destination:
-            for chunk in uploaded_file.chunks():
-                destination.write(chunk)
-        
-        # 🔧 VERIFICAR QUE SE GUARDÓ CORRECTAMENTE
-        if os.path.exists(file_path):
-            file_size = os.path.getsize(file_path)
-            print(f"✅ Archivo guardado exitosamente")
-            print(f"📊 Tamaño: {file_size:,} bytes")
-            print(f"🔗 Ruta BD: {relative_path}")
-            print(f"🌐 URL: {settings.MEDIA_URL}{relative_path}")
-            
-            # 🔧 VERIFICAR SI ES PERSISTENTE
-            is_persistent = not settings.DEBUG and os.environ.get('RAILWAY_VOLUME_MOUNT_PATH')
-            print(f"💾 Persistente: {'SÍ ✅' if is_persistent else 'NO ❌'}")
-            
-            return relative_path
-        else:
-            print(f"❌ Error: El archivo no se guardó en {file_path}")
-            return None
-        
-    except Exception as e:
-        print(f"❌ Error al guardar archivo: {e}")
-        import traceback
-        traceback.print_exc()
-        return None
