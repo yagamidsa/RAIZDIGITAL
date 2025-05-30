@@ -32,13 +32,11 @@ logger = logging.getLogger(__name__)
 
 # Importar decoradores personalizados (SI EXISTEN)
 try:
-    from .decorators import login_required_custom, admin_required, ajax_login_required, session_refresh, get_user_info
+    from .decorators import login_required_custom, admin_required, ajax_login_required, session_refresh, get_user_info, is_authenticated, is_admin_user
     DECORATORS_AVAILABLE = True
 except ImportError:
     # Si no existen los decoradores, crearlos aquí mismo
     DECORATORS_AVAILABLE = False
-
-logger = logging.getLogger(__name__)
 
 def index(request):
     """Página de inicio - pública"""
@@ -47,7 +45,7 @@ def index(request):
 
 
 def login_view(request):
-    """Vista de login mejorada con manejo de mensajes de logout"""
+    """Vista de login mejorada con manejo de foto de perfil"""
     
     # Si ya está logueado, redirigir al marketplace
     if request.session.get('user_id'):
@@ -67,9 +65,11 @@ def login_view(request):
         
         try:
             with connection.cursor() as cursor:
+                # 🎨 ACTUALIZADO: Incluir foto_perfil en la consulta
                 cursor.execute("""
                     SELECT u.id, u.username, u.password, u.nombre, u.apellido, 
-                           c.id as comunidad_id, c.nombre as comunidad_nombre, u.activo
+                           c.id as comunidad_id, c.nombre as comunidad_nombre, u.activo,
+                           u.foto_perfil
                     FROM raiz.usuarios u
                     LEFT JOIN raiz.comunidades c ON u.id_comunidad = c.id
                     WHERE u.username = %s
@@ -77,7 +77,7 @@ def login_view(request):
                 user_data = cursor.fetchone()
             
             if user_data:
-                user_id, db_username, db_password, nombre, apellido, comunidad_id, comunidad_nombre, activo = user_data
+                user_id, db_username, db_password, nombre, apellido, comunidad_id, comunidad_nombre, activo, foto_perfil = user_data
                 
                 # Verificar que el usuario esté activo
                 if not activo:
@@ -100,6 +100,10 @@ def login_view(request):
                     request.session['username'] = db_username
                     request.session['nombre'] = nombre
                     request.session['apellido'] = apellido
+                    
+                    # 🎨 NUEVO: Guardar foto de perfil en sesión
+                    if foto_perfil:
+                        request.session['foto_perfil'] = foto_perfil
                     
                     if comunidad_id:
                         request.session['comunidad_id'] = comunidad_id
@@ -182,15 +186,42 @@ def password_recovery(request):
 @login_required_custom
 @session_refresh
 def marketplace(request):
-    """Vista del marketplace - PROTEGIDA"""
+    """Vista del marketplace con avatar del usuario"""
     user_info = get_user_info(request)
+    
+    # Obtener foto de perfil del usuario
+    foto_perfil_url = None
+    try:
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT foto_perfil FROM raiz.usuarios 
+                WHERE id = %s
+            """, [user_info['user_id']])
+            
+            result = cursor.fetchone()
+            if result and result[0]:
+                # Construir URL completa para la foto
+                foto_perfil_path = result[0]
+                if foto_perfil_path:
+                    # Si es una ruta relativa (avatars/archivo.jpg)
+                    if not foto_perfil_path.startswith('/'):
+                        foto_perfil_url = f"{settings.MEDIA_URL}{foto_perfil_path}"
+                    else:
+                        foto_perfil_url = foto_perfil_path
+                    
+                    logger.info(f"Foto de perfil encontrada: {foto_perfil_url}")
+    except Exception as e:
+        logger.error(f"Error obteniendo foto de perfil: {e}")
     
     context = {
         'username': user_info['username'],
         'nombre': user_info['nombre'],
         'apellido': user_info['apellido'],
         'nombre_completo': f"{user_info['nombre']} {user_info['apellido']}".strip(),
-        'community_name': user_info['comunidad_nombre']
+        'community_name': user_info['comunidad_nombre'],
+        'is_admin': user_info.get('is_admin', False),
+        'foto_perfil_url': foto_perfil_url  # 🎨 NUEVO: URL de la foto
     }
     
     return render(request, 'core/marketplace_home.html', context)
@@ -1527,8 +1558,11 @@ def session_refresh(view_func):
 
 def get_user_info(request):
     """
-    Función helper para obtener información del usuario de la sesión
+    Obtiene información completa del usuario autenticado incluyendo foto de perfil.
     """
+    if not is_authenticated(request):
+        return None
+    
     return {
         'user_id': request.session.get('user_id'),
         'username': request.session.get('username', ''),
@@ -1536,14 +1570,15 @@ def get_user_info(request):
         'apellido': request.session.get('apellido', ''),
         'comunidad_id': request.session.get('comunidad_id'),
         'comunidad_nombre': request.session.get('comunidad_nombre', ''),
-        'is_admin': request.session.get('is_admin', False)
+        'is_admin': is_admin_user(request),
+        'foto_perfil': request.session.get('foto_perfil', '')  # 🎨 NUEVO: Foto de perfil
     }
 
 # En core/views.py - ELIMINAR la función register simple y usar solo esta:
 
 @csrf_protect
 def register(request):
-    """Vista de registro que funciona tanto en local como en producción"""
+    """Vista de registro con soporte para foto de perfil"""
     
     # LIMPIAR MENSAJES DE OTRAS VISTAS
     storage = messages.get_messages(request)
@@ -1564,10 +1599,14 @@ def register(request):
         biografia = request.POST.get('biografia', '').strip()
         id_comunidad = request.POST.get('id_comunidad', '')
         
+        # 🎨 NUEVO: Manejo de foto de perfil
+        foto_perfil_file = request.FILES.get('foto_perfil')
+        foto_perfil_base64 = request.POST.get('foto_perfil_base64', '')
+        
         # Lista de errores
         errors = []
         
-        # Validaciones
+        # Validaciones existentes...
         if not nombre:
             errors.append("El nombre es requerido")
         elif len(nombre) < 2:
@@ -1644,6 +1683,8 @@ def register(request):
                 from django.db import transaction
                 from django.conf import settings
                 import uuid
+                import base64
+                import os
                 
                 # DETECCIÓN AUTOMÁTICA DEL ENTORNO
                 is_atomic_requests = getattr(settings, 'DATABASES', {}).get('default', {}).get('ATOMIC_REQUESTS', False)
@@ -1656,15 +1697,77 @@ def register(request):
                     # Hashear la contraseña
                     hashed_password = make_password(password)
                     
+                    # 🎨 PROCESAR FOTO DE PERFIL
+                    foto_perfil_path = None
+                    
+                    # Opción 1: Foto desde archivo
+                    if foto_perfil_file:
+                        try:
+                            # Generar nombre único para la foto
+                            ext = os.path.splitext(foto_perfil_file.name)[1].lower()
+                            if ext not in ['.jpg', '.jpeg', '.png', '.gif', '.webp']:
+                                errors.append("Formato de imagen no válido")
+                                return None
+                            
+                            # Crear nombre único
+                            filename = f"avatar_{user_id}{ext}"
+                            
+                            # Guardar usando la función handle_uploaded_file
+                            foto_perfil_path = handle_uploaded_file(foto_perfil_file, 'avatars')
+                            
+                            if not foto_perfil_path:
+                                logger.warning("No se pudo guardar la foto de perfil desde archivo")
+                        except Exception as e:
+                            logger.error(f"Error procesando foto de perfil: {e}")
+                    
+                    # Opción 2: Foto desde base64 (cámara)
+                    elif foto_perfil_base64:
+                        try:
+                            # Remover el prefijo data:image/jpeg;base64,
+                            if ',' in foto_perfil_base64:
+                                header, data = foto_perfil_base64.split(',', 1)
+                            else:
+                                data = foto_perfil_base64
+                            
+                            # Decodificar base64
+                            image_data = base64.b64decode(data)
+                            
+                            # Crear archivo temporal
+                            filename = f"avatar_{user_id}.jpg"
+                            temp_path = os.path.join(settings.MEDIA_ROOT, 'temp', filename)
+                            os.makedirs(os.path.dirname(temp_path), exist_ok=True)
+                            
+                            # Guardar temporalmente
+                            with open(temp_path, 'wb') as f:
+                                f.write(image_data)
+                            
+                            # Crear objeto archivo simulado
+                            from django.core.files.uploadedfile import SimpleUploadedFile
+                            uploaded_file = SimpleUploadedFile(
+                                filename,
+                                image_data,
+                                content_type='image/jpeg'
+                            )
+                            
+                            # Guardar usando la función handle_uploaded_file
+                            foto_perfil_path = handle_uploaded_file(uploaded_file, 'avatars')
+                            
+                            # Limpiar archivo temporal
+                            if os.path.exists(temp_path):
+                                os.remove(temp_path)
+                                
+                        except Exception as e:
+                            logger.error(f"Error procesando foto base64: {e}")
+                    
                     # Insertar usuario
                     with connection.cursor() as cursor:
                         cursor.execute("""
                             INSERT INTO raiz.usuarios (
                                 id, username, password, email, nombre, apellido,
                                 fecha_nacimiento, telefono, direccion, biografia,
-                                id_comunidad, fecha_registro, activo, verificado
+                                id_comunidad, foto_perfil, fecha_registro, activo, verificado
                             ) VALUES (
-                                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+                                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                                 CURRENT_TIMESTAMP, true, false
                             )
                         """, [
@@ -1673,7 +1776,8 @@ def register(request):
                             telefono if telefono else None,
                             direccion if direccion else None,
                             biografia if biografia else None,
-                            int(id_comunidad)
+                            int(id_comunidad),
+                            foto_perfil_path  # 🎨 NUEVO: Guardar path de foto
                         ])
                         
                         # RETORNAR EL ID del usuario creado
