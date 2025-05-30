@@ -2027,3 +2027,313 @@ def send_verification_email(user_id, email, username):
     pass
 
 
+
+
+
+
+
+
+@csrf_protect
+@require_http_methods(["POST"])
+@login_required_custom
+@session_refresh
+def update_avatar(request):
+    """
+    Vista para actualizar avatar del usuario con eliminación automática del anterior.
+    Soporta tanto archivos como base64.
+    """
+    import os
+    import base64
+    from django.conf import settings
+    from django.http import JsonResponse
+    from django.core.files.uploadedfile import SimpleUploadedFile
+    
+    if not request.session.get('user_id'):
+        return JsonResponse({
+            'success': False,
+            'message': 'Usuario no autenticado'
+        }, status=401)
+    
+    user_id = request.session.get('user_id')
+    
+    try:
+        # 🔧 PASO 1: OBTENER AVATAR ACTUAL PARA ELIMINARLO
+        current_avatar_path = None
+        
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT foto_perfil FROM raiz.usuarios 
+                WHERE id = %s
+            """, [user_id])
+            
+            result = cursor.fetchone()
+            if result and result[0]:
+                current_avatar_path = result[0]
+                print(f"📷 Avatar actual encontrado: {current_avatar_path}")
+        
+        # 🔧 PASO 2: PROCESAR NUEVA IMAGEN
+        new_avatar_file = None
+        
+        # Opción A: Archivo directo
+        if 'avatar_file' in request.FILES:
+            new_avatar_file = request.FILES['avatar_file']
+            print(f"📁 Archivo recibido: {new_avatar_file.name} ({new_avatar_file.size} bytes)")
+            
+        # Opción B: Base64 (desde cámara)
+        elif 'avatar_base64' in request.POST:
+            base64_data = request.POST['avatar_base64']
+            print(f"📸 Datos base64 recibidos: {len(base64_data)} caracteres")
+            
+            try:
+                # Remover prefijo si existe
+                if ',' in base64_data:
+                    header, data = base64_data.split(',', 1)
+                else:
+                    data = base64_data
+                
+                # Decodificar
+                image_data = base64.b64decode(data)
+                
+                # Crear archivo temporal
+                new_avatar_file = SimpleUploadedFile(
+                    f"avatar_{user_id}.jpg",
+                    image_data,
+                    content_type='image/jpeg'
+                )
+                print(f"📸 Base64 convertido a archivo: {len(image_data)} bytes")
+                
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Error procesando imagen base64: {str(e)}'
+                }, status=400)
+        
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': 'No se recibió ninguna imagen'
+            }, status=400)
+        
+        # 🔧 PASO 3: VALIDAR NUEVA IMAGEN
+        if not new_avatar_file:
+            return JsonResponse({
+                'success': False,
+                'message': 'Archivo de imagen inválido'
+            }, status=400)
+        
+        # Validar tamaño (5MB máximo)
+        if new_avatar_file.size > 5 * 1024 * 1024:
+            return JsonResponse({
+                'success': False,
+                'message': 'La imagen es demasiado grande (máximo 5MB)'
+            }, status=400)
+        
+        # 🔧 PASO 4: ELIMINAR AVATAR ANTERIOR FÍSICAMENTE
+        if current_avatar_path:
+            try:
+                # Construir ruta completa del archivo anterior
+                old_file_path = os.path.join(settings.MEDIA_ROOT, current_avatar_path)
+                
+                if os.path.exists(old_file_path):
+                    os.remove(old_file_path)
+                    print(f"🗑️ Avatar anterior eliminado: {old_file_path}")
+                else:
+                    print(f"⚠️ Avatar anterior no encontrado en disco: {old_file_path}")
+                    
+            except Exception as e:
+                print(f"⚠️ Error eliminando avatar anterior: {e}")
+                # No fallar por esto, continuar con la subida
+        
+        # 🔧 PASO 5: GUARDAR NUEVA IMAGEN USANDO LA FUNCIÓN ORIGINAL
+        # Usamos handle_uploaded_file normal, la eliminación ya la hicimos arriba
+        new_avatar_path = handle_uploaded_file(new_avatar_file, 'avatars')
+        
+        if not new_avatar_path:
+            return JsonResponse({
+                'success': False,
+                'message': 'Error al guardar la nueva imagen'
+            }, status=500)
+        
+        # 🔧 PASO 6: ACTUALIZAR BASE DE DATOS
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE raiz.usuarios 
+                SET foto_perfil = %s 
+                WHERE id = %s
+            """, [new_avatar_path, user_id])
+            
+            print(f"✅ Avatar actualizado en BD: {new_avatar_path}")
+        
+        # 🔧 PASO 7: ACTUALIZAR SESIÓN
+        request.session['foto_perfil'] = new_avatar_path
+        request.session.modified = True
+        
+        # 🔧 PASO 8: CONSTRUIR URL COMPLETA PARA RESPUESTA
+        new_avatar_url = f"{settings.MEDIA_URL}{new_avatar_path}"
+        
+        # 🔧 PASO 9: LOG DE AUDITORÍA
+        logger.info(f"Avatar actualizado: Usuario {user_id} - Anterior: {current_avatar_path} - Nuevo: {new_avatar_path}")
+        
+        # Opcional: Registrar en tabla de logs
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO raiz.logs (
+                        id_usuario, accion, tabla_afectada, detalles, 
+                        ip, user_agent, fecha
+                    ) VALUES (%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+                """, [
+                    user_id,
+                    'update_avatar',
+                    'usuarios',
+                    f'Avatar actualizado: {current_avatar_path} -> {new_avatar_path}',
+                    request.META.get('REMOTE_ADDR', ''),
+                    request.META.get('HTTP_USER_AGENT', '')[:255]
+                ])
+        except Exception as e:
+            print(f"⚠️ Error registrando en logs: {e}")
+        
+        # 🔧 PASO 10: RESPUESTA EXITOSA
+        return JsonResponse({
+            'success': True,
+            'message': 'Avatar actualizado correctamente',
+            'new_avatar_url': new_avatar_url,
+            'new_avatar_path': new_avatar_path,
+            'old_avatar_path': current_avatar_path,
+            'user_id': user_id
+        })
+        
+    except Exception as e:
+        logger.error(f"Error actualizando avatar para usuario {user_id}: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        return JsonResponse({
+            'success': False,
+            'message': f'Error interno del servidor: {str(e)}'
+        }, status=500)
+
+
+@csrf_protect
+@require_http_methods(["DELETE"])
+@login_required_custom
+@session_refresh
+def delete_avatar(request):
+    """
+    Vista para eliminar avatar del usuario (opcional).
+    """
+    if not request.session.get('user_id'):
+        return JsonResponse({
+            'success': False,
+            'message': 'Usuario no autenticado'
+        }, status=401)
+    
+    user_id = request.session.get('user_id')
+    
+    try:
+        # Obtener avatar actual
+        current_avatar_path = None
+        
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT foto_perfil FROM raiz.usuarios 
+                WHERE id = %s
+            """, [user_id])
+            
+            result = cursor.fetchone()
+            if result and result[0]:
+                current_avatar_path = result[0]
+        
+        if not current_avatar_path:
+            return JsonResponse({
+                'success': False,
+                'message': 'No hay avatar para eliminar'
+            }, status=400)
+        
+        # Eliminar archivo físico
+        try:
+            old_file_path = os.path.join(settings.MEDIA_ROOT, current_avatar_path)
+            if os.path.exists(old_file_path):
+                os.remove(old_file_path)
+                print(f"🗑️ Avatar eliminado físicamente: {old_file_path}")
+        except Exception as e:
+            print(f"⚠️ Error eliminando archivo: {e}")
+        
+        # Actualizar base de datos
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE raiz.usuarios 
+                SET foto_perfil = NULL 
+                WHERE id = %s
+            """, [user_id])
+        
+        # Actualizar sesión
+        if 'foto_perfil' in request.session:
+            del request.session['foto_perfil']
+        request.session.modified = True
+        
+        logger.info(f"Avatar eliminado: Usuario {user_id} - Archivo: {current_avatar_path}")
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Avatar eliminado correctamente',
+            'deleted_avatar_path': current_avatar_path
+        })
+        
+    except Exception as e:
+        logger.error(f"Error eliminando avatar para usuario {user_id}: {e}")
+        return JsonResponse({
+            'success': False,
+            'message': f'Error interno del servidor: {str(e)}'
+        }, status=500)
+
+
+# 🔧 FUNCIÓN ADICIONAL PARA LIMPIAR AVATARES HUÉRFANOS (OPCIONAL)
+def cleanup_orphaned_avatars():
+    """
+    Función para limpiar avatares que están en disco pero no en la BD.
+    Ejecutar periódicamente como tarea de mantenimiento.
+    """
+    try:
+        avatars_dir = os.path.join(settings.MEDIA_ROOT, 'avatars')
+        if not os.path.exists(avatars_dir):
+            return
+        
+        # Obtener todos los avatares en disco
+        disk_avatars = set()
+        for filename in os.listdir(avatars_dir):
+            if filename.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp')):
+                disk_avatars.add(filename)
+        
+        # Obtener todos los avatares en BD
+        db_avatars = set()
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT foto_perfil FROM raiz.usuarios 
+                WHERE foto_perfil IS NOT NULL
+            """)
+            
+            for row in cursor.fetchall():
+                avatar_path = row[0]
+                if avatar_path and avatar_path.startswith('avatars/'):
+                    filename = os.path.basename(avatar_path)
+                    db_avatars.add(filename)
+        
+        # Encontrar huérfanos
+        orphaned = disk_avatars - db_avatars
+        
+        if orphaned:
+            print(f"🧹 Encontrados {len(orphaned)} avatares huérfanos")
+            
+            for filename in orphaned:
+                try:
+                    file_path = os.path.join(avatars_dir, filename)
+                    os.remove(file_path)
+                    print(f"🗑️ Eliminado avatar huérfano: {filename}")
+                except Exception as e:
+                    print(f"❌ Error eliminando {filename}: {e}")
+        else:
+            print("✅ No se encontraron avatares huérfanos")
+            
+    except Exception as e:
+        print(f"❌ Error en limpieza de avatares: {e}")
