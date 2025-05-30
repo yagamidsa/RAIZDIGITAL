@@ -3,6 +3,29 @@
 
 {% block title %}Registro - Raíz Digital{% endblock %}
 
+{% if success %}
+{% include 'core/includes/success_modal.html' %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const userData = {
+        username: '{{ form_data.username|default:"" }}',
+        email: '{{ form_data.email|default:"" }}'
+    };
+    
+    // Mostrar el modal automáticamente
+    if (window.showEpicSuccessModal) {
+        window.showEpicSuccessModal({
+            title: "¡REGISTRO EXITOSO!",
+            subtitle: "Bienvenido a Raíz Digital",
+            message: "Tu cuenta ha sido creada exitosamente para " + userData.username + ".",
+            verificationText: "Hemos enviado un enlace de verificación a " + userData.email + ". Por favor revisa tu bandeja de entrada."
+        });
+    }
+});
+</script>
+{% endif %}
+
+
 {% block extra_css %}
 <!-- 🔧 CARGAR VARIABLES CSS PRIMERO SIEMPRE -->
 <link rel="stylesheet" href="{% static 'core/css/variables.css' %}?v=1">
@@ -11,7 +34,424 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-<link rel="stylesheet" href="{% static 'core/css/register.css' %}?v=2">
+<link rel="stylesheet" href="{% static 'core/css/register.css' %}?v=3">
+
+<style>
+/* ===================================
+   🎨 AVATAR UPLOAD SYSTEM - LINUX STYLE
+   =================================== */
+   
+.avatar-upload-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 2rem 0;
+    position: relative;
+}
+
+.avatar-container {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.avatar-preview {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(0, 255, 157, 0.1) 0%, rgba(0, 246, 255, 0.05) 100%);
+    border: 3px solid rgba(0, 255, 157, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 
+        0 0 20px rgba(0, 255, 157, 0.2),
+        inset 0 0 20px rgba(0, 255, 157, 0.05);
+}
+
+.avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+}
+
+.avatar-preview.has-image img {
+    display: block;
+}
+
+.avatar-placeholder {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: rgba(0, 255, 157, 0.8);
+    transition: all 0.3s ease;
+}
+
+.avatar-preview.has-image .avatar-placeholder {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.avatar-icon {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 10px;
+    fill: currentColor;
+    filter: drop-shadow(0 0 5px rgba(0, 255, 157, 0.5));
+}
+
+.avatar-text {
+    font-size: 0.75rem;
+    text-align: center;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+}
+
+/* Plus sign overlay */
+.avatar-plus {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    background: var(--neon-green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 255, 157, 0.4);
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+.avatar-plus svg {
+    width: 24px;
+    height: 24px;
+    fill: var(--dark-matter);
+}
+
+/* Hover effects */
+.avatar-container:hover .avatar-preview {
+    border-color: var(--neon-green);
+    box-shadow: 
+        0 0 30px rgba(0, 255, 157, 0.4),
+        inset 0 0 30px rgba(0, 255, 157, 0.1);
+    transform: scale(1.05);
+}
+
+.avatar-container:hover .avatar-plus {
+    background: var(--cyber-blue);
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 4px 20px rgba(0, 246, 255, 0.6);
+}
+
+.avatar-container:hover .avatar-placeholder {
+    color: var(--neon-green);
+}
+
+/* Active/Focus state */
+.avatar-container:active .avatar-preview {
+    transform: scale(0.98);
+}
+
+/* Hidden file input */
+.avatar-input {
+    display: none;
+}
+
+/* Camera/Gallery options modal */
+.avatar-options-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.avatar-options-modal.show {
+    display: flex;
+    opacity: 1;
+}
+
+.avatar-options-content {
+    background: linear-gradient(135deg, var(--dark-matter) 0%, #0a1929 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 400px;
+    width: 90%;
+    border: 1px solid rgba(0, 255, 157, 0.3);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.avatar-options-modal.show .avatar-options-content {
+    transform: scale(1);
+}
+
+.avatar-options-title {
+    font-size: 1.3rem;
+    color: var(--neon-green);
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 700;
+}
+
+.avatar-option-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.avatar-option-btn {
+    flex: 1;
+    padding: 1rem;
+    background: rgba(0, 255, 157, 0.1);
+    border: 2px solid rgba(0, 255, 157, 0.3);
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.avatar-option-btn:hover {
+    background: rgba(0, 255, 157, 0.2);
+    border-color: var(--neon-green);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 255, 157, 0.3);
+}
+
+.avatar-option-btn svg {
+    width: 40px;
+    height: 40px;
+    fill: var(--neon-green);
+}
+
+.avatar-cancel-btn {
+    width: 100%;
+    padding: 0.8rem;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.avatar-cancel-btn:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    color: white;
+}
+
+/* Progress indicator */
+.avatar-upload-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 25, 47, 0.9);
+    z-index: 3;
+}
+
+.avatar-upload-progress.show {
+    display: flex;
+}
+
+.progress-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(0, 255, 157, 0.1);
+    border-top: 3px solid var(--neon-green);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .avatar-container {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .avatar-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .avatar-plus {
+        width: 35px;
+        height: 35px;
+        bottom: 5px;
+        right: 5px;
+    }
+    
+    .avatar-plus svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .avatar-option-buttons {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .avatar-container {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .avatar-icon {
+        width: 35px;
+        height: 35px;
+        margin-bottom: 5px;
+    }
+    
+    .avatar-text {
+        font-size: 0.65rem;
+    }
+}
+
+/* Camera capture styles */
+.camera-capture-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+.camera-capture-modal.show {
+    display: flex;
+}
+
+.camera-container {
+    position: relative;
+    max-width: 600px;
+    width: 100%;
+    background: #000;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 2px solid var(--neon-green);
+}
+
+#cameraVideo {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.camera-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.camera-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 3px solid white;
+    background: rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.camera-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(1.1);
+}
+
+.camera-btn.capture {
+    width: 80px;
+    height: 80px;
+    background: var(--neon-green);
+    border-color: var(--neon-green);
+}
+
+.camera-btn.capture:active {
+    transform: scale(0.95);
+}
+
+.camera-btn svg {
+    width: 30px;
+    height: 30px;
+    fill: white;
+}
+
+/* Terminal-style feedback */
+.avatar-feedback {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--neon-green);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.avatar-feedback.show {
+    opacity: 1;
+}
+
+.avatar-feedback::before {
+    content: '$ ';
+    opacity: 0.7;
+}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -47,6 +487,31 @@
                 <p class="register-subtitle">Únete a la comunidad digital de tradiciones</p>
             </div>
 
+            <!-- 🎨 NUEVA SECCIÓN DE AVATAR -->
+            <div class="avatar-upload-section">
+                <div class="avatar-container" id="avatarContainer">
+                    <div class="avatar-preview" id="avatarPreview">
+                        <img id="avatarImage" src="" alt="Avatar">
+                        <div class="avatar-placeholder">
+                            <svg class="avatar-icon" viewBox="0 0 24 24">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            </svg>
+                            <span class="avatar-text">Foto de perfil</span>
+                        </div>
+                    </div>
+                    <div class="avatar-plus">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                        </svg>
+                    </div>
+                    <div class="avatar-upload-progress" id="avatarProgress">
+                        <div class="progress-spinner"></div>
+                    </div>
+                    <div class="avatar-feedback" id="avatarFeedback"></div>
+                </div>
+                <input type="file" class="avatar-input" id="avatarInput" name="foto_perfil" accept="image/*">
+            </div>
+
             <!-- MENSAJES DE ERROR Y ÉXITO -->
             {% if errors %}
             <div class="error-messages">
@@ -68,8 +533,11 @@
                 {% endfor %}
             {% endif %}
 
-            <form class="register-form" method="post" action="{% url 'core:register' %}" novalidate>
+            <form class="register-form" method="post" action="{% url 'core:register' %}" enctype="multipart/form-data" novalidate>
                 {% csrf_token %}
+                
+                <!-- Campo oculto para la imagen en base64 si se toma con cámara -->
+                <input type="hidden" id="avatarBase64" name="foto_perfil_base64" value="">
                 
                 <!-- Nombre -->
                 <div class="form-group">
@@ -214,84 +682,237 @@
         </div>
     </div>
 </div>
+
+<!-- Modal de opciones de avatar -->
+<div class="avatar-options-modal" id="avatarOptionsModal">
+    <div class="avatar-options-content">
+        <h3 class="avatar-options-title">Seleccionar foto de perfil</h3>
+        <div class="avatar-option-buttons">
+            <button class="avatar-option-btn" id="cameraOption">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+                    <circle cx="12" cy="12" r="3.2"/>
+                    <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                </svg>
+                <span>Tomar foto</span>
+            </button>
+            <button class="avatar-option-btn" id="galleryOption">
+                <svg viewBox="0 0 24 24">
+                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                </svg>
+                <span>Elegir de galería</span>
+            </button>
+        </div>
+        <button class="avatar-cancel-btn" id="cancelAvatarOption">Cancelar</button>
+    </div>
+</div>
+
+<!-- Modal de captura de cámara -->
+<div class="camera-capture-modal" id="cameraCaptureModal">
+    <div class="camera-container">
+        <video id="cameraVideo" autoplay></video>
+        <canvas id="cameraCanvas" style="display: none;"></canvas>
+        <div class="camera-controls">
+            <button class="camera-btn" id="cancelCapture">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+            </button>
+            <button class="camera-btn capture" id="capturePhoto">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="3.2"/>
+                    <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'core/js/digital-effects.js' %}"></script>
 
-<!-- 🔧 SCRIPT CRÍTICO PARA DEBUG Y FUNCIONALIDAD MÓVIL -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Registro - Versión CORREGIDA para móvil iniciada');
-    
-    // 🔧 DEBUG: Verificar carga de archivos CSS
-    const link = document.querySelector('link[href*="variables.css"]');
-    if (link) {
-        console.log('✅ variables.css detectado:', link.href);
+// 🎨 AVATAR UPLOAD SYSTEM
+class AvatarUploadSystem {
+    constructor() {
+        this.avatarContainer = document.getElementById('avatarContainer');
+        this.avatarPreview = document.getElementById('avatarPreview');
+        this.avatarImage = document.getElementById('avatarImage');
+        this.avatarInput = document.getElementById('avatarInput');
+        this.avatarBase64 = document.getElementById('avatarBase64');
+        this.avatarProgress = document.getElementById('avatarProgress');
+        this.avatarFeedback = document.getElementById('avatarFeedback');
         
-        // Verificar si se cargó correctamente
-        link.onload = function() {
-            console.log('✅ variables.css cargado exitosamente');
-        };
+        this.optionsModal = document.getElementById('avatarOptionsModal');
+        this.cameraModal = document.getElementById('cameraCaptureModal');
+        this.video = document.getElementById('cameraVideo');
+        this.canvas = document.getElementById('cameraCanvas');
         
-        link.onerror = function() {
-            console.log('❌ Error cargando variables.css');
-            console.log('🔧 Usando estilos inline de fallback');
-        };
-    } else {
-        console.log('❌ variables.css NO encontrado');
+        this.stream = null;
+        this.init();
     }
     
-    // 🔧 DEBUG: Verificar estilos aplicados
-    const testElement = document.querySelector('.register-container');
-    if (testElement) {
-        const styles = window.getComputedStyle(testElement);
-        console.log('🎨 Background del container:', styles.background);
-        console.log('🎨 Border radius:', styles.borderRadius);
+    init() {
+        // Main avatar click
+        this.avatarContainer.addEventListener('click', () => this.showOptions());
         
-        if (styles.background.includes('rgba') || styles.borderRadius !== '0px') {
-            console.log('✅ Estilos CSS aplicados correctamente');
-        } else {
-            console.log('⚠️ Estilos CSS no aplicados, usando fallback inline');
+        // Options
+        document.getElementById('cameraOption').addEventListener('click', () => this.openCamera());
+        document.getElementById('galleryOption').addEventListener('click', () => this.openGallery());
+        document.getElementById('cancelAvatarOption').addEventListener('click', () => this.hideOptions());
+        
+        // Camera controls
+        document.getElementById('capturePhoto').addEventListener('click', () => this.capturePhoto());
+        document.getElementById('cancelCapture').addEventListener('click', () => this.closeCamera());
+        
+        // File input change
+        this.avatarInput.addEventListener('change', (e) => this.handleFileSelect(e));
+        
+        // Close modals on backdrop click
+        this.optionsModal.addEventListener('click', (e) => {
+            if (e.target === this.optionsModal) this.hideOptions();
+        });
+        
+        this.cameraModal.addEventListener('click', (e) => {
+            if (e.target === this.cameraModal) this.closeCamera();
+        });
+    }
+    
+    showOptions() {
+        this.optionsModal.classList.add('show');
+        this.showFeedback('Select avatar source');
+    }
+    
+    hideOptions() {
+        this.optionsModal.classList.remove('show');
+    }
+    
+    openGallery() {
+        this.hideOptions();
+        this.avatarInput.click();
+    }
+    
+    async openCamera() {
+        this.hideOptions();
+        this.cameraModal.classList.add('show');
+        
+        try {
+            this.stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'user',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                } 
+            });
+            this.video.srcObject = this.stream;
+            this.showFeedback('Camera ready');
+        } catch (err) {
+            console.error('Error accessing camera:', err);
+            this.showFeedback('Camera access denied', 'error');
+            this.closeCamera();
         }
     }
     
-    // 🔧 OPTIMIZACIONES PARA MÓVIL
-    if (window.innerWidth <= 768) {
-        console.log('📱 Modo móvil detectado - aplicando optimizaciones');
-        
-        // Prevenir zoom en inputs
-        const inputs = document.querySelectorAll('input, select, textarea');
-        inputs.forEach(input => {
-            input.style.fontSize = '16px'; // Prevenir zoom en iOS
-        });
-        
-        // Optimizar scroll
-        document.body.style.webkitOverflowScrolling = 'touch';
-        document.body.style.overscrollBehavior = 'none';
-        
-        // Prevenir pull-to-refresh
-        let startY = 0;
-        document.addEventListener('touchstart', function(e) {
-            startY = e.touches[0].clientY;
-        }, { passive: true });
-        
-        document.addEventListener('touchmove', function(e) {
-            const currentY = e.touches[0].clientY;
-            const scrollTop = window.scrollY;
-            
-            if (scrollTop <= 0 && currentY > startY) {
-                e.preventDefault();
-            }
-        }, { passive: false });
+    closeCamera() {
+        if (this.stream) {
+            this.stream.getTracks().forEach(track => track.stop());
+            this.stream = null;
+        }
+        this.video.srcObject = null;
+        this.cameraModal.classList.remove('show');
     }
     
-    // 🔧 SISTEMA DE VALIDACIÓN MEJORADO
+    capturePhoto() {
+        const context = this.canvas.getContext('2d');
+        this.canvas.width = this.video.videoWidth;
+        this.canvas.height = this.video.videoHeight;
+        context.drawImage(this.video, 0, 0);
+        
+        // Convert to blob
+        this.canvas.toBlob((blob) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                this.displayAvatar(reader.result);
+                this.avatarBase64.value = reader.result;
+                this.showFeedback('Photo captured successfully');
+            };
+            reader.readAsDataURL(blob);
+        }, 'image/jpeg', 0.9);
+        
+        this.closeCamera();
+    }
+    
+    handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        // Validate file
+        if (!file.type.startsWith('image/')) {
+            this.showFeedback('Invalid file type', 'error');
+            return;
+        }
+        
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            this.showFeedback('File too large (max 5MB)', 'error');
+            return;
+        }
+        
+        // Show progress
+        this.avatarProgress.classList.add('show');
+        
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            this.displayAvatar(reader.result);
+            this.avatarProgress.classList.remove('show');
+            this.showFeedback('Avatar uploaded');
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    displayAvatar(imageSrc) {
+        this.avatarImage.src = imageSrc;
+        this.avatarPreview.classList.add('has-image');
+        
+        // Animate the change
+        if (typeof gsap !== 'undefined') {
+            gsap.fromTo(this.avatarImage, 
+                { scale: 0.8, opacity: 0 },
+                { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(1.7)" }
+            );
+        }
+    }
+    
+    showFeedback(message, type = 'success') {
+        this.avatarFeedback.textContent = message;
+        this.avatarFeedback.classList.add('show');
+        
+        if (type === 'error') {
+            this.avatarFeedback.style.color = '#ff4444';
+        } else {
+            this.avatarFeedback.style.color = 'var(--neon-green)';
+        }
+        
+        setTimeout(() => {
+            this.avatarFeedback.classList.remove('show');
+        }, 3000);
+    }
+}
+
+// Initialize on DOM load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Registro con Avatar - Sistema inicializado');
+    
+    // Initialize avatar system
+    const avatarSystem = new AvatarUploadSystem();
+    
+    // Form validation
     const form = document.querySelector('.register-form');
     const inputs = form.querySelectorAll('.form-input, .form-select');
     const submitBtn = form.querySelector('.btn-submit');
 
-    // Validación en tiempo real
+    // Real-time validation
     inputs.forEach(input => {
         input.addEventListener('input', function() {
             validateField(this);
@@ -310,7 +931,7 @@ document.addEventListener('DOMContentLoaded', function() {
         field.classList.remove('valid', 'invalid');
 
         if (value.length === 0) {
-            return true; // Campo vacío - no mostrar validación
+            return true;
         }
 
         switch(fieldName) {
@@ -341,13 +962,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         return isValid;
     }
-
-    // 🔧 MANEJO DEL ENVÍO DEL FORMULARIO
+    
+    // Form submission
     if (form) {
         form.addEventListener('submit', function(e) {
             console.log('📝 Enviando formulario...');
             
-            // Validar campos requeridos
+            // Validate required fields
             const requiredFields = form.querySelectorAll('input[required], select[required]');
             let allValid = true;
             
@@ -364,7 +985,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Validar contraseñas
+            // Validate passwords
             const password = document.querySelector('input[name="password"]').value;
             const confirmPassword = document.querySelector('input[name="password_confirm"]').value;
             
@@ -380,19 +1001,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Agregar loading al botón
+            // Add loading to button
             if (submitBtn) {
                 submitBtn.classList.add('loading');
                 submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span>Creando cuenta...</span>';
             }
             
             console.log('✅ Formulario válido, enviando...');
         });
     }
 
-    // 🔧 SISTEMA DE NOTIFICACIONES
+    // Notification system
     function showNotification(message, type = 'info') {
-        // Remover notificaciones existentes
         const existing = document.querySelectorAll('.notification');
         existing.forEach(n => n.remove());
         
@@ -431,7 +1052,7 @@ document.addEventListener('DOMContentLoaded', function() {
             notification.style.borderColor = '#00ff9d';
         }
         
-        // Ajustar para móvil
+        // Mobile adjustments
         if (window.innerWidth <= 768) {
             notification.style.top = '1rem';
             notification.style.right = '1rem';
@@ -458,105 +1079,66 @@ document.addEventListener('DOMContentLoaded', function() {
             default: return '💚';
         }
     }
-
-    // 🔧 CARGAR LIBRERÍAS EXTERNAS DE FORMA SEGURA
-    function loadExternalLibraries() {
-        // AOS - Animaciones
-        if (typeof AOS !== 'undefined' && window.innerWidth > 768) {
-            try {
-                AOS.init({
-                    duration: 600,
-                    easing: 'ease-out-cubic',
-                    once: true,
-                    offset: 30,
-                    disable: window.innerWidth <= 768
-                });
-                console.log('✅ AOS inicializado');
-            } catch (error) {
-                console.log('⚠️ Error inicializando AOS:', error);
-            }
-        }
-
-        // GSAP - Animaciones avanzadas
-        if (typeof gsap !== 'undefined' && window.innerWidth > 768) {
-            try {
-                gsap.config({
-                    force3D: true,
-                    nullTargetWarn: false
-                });
-
-                // Animación sutil del contenedor
-                gsap.fromTo('.register-container', 
-                    { scale: 0.98, opacity: 0, y: 20 },
-                    { scale: 1, opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
-                );
-
-                console.log('✅ GSAP inicializado');
-            } catch (error) {
-                console.log('⚠️ Error inicializando GSAP:', error);
-            }
-        }
+    
+    // Initialize animations
+    if (typeof AOS !== 'undefined' && window.innerWidth > 768) {
+        AOS.init({
+            duration: 600,
+            easing: 'ease-out-cubic',
+            once: true,
+            offset: 30,
+            disable: window.innerWidth <= 768
+        });
     }
 
-    // Cargar librerías después de un breve delay
-    setTimeout(loadExternalLibraries, 500);
-
-    // 🔧 FIELD FOCUS MEJORADO PARA MÓVIL
-    inputs.forEach(input => {
-        input.addEventListener('focus', function() {
-            // Scroll suave al campo en móvil
-            if (window.innerWidth <= 768) {
+    if (typeof gsap !== 'undefined' && window.innerWidth > 768) {
+        gsap.fromTo('.register-container', 
+            { scale: 0.98, opacity: 0, y: 20 },
+            { scale: 1, opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
+        );
+        
+        // Animate avatar section
+        gsap.fromTo('.avatar-upload-section',
+            { scale: 0.9, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 0.5, delay: 0.3, ease: "back.out(1.5)" }
+        );
+    }
+    
+    // Mobile optimizations
+    if (window.innerWidth <= 768) {
+        console.log('📱 Modo móvil detectado - aplicando optimizaciones');
+        
+        // Prevent zoom on inputs
+        const allInputs = document.querySelectorAll('input, select, textarea');
+        allInputs.forEach(input => {
+            input.style.fontSize = '16px';
+        });
+        
+        // Smooth scroll for form fields
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
                 setTimeout(() => {
                     this.scrollIntoView({ 
                         behavior: 'smooth', 
                         block: 'center',
                         inline: 'nearest'
                     });
-                }, 300); // Delay para que el teclado aparezca
-            }
+                }, 300);
+            });
         });
-    });
-
-    // 🔧 MANEJO DE ORIENTACIÓN EN MÓVIL
+    }
+    
+    // Handle orientation change
     window.addEventListener('orientationchange', function() {
         setTimeout(() => {
-            // Re-optimizar después del cambio de orientación
             if (window.innerWidth <= 768) {
                 document.body.style.height = 'auto';
                 window.scrollTo(0, 0);
             }
         }, 200);
     });
-
-    console.log('✨ Registro móvil - Inicialización completa');
-});
-
-// 🔧 SCRIPT PARA DETECTAR PROBLEMAS DE CARGA CSS
-window.addEventListener('load', function() {
-    const cssLoaded = Array.from(document.styleSheets).some(sheet => {
-        try {
-            return sheet.href && sheet.href.includes('variables.css');
-        } catch (e) {
-            return false;
-        }
-    });
     
-    if (cssLoaded) {
-        console.log('✅ CSS externo cargado correctamente');
-    } else {
-        console.log('⚠️ CSS externo no detectado - usando estilos inline');
-    }
-    
-    // Test final de estilos
-    const container = document.querySelector('.register-container');
-    if (container) {
-        const bgColor = window.getComputedStyle(container).backgroundColor;
-        if (bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
-            console.log('✅ Estilos aplicados correctamente');
-        } else {
-            console.log('❌ Estilos no aplicados - problema con archivos CSS');
-        }
-    }
+    console.log('✨ Sistema de registro con avatar completamente inicializado');
 });
 </script>
 

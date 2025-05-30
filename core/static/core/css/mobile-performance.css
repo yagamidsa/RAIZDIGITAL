@@ -1,6 +1,7 @@
 :root {
     --neon-green: #00ff9d;
     --cyber-blue: #00f6ff;
+    --dark-matter: #0a192f;
     --dark-blue: #041222;
     --dark-green: #051f17;
 }
@@ -97,9 +98,27 @@ canvas {
     padding-top: 0;
 }
 
-/* 8. OPTIMIZACIONES MÓVIL CONSERVADORAS */
+/* 8. OPTIMIZACIONES MÓVIL CONSERVADORAS - ACTUALIZADO */
 @media (max-width: 768px) {
-    /* Desactivar elementos pesados solo con display: none */
+    /* ===================================
+       🎨 IMPORTANTE: MANTENER AVATARES Y ELEMENTOS DE USUARIO
+       =================================== */
+    
+    /* NO ocultar estos elementos importantes */
+    .user-info,
+    .user-avatar,
+    .welcome-avatar-container,
+    .welcome-avatar,
+    .avatar-status,
+    .welcome-user-name,
+    .welcome-community,
+    .welcome-section {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* Desactivar SOLO elementos pesados de fondo */
     .cyber-grid,
     .organic-shapes,
     .particles-container,
@@ -111,7 +130,7 @@ canvas {
         display: none;
     }
     
-    /* Canvas más ligero en móvil */
+    /* Canvas más ligero en móvil pero NO oculto */
     canvas {
         opacity: 0.3;
     }
@@ -145,11 +164,57 @@ canvas {
     .mobile-nav-link:hover {
         opacity: 0.8;
     }
+    
+    /* ===================================
+       🎨 AJUSTES ESPECÍFICOS PARA AVATARES EN MÓVIL
+       =================================== */
+    
+    /* User info badge en esquina */
+    .user-info {
+        position: fixed !important;
+        top: 10px !important;
+        left: 10px !important;
+        z-index: 1000 !important;
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* Avatar principal en marketplace */
+    .welcome-avatar-container {
+        width: 140px !important;
+        height: 140px !important;
+        margin: 0 auto 1.5rem !important;
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    .welcome-avatar {
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    .welcome-avatar img,
+    .user-avatar img {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* Mantener animaciones suaves para avatares */
+    .welcome-avatar-container,
+    .user-avatar {
+        transition: transform 0.3s ease !important;
+    }
 }
 
-/* 9. DISPOSITIVOS MUY LENTOS */
+/* 9. DISPOSITIVOS MUY LENTOS - ACTUALIZADO */
 @media (max-width: 480px) {
-    /* Canvas oculto completamente */
+    /* Canvas oculto completamente PERO mantener avatares */
     canvas {
         display: none;
     }
@@ -157,6 +222,22 @@ canvas {
     /* Background sólido para ahorrar recursos */
     body {
         background: #041222;
+    }
+    
+    /* MANTENER AVATARES VISIBLES */
+    .user-info,
+    .user-avatar,
+    .welcome-avatar-container,
+    .welcome-avatar {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* Avatar más pequeño pero visible */
+    .welcome-avatar-container {
+        width: 120px !important;
+        height: 120px !important;
     }
 }
 
@@ -426,4 +507,27 @@ img, video {
 .welcome-container > * {
     position: relative;
     z-index: 10;
+}
+
+/* ===================================
+   🎨 REGLAS ESPECÍFICAS PARA AVATARES - MÁXIMA PRIORIDAD
+   =================================== */
+.user-info,
+.user-avatar,
+.welcome-avatar-container,
+.welcome-avatar,
+.welcome-section {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+/* Asegurar que las imágenes de avatar siempre sean visibles */
+.user-avatar img,
+.welcome-avatar img {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    object-fit: cover !important;
 }
