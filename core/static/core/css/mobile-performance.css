@@ -531,3 +531,168 @@ img, video {
     visibility: visible !important;
     object-fit: cover !important;
 }
+
+
+
+
+
+
+/* 3. AGREGAR AL FINAL DE mobile-performance.css */
+
+/* ===================================
+   🎨 CORRECCIÓN CRÍTICA PARA AVATARES EN MÓVIL
+   =================================== */
+
+/* FORZAR VISIBILIDAD DE TODOS LOS ELEMENTOS DE AVATAR */
+.user-info,
+.user-avatar,
+.user-avatar img,
+.welcome-avatar-container,
+.welcome-avatar,
+.welcome-avatar img,
+.avatar-status,
+.welcome-user-name,
+.welcome-community,
+.welcome-section,
+.avatar-preview,
+.avatar-preview img,
+.avatar-container {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    z-index: 1000 !important;
+}
+
+/* ESPECÍFICO PARA IMÁGENES DE AVATAR */
+.user-avatar img,
+.welcome-avatar img,
+.avatar-preview img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* CONTENEDORES DE AVATAR CON ALTA PRIORIDAD */
+@media (max-width: 768px) {
+    .user-info {
+        position: fixed !important;
+        top: 10px !important;
+        left: 10px !important;
+        z-index: 1001 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        background: rgba(10, 25, 47, 0.9) !important;
+        padding: 8px 12px !important;
+        border-radius: 25px !important;
+        border: 1px solid rgba(0, 255, 157, 0.3) !important;
+        backdrop-filter: blur(10px) !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    .user-avatar {
+        width: 30px !important;
+        height: 30px !important;
+        border-radius: 50% !important;
+        overflow: hidden !important;
+        background: rgba(0, 255, 157, 0.1) !important;
+        border: 1px solid var(--neon-green) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .user-name {
+        color: #ffffff !important;
+        font-size: 0.85rem !important;
+        font-weight: 500 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        white-space: nowrap !important;
+    }
+    
+    /* AVATAR PRINCIPAL EN MARKETPLACE */
+    .welcome-avatar-container {
+        width: 140px !important;
+        height: 140px !important;
+        margin: 0 auto 1.5rem !important;
+        position: relative !important;
+        cursor: pointer !important;
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    .welcome-avatar {
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: 50% !important;
+        background: linear-gradient(135deg, rgba(0, 255, 157, 0.1) 0%, rgba(0, 246, 255, 0.05) 100%) !important;
+        border: 3px solid rgba(0, 255, 157, 0.4) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        overflow: hidden !important;
+        position: relative !important;
+        box-shadow: 0 0 20px rgba(0, 255, 157, 0.3) !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+}
+
+/* PARA PANTALLAS MUY PEQUEÑAS */
+@media (max-width: 480px) {
+    .user-info {
+        top: 8px !important;
+        left: 8px !important;
+        padding: 6px 10px !important;
+    }
+    
+    .user-avatar {
+        width: 26px !important;
+        height: 26px !important;
+    }
+    
+    .user-name {
+        font-size: 0.8rem !important;
+    }
+    
+    .welcome-avatar-container {
+        width: 120px !important;
+        height: 120px !important;
+    }
+}
+
+/* DEBUG TEMPORAL - AGREGAR PARA VERIFICAR */
+.user-avatar::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: 2px solid red;
+    border-radius: 50%;
+    z-index: 10000;
+    pointer-events: none;
+    /* QUITAR ESTO DESPUÉS DE VERIFICAR QUE FUNCIONA */
+}
+
+/* ASEGURAR QUE NO HAY CONFLICTOS CON OTROS ESTILOS */
+.user-info,
+.user-avatar,
+.welcome-avatar-container,
+.welcome-avatar {
+    animation: none !important;
+    transform: none !important;
+    transition: all 0.3s ease !important;
+}
