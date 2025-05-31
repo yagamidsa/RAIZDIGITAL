@@ -503,7 +503,8 @@
                 <p class="register-subtitle">Únete a la comunidad digital de tradiciones</p>
             </div>
 
-            <!-- 🎨 NUEVA SECCIÓN DE AVATAR -->
+
+            <!-- 🎨 NUEVA SECCIÓN DE AVATAR - CORREGIDA -->
             <div class="avatar-upload-section">
                 <div class="avatar-container" id="avatarContainer">
                     <div class="avatar-preview" id="avatarPreview">
@@ -526,7 +527,7 @@
                     </div>
                     <div class="avatar-feedback" id="avatarFeedback"></div>
                 </div>
-                <input type="file" id="avatarFileInput" accept="image/*" style="display: none;">
+                <input type="file" id="avatarFileInput" name="foto_perfil" accept="image/*" style="display: none;">
             </div>
 
             <!-- MENSAJES DE ERROR Y ÉXITO -->
@@ -644,10 +645,7 @@
                         <select class="form-select" name="id_comunidad" required>
                             <option value="">Selecciona tu comunidad</option>
                             {% for comunidad in comunidades %}
-                            <option value="{{ comunidad.id }}" {% if
-                                form_data.id_comunidad|default:''==comunidad.id|stringformat:"s" %}selected{% endif %}>
-                                {{ comunidad.display_name }}
-                            </option>
+                            <option value="{{ comunidad.id }}">{{ comunidad.display_name }}</option>
                             {% endfor %}
                             {% if not comunidades %}
                             <option value="" disabled>No hay comunidades disponibles</option>
@@ -656,7 +654,6 @@
                         <div class="input-effect"></div>
                     </div>
                 </div>
-
                 <!-- Dirección -->
                 <div class="form-group">
                     <label class="form-label">Dirección</label>
