@@ -10,22 +10,24 @@
             <h3>Gestión de Avatar</h3>
             <button class="close-modal-btn" id="closeAvatarModal">
                 <svg viewBox="0 0 24 24">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    <path
+                        d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
                 </svg>
             </button>
         </div>
-        
+
         <div class="avatar-preview-section">
             <div class="current-avatar-display" id="currentAvatarDisplay">
                 <!-- La imagen actual se cargará aquí -->
             </div>
         </div>
-        
+
         <div class="avatar-management-options">
             <button class="avatar-option-btn view-photo-btn" id="viewPhotoBtn">
                 <div class="option-icon">
                     <svg viewBox="0 0 24 24">
-                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                        <path
+                            d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
                     </svg>
                 </div>
                 <div class="option-content">
@@ -33,12 +35,14 @@
                     <span class="option-subtitle">Visualizar en pantalla completa</span>
                 </div>
             </button>
-            
+
             <button class="avatar-option-btn change-photo-btn" id="changePhotoBtn">
                 <div class="option-icon">
                     <svg viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                        <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                        <path
+                            d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" />
                     </svg>
                 </div>
                 <div class="option-content">
@@ -55,34 +59,16 @@
     <div class="photo-viewer-backdrop"></div>
     <div class="photo-viewer-content">
         <div class="photo-viewer-header">
-            <h3>Avatar de {{ nombre }} {{ apellido }}</h3>
+            <h3 id="photoViewerTitle">Avatar de {{ nombre }} {{ apellido }}</h3>
             <button class="close-viewer-btn" id="closePhotoViewer">
                 <svg viewBox="0 0 24 24">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    <path
+                        d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
                 </svg>
             </button>
         </div>
         <div class="photo-viewer-container">
             <img id="fullSizeAvatar" src="" alt="Avatar" class="full-size-photo">
-            <div class="photo-controls">
-                <button class="photo-control-btn" id="zoomInBtn">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                        <path d="M12 10h-2v2H9v-2H7V9h2V7h1v2h2v1z"/>
-                    </svg>
-                </button>
-                <button class="photo-control-btn" id="zoomOutBtn">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                        <path d="M7 9h5v1H7z"/>
-                    </svg>
-                </button>
-                <button class="photo-control-btn" id="resetZoomBtn">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
-                    </svg>
-                </button>
-            </div>
         </div>
     </div>
 </div>
@@ -95,28 +81,18 @@
             <h3>Cambiar Avatar</h3>
             <button class="close-change-btn" id="closePhotoChange">
                 <svg viewBox="0 0 24 24">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    <path
+                        d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
                 </svg>
             </button>
         </div>
-        
+
         <div class="photo-change-options">
-            <button class="photo-source-btn" id="takePhotoBtn">
-                <div class="source-icon camera-icon">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
-                    </svg>
-                </div>
-                <div class="source-content">
-                    <span class="source-title">Tomar Foto</span>
-                    <span class="source-subtitle">Usar cámara del dispositivo</span>
-                </div>
-            </button>
-            
             <button class="photo-source-btn" id="uploadPhotoBtn">
                 <div class="source-icon gallery-icon">
                     <svg viewBox="0 0 24 24">
-                        <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                        <path
+                            d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
                     </svg>
                 </div>
                 <div class="source-content">
@@ -125,7 +101,7 @@
                 </div>
             </button>
         </div>
-        
+
         <!-- Zona de previsualización -->
         <div class="photo-preview-section" id="photoPreviewSection" style="display: none;">
             <div class="preview-container">
@@ -136,46 +112,9 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Input de archivo oculto -->
-        <input type="file" id="avatarFileInput" accept="image/*" style="display: none;">
-    </div>
-</div>
 
-<!-- Modal de cámara -->
-<div class="camera-modal" id="cameraModal">
-    <div class="camera-backdrop"></div>
-    <div class="camera-content">
-        <div class="camera-header">
-            <h3>Tomar Foto</h3>
-            <button class="close-camera-btn" id="closeCameraBtn">
-                <svg viewBox="0 0 24 24">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                </svg>
-            </button>
-        </div>
-        <div class="camera-container">
-            <video id="cameraVideo" autoplay></video>
-            <canvas id="cameraCanvas" style="display: none;"></canvas>
-            <div class="camera-overlay">
-                <div class="camera-guide"></div>
-            </div>
-            <div class="camera-controls">
-                <button class="camera-control-btn cancel-camera" id="cancelCameraBtn">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                    </svg>
-                </button>
-                <button class="camera-control-btn capture-btn" id="captureBtn">
-                    <div class="capture-inner"></div>
-                </button>
-                <button class="camera-control-btn switch-camera" id="switchCameraBtn">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M20 4h-3.17L15 2H9L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 15c-2.76 0-5-2.24-5-5H5l2.5-2.5L10 14H8c0 1.65 1.35 3 3 3s3-1.35 3-3-1.35-3-3-3c-.35 0-.69.07-1 .18V9.82c.31-.11.65-.18 1-.18 2.76 0 5 2.24 5 5s-2.24 5-5 5z"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
+        <!-- Input de archivo oculto -->
+        <input type="file" id="avatarFileInput" accept="image/*" capture="environment" style="display: none;">
     </div>
 </div>
 
@@ -194,1297 +133,1356 @@
 </div>
 
 <style>
-/* ===================================
+    /* ===================================
    🎨 ESTILOS DEL SISTEMA DE GESTIÓN DE AVATAR
    =================================== */
 
-:root {
-    --modal-bg: rgba(10, 25, 47, 0.95);
-    --modal-border: rgba(0, 255, 157, 0.3);
-    --btn-primary: rgba(0, 255, 157, 0.15);
-    --btn-hover: rgba(0, 255, 157, 0.25);
-    --text-primary: #ffffff;
-    --text-secondary: rgba(255, 255, 255, 0.7);
-    --neon-green: #00ff9d;
-    --cyber-blue: #00f6ff;
-}
+    :root {
+        --modal-bg: rgba(10, 25, 47, 0.95);
+        --modal-border: rgba(0, 255, 157, 0.3);
+        --btn-primary: rgba(0, 255, 157, 0.15);
+        --btn-hover: rgba(0, 255, 157, 0.25);
+        --text-primary: #ffffff;
+        --text-secondary: rgba(255, 255, 255, 0.7);
+        --neon-green: #00ff9d;
+        --cyber-blue: #00f6ff;
+    }
 
-/* ===================================
+    /* ===================================
    MODAL BASE
    =================================== */
 
-.avatar-management-modal,
-.photo-viewer-modal,
-.photo-change-modal,
-.camera-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 2000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
+    .avatar-management-modal,
+    .photo-viewer-modal,
+    .photo-change-modal,
+    .camera-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 2000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
 
-.avatar-management-modal.show,
-.photo-viewer-modal.show,
-.photo-change-modal.show,
-.camera-modal.show {
-    display: flex;
-    opacity: 1;
-}
+    .avatar-management-modal.show,
+    .photo-viewer-modal.show,
+    .photo-change-modal.show,
+    .camera-modal.show {
+        display: flex;
+        opacity: 1;
+    }
 
-/* Backdrops */
-.avatar-management-backdrop,
-.photo-viewer-backdrop,
-.photo-change-backdrop,
-.camera-backdrop {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-}
+    /* Backdrops */
+    .avatar-management-backdrop,
+    .photo-viewer-backdrop,
+    .photo-change-backdrop,
+    .camera-backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
 
-/* ===================================
+    /* ===================================
    MODAL DE GESTIÓN PRINCIPAL
    =================================== */
 
-.avatar-management-content {
-    position: relative;
-    background: var(--modal-bg);
-    border: 1px solid var(--modal-border);
-    border-radius: 20px;
-    padding: 2rem;
-    max-width: 500px;
-    width: 90%;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    transform: scale(0.9);
-    transition: transform 0.3s ease;
-}
+    .avatar-management-content {
+        position: relative;
+        background: var(--modal-bg);
+        border: 1px solid var(--modal-border);
+        border-radius: 20px;
+        padding: 2rem;
+        max-width: 500px;
+        width: 90%;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+    }
 
-.avatar-management-modal.show .avatar-management-content {
-    transform: scale(1);
-}
+    .avatar-management-modal.show .avatar-management-content {
+        transform: scale(1);
+    }
 
-.avatar-management-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
+    .avatar-management-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-.avatar-management-header h3 {
-    color: var(--neon-green);
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0;
-}
+    .avatar-management-header h3 {
+        color: var(--neon-green);
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
 
-.close-modal-btn,
-.close-viewer-btn,
-.close-change-btn,
-.close-camera-btn {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 50%;
-    transition: all 0.3s ease;
-}
+    .close-modal-btn,
+    .close-viewer-btn,
+    .close-change-btn,
+    .close-camera-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
 
-.close-modal-btn:hover,
-.close-viewer-btn:hover,
-.close-change-btn:hover,
-.close-camera-btn:hover {
-    color: var(--neon-green);
-    background: rgba(0, 255, 157, 0.1);
-}
+    .close-modal-btn:hover,
+    .close-viewer-btn:hover,
+    .close-change-btn:hover,
+    .close-camera-btn:hover {
+        color: var(--neon-green);
+        background: rgba(0, 255, 157, 0.1);
+    }
 
-.close-modal-btn svg,
-.close-viewer-btn svg,
-.close-change-btn svg,
-.close-camera-btn svg {
-    width: 24px;
-    height: 24px;
-    fill: currentColor;
-}
+    .close-modal-btn svg,
+    .close-viewer-btn svg,
+    .close-change-btn svg,
+    .close-camera-btn svg {
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+    }
 
-/* ===================================
+    /* ===================================
    PREVIEW DEL AVATAR ACTUAL
    =================================== */
 
-.avatar-preview-section {
-    text-align: center;
-    margin-bottom: 2rem;
-}
+    .avatar-preview-section {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
 
-.current-avatar-display {
-    width: 120px;
-    height: 120px;
-    margin: 0 auto;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 3px solid var(--modal-border);
-    background: rgba(0, 255, 157, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
+    .current-avatar-display {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--modal-border);
+        background: rgba(0, 255, 157, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
 
-.current-avatar-display img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+    .current-avatar-display img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
-.current-avatar-display svg {
-    width: 60px;
-    height: 60px;
-    fill: var(--neon-green);
-    opacity: 0.7;
-}
+    .current-avatar-display svg {
+        width: 60px;
+        height: 60px;
+        fill: var(--neon-green);
+        opacity: 0.7;
+    }
 
-/* ===================================
+    /* ===================================
    OPCIONES DE GESTIÓN
    =================================== */
 
-.avatar-management-options {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
+    .avatar-management-options {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
 
-.avatar-option-btn {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: var(--btn-primary);
-    border: 2px solid var(--modal-border);
-    border-radius: 15px;
-    padding: 1.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: var(--text-primary);
-    text-align: left;
-}
+    .avatar-option-btn {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: var(--btn-primary);
+        border: 2px solid var(--modal-border);
+        border-radius: 15px;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: var(--text-primary);
+        text-align: left;
+    }
 
-.avatar-option-btn:hover {
-    background: var(--btn-hover);
-    border-color: var(--neon-green);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(0, 255, 157, 0.2);
-}
+    .avatar-option-btn:hover {
+        background: var(--btn-hover);
+        border-color: var(--neon-green);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(0, 255, 157, 0.2);
+    }
 
-.option-icon {
-    width: 50px;
-    height: 50px;
-    background: rgba(0, 255, 157, 0.2);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
+    .option-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(0, 255, 157, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
 
-.option-icon svg {
-    width: 28px;
-    height: 28px;
-    fill: var(--neon-green);
-}
+    .option-icon svg {
+        width: 28px;
+        height: 28px;
+        fill: var(--neon-green);
+    }
 
-.option-content {
-    flex: 1;
-}
+    .option-content {
+        flex: 1;
+    }
 
-.option-title {
-    display: block;
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
+    .option-title {
+        display: block;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
 
-.option-subtitle {
-    display: block;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-}
+    .option-subtitle {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
 
-/* ===================================
+    /* ===================================
    MODAL DE VISUALIZACIÓN DE FOTO
    =================================== */
 
-.photo-viewer-content {
-    position: relative;
-    background: var(--modal-bg);
-    border: 1px solid var(--modal-border);
-    border-radius: 20px;
-    max-width: 90vw;
-    max-height: 90vh;
-    width: auto;
-    height: auto;
-    backdrop-filter: blur(20px);
-    overflow: hidden;
-}
+    .photo-viewer-content {
+        position: relative;
+        background: var(--modal-bg);
+        border: 1px solid var(--modal-border);
+        border-radius: 20px;
+        max-width: 95vw;
+        /* ✅ Cambiado de 90vw a 95vw */
+        max-height: 95vh;
+        /* ✅ Cambiado de 90vh a 95vh */
+        backdrop-filter: blur(20px);
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+    }
 
-.photo-viewer-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
+    .photo-viewer-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(10, 25, 47, 0.8);
+    }
 
-.photo-viewer-header h3 {
-    color: var(--neon-green);
-    font-size: 1.3rem;
-    font-weight: 600;
-    margin: 0;
-}
+    .photo-viewer-header h3 {
+        color: var(--neon-green);
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin: 0;
+    }
 
-.photo-viewer-container {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem;
-}
+    .close-viewer-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-.full-size-photo {
-    max-width: 70vw;
-    max-height: 60vh;
-    object-fit: contain;
-    border-radius: 10px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    transition: transform 0.3s ease;
-    cursor: zoom-in;
-}
+    .close-viewer-btn:hover {
+        color: var(--neon-green);
+        background: rgba(0, 255, 157, 0.1);
+        transform: scale(1.1);
+    }
 
-.full-size-photo.zoomed {
-    transform: scale(1.5);
-    cursor: zoom-out;
-}
+    .close-viewer-btn svg {
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+    }
 
-.photo-controls {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1.5rem;
-}
+    .photo-viewer-container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        /* ✅ Reducido de 2rem a 1rem para más espacio */
+        background: rgba(0, 0, 0, 0.2);
+        min-height: 500px;
+        /* ✅ Aumentado para pantallas grandes */
+    }
 
-.photo-control-btn {
-    background: var(--btn-primary);
-    border: 1px solid var(--modal-border);
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: var(--text-primary);
-}
+    .full-size-photo {
+        max-width: 85vw;
+        /* ✅ Cambiado de 70vw a 85vw */
+        max-height: 75vh;
+        /* ✅ Cambiado de 60vh a 75vh */
+        min-width: 400px;
+        /* ✅ Tamaño mínimo más grande */
+        min-height: 400px;
+        /* ✅ Tamaño mínimo más grande */
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        border-radius: 15px;
+        /* ✅ Bordes más grandes */
+        box-shadow:
+            0 15px 50px rgba(0, 0, 0, 0.6),
+            0 0 30px rgba(0, 255, 157, 0.2);
+        /* ✅ Sombra más dramática */
+        transition: transform 0.3s ease;
+        cursor: zoom-in;
+        border: 3px solid var(--modal-border);
+        /* ✅ Borde más grueso */
+    }
 
-.photo-control-btn:hover {
-    background: var(--btn-hover);
-    border-color: var(--neon-green);
-    transform: scale(1.1);
-}
+    .full-size-photo.zoomed {
+        transform: scale(1.3);
+        /* ✅ Zoom más grande */
+        cursor: zoom-out;
+        z-index: 10;
+    }
 
-.photo-control-btn svg {
-    width: 24px;
-    height: 24px;
-    fill: currentColor;
-}
 
-/* ===================================
+    /* Responsive para pantallas grandes */
+    @media (min-width: 1200px) {
+        .photo-viewer-content {
+            max-width: 90vw;
+            max-height: 90vh;
+        }
+
+        .full-size-photo {
+            max-width: 80vw;
+            max-height: 70vh;
+            min-width: 600px;
+            min-height: 600px;
+        }
+    }
+
+    /* Responsive móvil - MEJORADO */
+    @media (max-width: 768px) {
+        .photo-viewer-content {
+            max-width: 98vw;
+            max-height: 98vh;
+            border-radius: 10px;
+        }
+
+        .photo-viewer-container {
+            padding: 0.5rem;
+            min-height: 300px;
+        }
+
+        .full-size-photo {
+            max-width: 92vw;
+            /* ✅ Más grande en móvil */
+            max-height: 70vh;
+            /* ✅ Más alto en móvil */
+            min-width: 280px;
+            min-height: 280px;
+            border-radius: 10px;
+        }
+
+        .full-size-photo.zoomed {
+            transform: scale(1.5);
+            /* ✅ Zoom aún más grande en móvil */
+        }
+    }
+
+    @media (max-width: 480px) {
+        .full-size-photo {
+            max-width: 95vw;
+            max-height: 65vh;
+            min-width: 250px;
+            min-height: 250px;
+        }
+    }
+
+
+    /* Efecto hover más llamativo */
+    .full-size-photo:hover {
+        box-shadow:
+            0 20px 60px rgba(0, 0, 0, 0.8),
+            0 0 40px rgba(0, 255, 157, 0.4);
+        transform: scale(1.02);
+    }
+
+    /* Indicador de que se puede hacer zoom */
+    .full-size-photo::after {
+        content: '🔍';
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 5px 8px;
+        border-radius: 15px;
+        font-size: 14px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
+
+    .photo-viewer-container:hover .full-size-photo::after {
+        opacity: 1;
+    }
+
+    .photo-controls {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .photo-control-btn {
+        background: var(--btn-primary);
+        border: 1px solid var(--modal-border);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: var(--text-primary);
+    }
+
+    .photo-control-btn:hover {
+        background: var(--btn-hover);
+        border-color: var(--neon-green);
+        transform: scale(1.1);
+    }
+
+    .photo-control-btn svg {
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+    }
+
+    /* ===================================
    MODAL DE CAMBIO DE FOTO
    =================================== */
 
-.photo-change-content {
-    position: relative;
-    background: var(--modal-bg);
-    border: 1px solid var(--modal-border);
-    border-radius: 20px;
-    padding: 2rem;
-    max-width: 600px;
-    width: 90%;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
+    .photo-change-content {
+        position: relative;
+        background: var(--modal-bg);
+        border: 1px solid var(--modal-border);
+        border-radius: 20px;
+        padding: 2rem;
+        max-width: 600px;
+        width: 90%;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
 
-.photo-change-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
+    .photo-change-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-.photo-change-header h3 {
-    color: var(--neon-green);
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0;
-}
+    .photo-change-header h3 {
+        color: var(--neon-green);
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
 
-.photo-change-options {
-    display: flex;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
+    .photo-change-options {
+        display: flex;
+        justify-content: center;
+        /* Centrar cuando solo hay un botón */
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
 
-.photo-source-btn {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    background: var(--btn-primary);
-    border: 2px solid var(--modal-border);
-    border-radius: 15px;
-    padding: 2rem 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: var(--text-primary);
-    text-align: center;
-}
+    .photo-source-btn {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        background: var(--btn-primary);
+        border: 2px solid var(--modal-border);
+        border-radius: 15px;
+        padding: 2rem 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: var(--text-primary);
+        text-align: center;
+    }
 
-.photo-source-btn:hover {
-    background: var(--btn-hover);
-    border-color: var(--neon-green);
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 255, 157, 0.2);
-}
+    .photo-source-btn:hover {
+        background: var(--btn-hover);
+        border-color: var(--neon-green);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 255, 157, 0.2);
+    }
 
-.source-icon {
-    width: 70px;
-    height: 70px;
-    background: rgba(0, 255, 157, 0.2);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+    .source-icon {
+        width: 70px;
+        height: 70px;
+        background: rgba(0, 255, 157, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-.source-icon svg {
-    width: 40px;
-    height: 40px;
-    fill: var(--neon-green);
-}
+    .source-icon svg {
+        width: 40px;
+        height: 40px;
+        fill: var(--neon-green);
+    }
 
-.source-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
+    .source-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
 
-.source-subtitle {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-}
+    .source-subtitle {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
 
-/* ===================================
+    /* ===================================
    SECCIÓN DE PREVISUALIZACIÓN
    =================================== */
 
-.photo-preview-section {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding-top: 2rem;
-    margin-top: 2rem;
-}
+    .photo-preview-section {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 2rem;
+        margin-top: 2rem;
+    }
 
-.preview-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-}
+    .preview-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+    }
 
-.avatar-preview-img {
-    width: 200px;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 3px solid var(--neon-green);
-    box-shadow: 0 0 30px rgba(0, 255, 157, 0.3);
-}
+    .avatar-preview-img {
+        width: 200px;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 3px solid var(--neon-green);
+        box-shadow: 0 0 30px rgba(0, 255, 157, 0.3);
+    }
 
-.preview-controls {
-    display: flex;
-    gap: 1rem;
-}
+    .preview-controls {
+        display: flex;
+        gap: 1rem;
+    }
 
-.preview-btn {
-    padding: 0.8rem 2rem;
-    border: none;
-    border-radius: 25px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
+    .preview-btn {
+        padding: 0.8rem 2rem;
+        border: none;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
 
-.cancel-preview {
-    background: rgba(255, 0, 0, 0.2);
-    color: #ff6b6b;
-    border: 1px solid rgba(255, 0, 0, 0.3);
-}
+    .cancel-preview {
+        background: rgba(255, 0, 0, 0.2);
+        color: #ff6b6b;
+        border: 1px solid rgba(255, 0, 0, 0.3);
+    }
 
-.cancel-preview:hover {
-    background: rgba(255, 0, 0, 0.3);
-    transform: translateY(-2px);
-}
+    .cancel-preview:hover {
+        background: rgba(255, 0, 0, 0.3);
+        transform: translateY(-2px);
+    }
 
-.confirm-preview {
-    background: var(--btn-primary);
-    color: var(--neon-green);
-    border: 1px solid var(--modal-border);
-}
+    .confirm-preview {
+        background: var(--btn-primary);
+        color: var(--neon-green);
+        border: 1px solid var(--modal-border);
+    }
 
-.confirm-preview:hover {
-    background: var(--btn-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 255, 157, 0.3);
-}
+    .confirm-preview:hover {
+        background: var(--btn-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 255, 157, 0.3);
+    }
 
-/* ===================================
+    /* ===================================
    MODAL DE CÁMARA
    =================================== */
 
-.camera-content {
-    position: relative;
-    background: var(--modal-bg);
-    border: 1px solid var(--modal-border);
-    border-radius: 20px;
-    max-width: 90vw;
-    max-height: 90vh;
-    width: auto;
-    height: auto;
-    backdrop-filter: blur(20px);
-    overflow: hidden;
-}
-
-.camera-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.camera-header h3 {
-    color: var(--neon-green);
-    font-size: 1.3rem;
-    font-weight: 600;
-    margin: 0;
-}
-
-.camera-container {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-#cameraVideo {
-    width: 100%;
-    max-width: 600px;
-    height: auto;
-    border-radius: 0 0 20px 20px;
-}
-
-.camera-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 80px;
-    pointer-events: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.camera-guide {
-    width: 200px;
-    height: 200px;
-    border: 3px solid var(--neon-green);
-    border-radius: 50%;
-    background: rgba(0, 255, 157, 0.1);
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { 
-        transform: scale(1);
-        opacity: 0.7;
+    .camera-content {
+        position: relative;
+        background: var(--modal-bg);
+        border: 1px solid var(--modal-border);
+        border-radius: 20px;
+        max-width: 90vw;
+        max-height: 90vh;
+        width: auto;
+        height: auto;
+        backdrop-filter: blur(20px);
+        overflow: hidden;
     }
-    50% { 
+
+    .camera-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .camera-header h3 {
+        color: var(--neon-green);
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .camera-container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #cameraVideo {
+        width: 100%;
+        max-width: 600px;
+        height: auto;
+        border-radius: 0 0 20px 20px;
+    }
+
+    .camera-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 80px;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .camera-guide {
+        width: 200px;
+        height: 200px;
+        border: 3px solid var(--neon-green);
+        border-radius: 50%;
+        background: rgba(0, 255, 157, 0.1);
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+            opacity: 0.7;
+        }
+
+        50% {
+            transform: scale(1.05);
+            opacity: 1;
+        }
+    }
+
+    .camera-controls {
+        position: absolute;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 2rem;
+        padding: 0 2rem;
+    }
+
+    .camera-control-btn {
+        background: rgba(0, 0, 0, 0.7);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: white;
+    }
+
+    .camera-control-btn:hover {
+        background: rgba(0, 255, 157, 0.2);
+        border-color: var(--neon-green);
+        transform: scale(1.1);
+    }
+
+    .camera-control-btn svg {
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+    }
+
+    .capture-btn {
+        width: 80px;
+        height: 80px;
+        background: var(--neon-green);
+        border-color: var(--neon-green);
+        position: relative;
+    }
+
+    .capture-btn:hover {
+        background: rgba(0, 255, 157, 0.8);
         transform: scale(1.05);
-        opacity: 1;
     }
-}
 
-.camera-controls {
-    position: absolute;
-    bottom: 20px;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 2rem;
-    padding: 0 2rem;
-}
+    .capture-inner {
+        width: 60px;
+        height: 60px;
+        background: white;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+    }
 
-.camera-control-btn {
-    background: rgba(0, 0, 0, 0.7);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: white;
-}
+    .capture-btn:active .capture-inner {
+        transform: scale(0.9);
+    }
 
-.camera-control-btn:hover {
-    background: rgba(0, 255, 157, 0.2);
-    border-color: var(--neon-green);
-    transform: scale(1.1);
-}
-
-.camera-control-btn svg {
-    width: 24px;
-    height: 24px;
-    fill: currentColor;
-}
-
-.capture-btn {
-    width: 80px;
-    height: 80px;
-    background: var(--neon-green);
-    border-color: var(--neon-green);
-    position: relative;
-}
-
-.capture-btn:hover {
-    background: rgba(0, 255, 157, 0.8);
-    transform: scale(1.05);
-}
-
-.capture-inner {
-    width: 60px;
-    height: 60px;
-    background: white;
-    border-radius: 50%;
-    transition: all 0.2s ease;
-}
-
-.capture-btn:active .capture-inner {
-    transform: scale(0.9);
-}
-
-/* ===================================
+    /* ===================================
    LOADER DE ACTUALIZACIÓN
    =================================== */
 
-.avatar-update-loader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 2500;
-    display: none;
-    align-items: center;
-    justify-content: center;
-}
+    .avatar-update-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 2500;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
 
-.avatar-update-loader.show {
-    display: flex;
-}
+    .avatar-update-loader.show {
+        display: flex;
+    }
 
-.loader-backdrop {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(10px);
-}
+    .loader-backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.9);
+        backdrop-filter: blur(10px);
+    }
 
-.loader-content {
-    position: relative;
-    text-align: center;
-    color: var(--text-primary);
-}
+    .loader-content {
+        position: relative;
+        text-align: center;
+        color: var(--text-primary);
+    }
 
-.loader-content h3 {
-    color: var(--neon-green);
-    font-size: 1.5rem;
-    margin: 1rem 0 0.5rem;
-}
+    .loader-content h3 {
+        color: var(--neon-green);
+        font-size: 1.5rem;
+        margin: 1rem 0 0.5rem;
+    }
 
-.loader-content p {
-    color: var(--text-secondary);
-    font-size: 1rem;
-}
+    .loader-content p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+    }
 
-.quantum-spinner {
-    position: relative;
-    width: 80px;
-    height: 80px;
-    margin: 0 auto;
-}
+    .quantum-spinner {
+        position: relative;
+        width: 80px;
+        height: 80px;
+        margin: 0 auto;
+    }
 
-.spinner-ring {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border: 3px solid transparent;
-    border-radius: 50%;
-    animation: quantumSpin 2s linear infinite;
-}
+    .spinner-ring {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 3px solid transparent;
+        border-radius: 50%;
+        animation: quantumSpin 2s linear infinite;
+    }
 
-.spinner-ring:nth-child(1) {
-    border-top-color: var(--neon-green);
-    animation-delay: 0s;
-}
+    .spinner-ring:nth-child(1) {
+        border-top-color: var(--neon-green);
+        animation-delay: 0s;
+    }
 
-.spinner-ring:nth-child(2) {
-    border-top-color: var(--cyber-blue);
-    animation-delay: -0.7s;
-    animation-direction: reverse;
-}
+    .spinner-ring:nth-child(2) {
+        border-top-color: var(--cyber-blue);
+        animation-delay: -0.7s;
+        animation-direction: reverse;
+    }
 
-.spinner-ring:nth-child(3) {
-    border-top-color: #ff1493;
-    animation-delay: -1.4s;
-}
+    .spinner-ring:nth-child(3) {
+        border-top-color: #ff1493;
+        animation-delay: -1.4s;
+    }
 
-@keyframes quantumSpin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
+    @keyframes quantumSpin {
+        0% {
+            transform: rotate(0deg);
+        }
 
-/* ===================================
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* ===================================
    RESPONSIVE DESIGN
    =================================== */
 
-@media (max-width: 768px) {
-    .avatar-management-content,
-    .photo-change-content {
-        padding: 1.5rem;
-        width: 95%;
-    }
-    
-    .photo-change-options {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .photo-source-btn {
-        flex-direction: row;
-        padding: 1.5rem;
-        text-align: left;
-    }
-    
-    .source-icon {
-        width: 60px;
-        height: 60px;
-    }
-    
-    .source-icon svg {
-        width: 30px;
-        height: 30px;
-    }
-    
-    .current-avatar-display {
-        width: 100px;
-        height: 100px;
-    }
-    
-    .avatar-preview-img {
-        width: 150px;
-        height: 150px;
-    }
-    
-    .full-size-photo {
-        max-width: 85vw;
-        max-height: 50vh;
-    }
-    
-    .camera-controls {
-        gap: 1rem;
-        padding: 0 1rem;
-    }
-    
-    .camera-control-btn {
-        width: 50px;
-        height: 50px;
-    }
-    
-    .capture-btn {
-        width: 70px;
-        height: 70px;
-    }
-    
-    .capture-inner {
-        width: 50px;
-        height: 50px;
-    }
-}
+    @media (max-width: 768px) {
 
-@media (max-width: 480px) {
-    .avatar-management-content,
-    .photo-change-content {
-        padding: 1rem;
-        width: 98%;
+        .avatar-management-content,
+        .photo-change-content {
+            padding: 1.5rem;
+            width: 95%;
+        }
+
+        .photo-change-options,
+        .avatar-option-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .photo-source-btn,
+        .avatar-option-btn {
+            width: 100%;
+            max-width: none;
+        }
+
+        .photo-change-options {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .photo-source-btn {
+            flex-direction: row;
+            padding: 1.5rem;
+            text-align: left;
+        }
+
+        .source-icon {
+            width: 60px;
+            height: 60px;
+        }
+
+        .source-icon svg {
+            width: 30px;
+            height: 30px;
+        }
+
+        .current-avatar-display {
+            width: 100px;
+            height: 100px;
+        }
+
+        .avatar-preview-img {
+            width: 150px;
+            height: 150px;
+        }
+
+        .full-size-photo {
+            max-width: 85vw;
+            max-height: 50vh;
+        }
+
+        .camera-controls {
+            gap: 1rem;
+            padding: 0 1rem;
+        }
+
+        .camera-control-btn {
+            width: 50px;
+            height: 50px;
+        }
+
+        .capture-btn {
+            width: 70px;
+            height: 70px;
+        }
+
+        .capture-inner {
+            width: 50px;
+            height: 50px;
+        }
     }
-    
-    .avatar-management-options {
-        gap: 0.8rem;
+
+    @media (max-width: 480px) {
+
+        .avatar-management-content,
+        .photo-change-content {
+            padding: 1rem;
+            width: 98%;
+        }
+
+        .avatar-management-options {
+            gap: 0.8rem;
+        }
+
+        .avatar-option-btn {
+            padding: 1rem;
+        }
+
+        .option-icon {
+            width: 40px;
+            height: 40px;
+        }
+
+        .option-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .option-title {
+            font-size: 1rem;
+        }
+
+        .option-subtitle {
+            font-size: 0.8rem;
+        }
+
+        .preview-controls {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .preview-btn {
+            width: 100%;
+            padding: 1rem;
+        }
     }
-    
-    .avatar-option-btn {
-        padding: 1rem;
-    }
-    
-    .option-icon {
-        width: 40px;
-        height: 40px;
-    }
-    
-    .option-icon svg {
-        width: 20px;
-        height: 20px;
-    }
-    
-    .option-title {
-        font-size: 1rem;
-    }
-    
-    .option-subtitle {
-        font-size: 0.8rem;
-    }
-    
-    .preview-controls {
-        flex-direction: column;
-        width: 100%;
-    }
-    
-    .preview-btn {
-        width: 100%;
-        padding: 1rem;
-    }
-}
 </style>
 
 <script>
-// ===================================
-// 🎨 SISTEMA DE GESTIÓN DE AVATAR CORREGIDO
-// ===================================
+    // ===================================
+    // 🎨 SISTEMA DE GESTIÓN DE AVATAR CORREGIDO
+    // ===================================
 
-class AvatarManagementSystem {
-    constructor() {
-        this.currentUserId = '{{ request.session.user_id }}';
-        this.currentAvatarUrl = '{{ foto_perfil_url|default:"" }}';
-        this.userName = '{{ nombre }} {{ apellido }}';
-        
-        this.managementModal = document.getElementById('avatarManagementModal');
-        this.viewerModal = document.getElementById('photoViewerModal');
-        this.changeModal = document.getElementById('photoChangeModal');
-        this.cameraModal = document.getElementById('cameraModal');
-        this.updateLoader = document.getElementById('avatarUpdateLoader');
-        
-        this.cameraStream = null;
-        this.facingMode = 'user';
-        this.newAvatarData = null;
-        
-        this.init();
-    }
-    
-    init() {
-        this.setupEventListeners();
-        this.updateCurrentAvatar();
-        console.log('🎨 Sistema de avatar inicializado para usuario:', this.currentUserId);
-    }
-    
-    setupEventListeners() {
-        // Avatar clicks para abrir gestión
-        const avatarElements = document.querySelectorAll('.welcome-avatar-container, .user-avatar');
-        avatarElements.forEach(element => {
-            element.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('👤 Click en avatar detectado');
-                this.showManagementModal();
+    class AvatarManagementSystem {
+        constructor() {
+            this.currentUserId = '{{ request.session.user_id }}';
+            this.currentAvatarUrl = '{{ foto_perfil_url|default:"" }}';
+            this.userName = '{{ nombre }} {{ apellido }}';
+
+            this.managementModal = document.getElementById('avatarManagementModal');
+            this.viewerModal = document.getElementById('photoViewerModal');
+            this.changeModal = document.getElementById('photoChangeModal');
+            this.cameraModal = document.getElementById('cameraModal');
+            this.updateLoader = document.getElementById('avatarUpdateLoader');
+
+            this.cameraStream = null;
+            this.facingMode = 'user';
+            this.newAvatarData = null;
+
+            this.init();
+        }
+
+        init() {
+            this.setupEventListeners();
+            this.updateCurrentAvatar();
+            console.log('🎨 Sistema de avatar inicializado para usuario:', this.currentUserId);
+        }
+
+        setupEventListeners() {
+            // Avatar clicks para abrir gestión
+            const avatarElements = document.querySelectorAll('.welcome-avatar-container, .user-avatar');
+            avatarElements.forEach(element => {
+                element.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('👤 Click en avatar detectado');
+                    this.showManagementModal();
+                });
             });
-        });
-        
-        // Botones de opciones principales
-        document.getElementById('viewPhotoBtn')?.addEventListener('click', () => this.viewPhoto());
-        document.getElementById('changePhotoBtn')?.addEventListener('click', () => this.showChangeModal());
-        
-        // Botones de fuente de foto
-        document.getElementById('takePhotoBtn')?.addEventListener('click', () => this.openCamera());
-        document.getElementById('uploadPhotoBtn')?.addEventListener('click', () => this.openFileDialog());
-        
-        // Controles de cámara
-        document.getElementById('captureBtn')?.addEventListener('click', () => this.capturePhoto());
-        document.getElementById('switchCameraBtn')?.addEventListener('click', () => this.switchCamera());
-        
-        // Preview controls
-        document.getElementById('cancelPreview')?.addEventListener('click', () => this.cancelPreview());
-        document.getElementById('confirmPreview')?.addEventListener('click', () => this.confirmNewAvatar());
-        
-        // Controles de zoom en viewer
-        document.getElementById('zoomInBtn')?.addEventListener('click', () => this.zoomPhoto(1.2));
-        document.getElementById('zoomOutBtn')?.addEventListener('click', () => this.zoomPhoto(0.8));
-        document.getElementById('resetZoomBtn')?.addEventListener('click', () => this.resetZoom());
-        
-        // File input
-        document.getElementById('avatarFileInput')?.addEventListener('change', (e) => this.handleFileSelect(e));
-        
-        // Close buttons
-        this.setupCloseButtons();
-        
-        // Close on backdrop click
-        this.setupBackdropClose();
-    }
-    
-    setupCloseButtons() {
-        const closeButtons = [
-            'closeAvatarModal',
-            'closePhotoViewer', 
-            'closePhotoChange',
-            'closeCameraBtn',
-            'cancelCameraBtn'
-        ];
-        
-        closeButtons.forEach(id => {
-            const btn = document.getElementById(id);
-            if (btn) {
-                btn.addEventListener('click', () => this.closeAllModals());
-            }
-        });
-    }
-    
-    setupBackdropClose() {
-        const backdrops = document.querySelectorAll(
-            '.avatar-management-backdrop, .photo-viewer-backdrop, ' +
-            '.photo-change-backdrop, .camera-backdrop'
-        );
-        
-        backdrops.forEach(backdrop => {
-            backdrop.addEventListener('click', () => this.closeAllModals());
-        });
-    }
-    
-    updateCurrentAvatar() {
-        const display = document.getElementById('currentAvatarDisplay');
-        if (!display) return;
-        
-        if (this.currentAvatarUrl) {
-            display.innerHTML = `<img src="${this.currentAvatarUrl}" alt="Avatar actual">`;
-        } else {
-            display.innerHTML = `
+
+            // Botones de opciones principales
+            document.getElementById('viewPhotoBtn')?.addEventListener('click', () => this.viewPhoto());
+            document.getElementById('changePhotoBtn')?.addEventListener('click', () => this.showChangeModal());
+
+            // Botones de fuente de foto
+            document.getElementById('uploadPhotoBtn')?.addEventListener('click', () => this.openFileDialog());
+
+            // Preview controls
+            document.getElementById('cancelPreview')?.addEventListener('click', () => this.cancelPreview());
+            document.getElementById('confirmPreview')?.addEventListener('click', () => this.confirmNewAvatar());
+
+            // File input
+            document.getElementById('avatarFileInput')?.addEventListener('change', (e) => this.handleFileSelect(e));
+
+            // Close buttons
+            this.setupCloseButtons();
+
+            // Close on backdrop click
+            this.setupBackdropClose();
+        }
+
+        setupCloseButtons() {
+            const closeButtons = [
+                'closeAvatarModal',
+                'closePhotoViewer',
+                'closePhotoChange'
+            ];
+
+            closeButtons.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.addEventListener('click', () => this.closeAllModals());
+                }
+            });
+        }
+
+        setupBackdropClose() {
+            const backdrops = document.querySelectorAll(
+                '.avatar-management-backdrop, .photo-viewer-backdrop'
+            );
+
+            backdrops.forEach(backdrop => {
+                backdrop.addEventListener('click', () => this.closeAllModals());
+            });
+        }
+
+        updateCurrentAvatar() {
+            const display = document.getElementById('currentAvatarDisplay');
+            if (!display) return;
+
+            if (this.currentAvatarUrl) {
+                display.innerHTML = `<img src="${this.currentAvatarUrl}" alt="Avatar actual">`;
+            } else {
+                display.innerHTML = `
                 <svg viewBox="0 0 24 24">
                     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                 </svg>
             `;
-        }
-    }
-    
-    // ===================================
-    // GESTIÓN DE MODALES
-    // ===================================
-    
-    showManagementModal() {
-        console.log('📱 Abriendo modal de gestión');
-        this.closeAllModals();
-        this.updateCurrentAvatar();
-        this.managementModal.classList.add('show');
-        document.body.style.overflow = 'hidden';
-    }
-    
-    viewPhoto() {
-        if (!this.currentAvatarUrl) {
-            this.showNotification('No hay foto para mostrar', 'warning');
-            return;
-        }
-        
-        console.log('🔍 Viendo foto:', this.currentAvatarUrl);
-        this.closeAllModals();
-        
-        const fullSizeImg = document.getElementById('fullSizeAvatar');
-        fullSizeImg.src = this.currentAvatarUrl;
-        
-        this.viewerModal.classList.add('show');
-        document.body.style.overflow = 'hidden';
-    }
-    
-    showChangeModal() {
-        console.log('🔄 Abriendo modal de cambio');
-        this.closeAllModals();
-        this.changeModal.classList.add('show');
-        document.body.style.overflow = 'hidden';
-    }
-    
-    closeAllModals() {
-        const modals = [
-            this.managementModal,
-            this.viewerModal, 
-            this.changeModal,
-            this.cameraModal
-        ];
-        
-        modals.forEach(modal => {
-            if (modal) {
-                modal.classList.remove('show');
             }
-        });
-        
-        const previewSection = document.getElementById('photoPreviewSection');
-        if (previewSection) {
-            previewSection.style.display = 'none';
         }
-        
-        document.body.style.overflow = '';
-        this.stopCamera();
-    }
-    
-    // ===================================
-    // GESTIÓN DE CÁMARA
-    // ===================================
-    
-    async openCamera() {
-        try {
-            console.log('📸 Abriendo cámara...');
+
+        // ===================================
+        // GESTIÓN DE MODALES
+        // ===================================
+
+        showManagementModal() {
+            console.log('📱 Abriendo modal de gestión');
             this.closeAllModals();
-            this.cameraModal.classList.add('show');
+            this.updateCurrentAvatar();
+            this.managementModal.classList.add('show');
             document.body.style.overflow = 'hidden';
-            
-            await this.startCamera();
-            
-        } catch (error) {
-            console.error('Error al abrir cámara:', error);
-            this.showNotification('No se pudo acceder a la cámara: ' + error.message, 'error');
-            this.closeAllModals();
         }
-    }
-    
-    async startCamera() {
-        try {
-            this.cameraStream = await navigator.mediaDevices.getUserMedia({
-                video: { 
-                    facingMode: this.facingMode,
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
+
+        viewPhoto() {
+            console.log('🔍 Intentando ver foto:', this.currentAvatarUrl);
+
+            if (!this.currentAvatarUrl || this.currentAvatarUrl.trim() === '') {
+                this.showNotification('No hay foto para mostrar', 'warning');
+                return;
+            }
+
+            this.closeAllModals();
+
+            // CORRECCIÓN: Configurar la imagen ANTES de mostrar el modal
+            const fullSizeImg = document.getElementById('fullSizeAvatar');
+
+            if (fullSizeImg) {
+                console.log('📸 Configurando imagen:', this.currentAvatarUrl);
+                fullSizeImg.src = this.currentAvatarUrl;
+
+                fullSizeImg.onload = () => {
+                    console.log('✅ Imagen cargada correctamente');
+                };
+
+                fullSizeImg.onerror = () => {
+                    console.error('❌ Error cargando imagen');
+                    this.showNotification('Error al cargar la imagen', 'error');
+                };
+            }
+
+            // Mostrar el modal DESPUÉS de configurar la imagen
+            this.viewerModal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+
+            console.log('📱 Modal de visualización abierto');
+        }
+
+        showChangeModal() {
+            console.log('🔄 Abriendo modal de cambio');
+            this.closeAllModals();
+            this.changeModal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        closeAllModals() {
+            const modals = [
+                this.managementModal,
+                this.viewerModal,
+                this.changeModal
+            ];
+
+            modals.forEach(modal => {
+                if (modal) {
+                    modal.classList.remove('show');
                 }
             });
-            
-            const video = document.getElementById('cameraVideo');
-            video.srcObject = this.cameraStream;
-            console.log('✅ Cámara iniciada correctamente');
-            
-        } catch (error) {
-            throw new Error('Error al iniciar cámara: ' + error.message);
+
+            const previewSection = document.getElementById('photoPreviewSection');
+            if (previewSection) {
+                previewSection.style.display = 'none';
+            }
+
+            document.body.style.overflow = '';
         }
-    }
-    
-    stopCamera() {
-        if (this.cameraStream) {
-            this.cameraStream.getTracks().forEach(track => track.stop());
-            this.cameraStream = null;
-            console.log('📷 Cámara detenida');
+
+        // ===================================
+        // GESTIÓN DE ARCHIVOS
+        // ===================================
+
+        openFileDialog() {
+            console.log('📁 Abriendo selector de archivos');
+            document.getElementById('avatarFileInput').click();
         }
-    }
-    
-    async switchCamera() {
-        this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
-        this.stopCamera();
-        
-        try {
-            await this.startCamera();
-            console.log('🔄 Cámara cambiada a:', this.facingMode);
-        } catch (error) {
-            console.error('Error al cambiar cámara:', error);
-            this.showNotification('No se pudo cambiar la cámara', 'error');
-        }
-    }
-    
-    capturePhoto() {
-        console.log('📸 Capturando foto...');
-        const video = document.getElementById('cameraVideo');
-        const canvas = document.getElementById('cameraCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        
-        ctx.drawImage(video, 0, 0);
-        
-        canvas.toBlob((blob) => {
+
+        handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            console.log('📁 Archivo seleccionado:', file.name, file.size, 'bytes');
+
+            if (!file.type.startsWith('image/')) {
+                this.showNotification('Por favor selecciona una imagen válida', 'error');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                this.showNotification('La imagen es demasiado grande (máximo 5MB)', 'error');
+                return;
+            }
+
             const reader = new FileReader();
             reader.onloadend = () => {
-                console.log('✅ Foto capturada, mostrando preview');
+                console.log('✅ Archivo leído, mostrando preview');
                 this.showPreview(reader.result);
-                this.closeAllModals();
-                this.showChangeModal();
             };
-            reader.readAsDataURL(blob);
-        }, 'image/jpeg', 0.9);
-    }
-    
-    // ===================================
-    // GESTIÓN DE ARCHIVOS
-    // ===================================
-    
-    openFileDialog() {
-        console.log('📁 Abriendo selector de archivos');
-        document.getElementById('avatarFileInput').click();
-    }
-    
-    handleFileSelect(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        console.log('📁 Archivo seleccionado:', file.name, file.size, 'bytes');
-        
-        if (!file.type.startsWith('image/')) {
-            this.showNotification('Por favor selecciona una imagen válida', 'error');
-            return;
+            reader.readAsDataURL(file);
         }
-        
-        if (file.size > 5 * 1024 * 1024) {
-            this.showNotification('La imagen es demasiado grande (máximo 5MB)', 'error');
-            return;
+
+        // ===================================
+        // PREVIEW Y CONFIRMACIÓN
+        // ===================================
+
+        showPreview(imageData) {
+            const previewSection = document.getElementById('photoPreviewSection');
+            const previewImg = document.getElementById('avatarPreviewImg');
+
+            previewImg.src = imageData;
+            previewSection.style.display = 'block';
+
+            this.newAvatarData = imageData;
+            console.log('👁️ Preview mostrado');
         }
-        
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            console.log('✅ Archivo leído, mostrando preview');
-            this.showPreview(reader.result);
-        };
-        reader.readAsDataURL(file);
-    }
-    
-    // ===================================
-    // PREVIEW Y CONFIRMACIÓN
-    // ===================================
-    
-    showPreview(imageData) {
-        const previewSection = document.getElementById('photoPreviewSection');
-        const previewImg = document.getElementById('avatarPreviewImg');
-        
-        previewImg.src = imageData;
-        previewSection.style.display = 'block';
-        
-        this.newAvatarData = imageData;
-        console.log('👁️ Preview mostrado');
-    }
-    
-    cancelPreview() {
-        const previewSection = document.getElementById('photoPreviewSection');
-        previewSection.style.display = 'none';
-        this.newAvatarData = null;
-        
-        document.getElementById('avatarFileInput').value = '';
-        console.log('❌ Preview cancelado');
-    }
-    
-    async confirmNewAvatar() {
-        if (!this.newAvatarData) {
-            this.showNotification('No hay imagen para confirmar', 'error');
-            return;
+
+        cancelPreview() {
+            const previewSection = document.getElementById('photoPreviewSection');
+            previewSection.style.display = 'none';
+            this.newAvatarData = null;
+
+            document.getElementById('avatarFileInput').value = '';
+            console.log('❌ Preview cancelado');
         }
-        
-        console.log('🚀 Iniciando actualización de avatar...');
-        this.showUpdateLoader('Eliminando avatar anterior...');
-        
-        try {
-            // Crear FormData
-            const formData = new FormData();
-            
-            // Convertir base64 a blob
-            const response = await fetch(this.newAvatarData);
-            const blob = await response.blob();
-            
-            formData.append('avatar_file', blob, 'avatar.jpg');
-            formData.append('user_id', this.currentUserId);
-            formData.append('action', 'replace_avatar');
-            
-            console.log('📦 FormData preparado, enviando al servidor...');
-            
-            // Obtener token CSRF
-            const csrfToken = this.getCSRFToken();
-            
-            if (!csrfToken) {
-                throw new Error('Token CSRF no encontrado');
+
+        async confirmNewAvatar() {
+            if (!this.newAvatarData) {
+                this.showNotification('No hay imagen para confirmar', 'error');
+                return;
             }
-            
-            this.updateLoaderStatus('Subiendo nueva imagen...');
-            
-            // 🔧 CORRECCIÓN: Usar la URL correcta
-            const uploadResponse = await fetch('/api/update-avatar/', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: formData,
-                credentials: 'same-origin'  // 🔧 AÑADIDO
-            });
-            
-            console.log('📡 Respuesta del servidor:', uploadResponse.status, uploadResponse.statusText);
-            
-            // 🔧 CORRECCIÓN: Verificar content-type antes de parsear JSON
-            const contentType = uploadResponse.headers.get('content-type');
-            
-            if (!contentType || !contentType.includes('application/json')) {
-                // La respuesta no es JSON, probablemente HTML de error
-                const textResponse = await uploadResponse.text();
-                console.error('❌ Respuesta no es JSON:', textResponse.substring(0, 500));
-                
-                if (uploadResponse.status === 403) {
-                    throw new Error('Acceso denegado. Verifica que tengas permisos.');
-                } else if (uploadResponse.status === 404) {
-                    throw new Error('Endpoint no encontrado. Verifica la URL de la API.');
-                } else if (uploadResponse.status === 500) {
-                    throw new Error('Error interno del servidor. Revisa los logs.');
-                } else {
-                    throw new Error(`Error del servidor (${uploadResponse.status}): ${uploadResponse.statusText}`);
+
+            console.log('🚀 Iniciando actualización de avatar...');
+            this.showUpdateLoader('Eliminando avatar anterior...');
+
+            try {
+                // Crear FormData
+                const formData = new FormData();
+
+                // Convertir base64 a blob
+                const response = await fetch(this.newAvatarData);
+                const blob = await response.blob();
+
+                formData.append('avatar_file', blob, 'avatar.jpg');
+                formData.append('user_id', this.currentUserId);
+                formData.append('action', 'replace_avatar');
+
+                console.log('📦 FormData preparado, enviando al servidor...');
+
+                // Obtener token CSRF
+                const csrfToken = this.getCSRFToken();
+
+                if (!csrfToken) {
+                    throw new Error('Token CSRF no encontrado');
                 }
+
+                this.updateLoaderStatus('Subiendo nueva imagen...');
+
+                // 🔧 CORRECCIÓN: Usar la URL correcta
+                const uploadResponse = await fetch('/api/update-avatar/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData,
+                    credentials: 'same-origin'  // 🔧 AÑADIDO
+                });
+
+                console.log('📡 Respuesta del servidor:', uploadResponse.status, uploadResponse.statusText);
+
+                // 🔧 CORRECCIÓN: Verificar content-type antes de parsear JSON
+                const contentType = uploadResponse.headers.get('content-type');
+
+                if (!contentType || !contentType.includes('application/json')) {
+                    // La respuesta no es JSON, probablemente HTML de error
+                    const textResponse = await uploadResponse.text();
+                    console.error('❌ Respuesta no es JSON:', textResponse.substring(0, 500));
+
+                    if (uploadResponse.status === 403) {
+                        throw new Error('Acceso denegado. Verifica que tengas permisos.');
+                    } else if (uploadResponse.status === 404) {
+                        throw new Error('Endpoint no encontrado. Verifica la URL de la API.');
+                    } else if (uploadResponse.status === 500) {
+                        throw new Error('Error interno del servidor. Revisa los logs.');
+                    } else {
+                        throw new Error(`Error del servidor (${uploadResponse.status}): ${uploadResponse.statusText}`);
+                    }
+                }
+
+                const result = await uploadResponse.json();
+                console.log('📊 Resultado:', result);
+
+                if (result.success) {
+                    this.updateLoaderStatus('Avatar actualizado exitosamente!');
+
+                    // Actualizar URL actual
+                    this.currentAvatarUrl = result.new_avatar_url;
+
+                    // Actualizar elementos en la página
+                    this.updateAvatarElements(result.new_avatar_url);
+
+                    console.log('✅ Avatar actualizado correctamente');
+
+                    setTimeout(() => {
+                        this.hideUpdateLoader();
+                        this.closeAllModals();
+                        this.showNotification('Avatar actualizado correctamente', 'success');
+                    }, 1500);
+
+                } else {
+                    throw new Error(result.message || 'Error al actualizar avatar');
+                }
+
+            } catch (error) {
+                console.error('❌ Error al actualizar avatar:', error);
+                this.hideUpdateLoader();
+                this.showNotification('Error al actualizar avatar: ' + error.message, 'error');
             }
-            
-            const result = await uploadResponse.json();
-            console.log('📊 Resultado:', result);
-            
-            if (result.success) {
-                this.updateLoaderStatus('Avatar actualizado exitosamente!');
-                
-                // Actualizar URL actual
-                this.currentAvatarUrl = result.new_avatar_url;
-                
-                // Actualizar elementos en la página
-                this.updateAvatarElements(result.new_avatar_url);
-                
-                console.log('✅ Avatar actualizado correctamente');
-                
-                setTimeout(() => {
-                    this.hideUpdateLoader();
-                    this.closeAllModals();
-                    this.showNotification('Avatar actualizado correctamente', 'success');
-                }, 1500);
-                
-            } else {
-                throw new Error(result.message || 'Error al actualizar avatar');
+        }
+
+        // ===================================
+        // UTILIDADES
+        // ===================================
+
+        updateAvatarElements(newUrl) {
+            console.log('🔄 Actualizando elementos de avatar con URL:', newUrl);
+
+            // Actualizar todos los avatares en la página
+            const avatarElements = document.querySelectorAll(
+                '.user-avatar img, .welcome-avatar img, .avatar-preview img'
+            );
+
+            avatarElements.forEach(img => {
+                img.src = newUrl + '?t=' + Date.now(); // Cache busting
+            });
+
+            // Actualizar el display del modal también
+            this.updateCurrentAvatar();
+
+            console.log('✅ Elementos de avatar actualizados');
+        }
+
+
+        // ===================================
+        // LOADER Y NOTIFICACIONES
+        // ===================================
+
+        showUpdateLoader(status) {
+            this.updateLoaderStatus(status);
+            this.updateLoader.classList.add('show');
+        }
+
+        hideUpdateLoader() {
+            this.updateLoader.classList.remove('show');
+        }
+
+        updateLoaderStatus(status) {
+            const statusElement = document.getElementById('updateStatus');
+            if (statusElement) {
+                statusElement.textContent = status;
             }
-            
-        } catch (error) {
-            console.error('❌ Error al actualizar avatar:', error);
-            this.hideUpdateLoader();
-            this.showNotification('Error al actualizar avatar: ' + error.message, 'error');
         }
-    }
-    
-    // ===================================
-    // UTILIDADES
-    // ===================================
-    
-    updateAvatarElements(newUrl) {
-        console.log('🔄 Actualizando elementos de avatar con URL:', newUrl);
-        
-        // Actualizar todos los avatares en la página
-        const avatarElements = document.querySelectorAll(
-            '.user-avatar img, .welcome-avatar img, .avatar-preview img'
-        );
-        
-        avatarElements.forEach(img => {
-            img.src = newUrl + '?t=' + Date.now(); // Cache busting
-        });
-        
-        // Actualizar el display del modal también
-        this.updateCurrentAvatar();
-        
-        console.log('✅ Elementos de avatar actualizados');
-    }
-    
-    // ===================================
-    // CONTROLES DE ZOOM
-    // ===================================
-    
-    zoomPhoto(factor) {
-        const photo = document.getElementById('fullSizeAvatar');
-        const currentScale = parseFloat(photo.style.transform.replace(/.*scale\(([^)]*)\).*/, '$1')) || 1;
-        const newScale = Math.max(0.5, Math.min(3, currentScale * factor));
-        
-        photo.style.transform = `scale(${newScale})`;
-        photo.classList.toggle('zoomed', newScale > 1);
-    }
-    
-    resetZoom() {
-        const photo = document.getElementById('fullSizeAvatar');
-        photo.style.transform = 'scale(1)';
-        photo.classList.remove('zoomed');
-    }
-    
-    // ===================================
-    // LOADER Y NOTIFICACIONES
-    // ===================================
-    
-    showUpdateLoader(status) {
-        this.updateLoaderStatus(status);
-        this.updateLoader.classList.add('show');
-    }
-    
-    hideUpdateLoader() {
-        this.updateLoader.classList.remove('show');
-    }
-    
-    updateLoaderStatus(status) {
-        const statusElement = document.getElementById('updateStatus');
-        if (statusElement) {
-            statusElement.textContent = status;
-        }
-    }
-    
-    showNotification(message, type = 'info') {
-        console.log(`🔔 Notificación [${type}]:`, message);
-        
-        // Remover notificaciones existentes
-        const existing = document.querySelectorAll('.notification.toast');
-        existing.forEach(n => n.remove());
-        
-        const notification = document.createElement('div');
-        notification.className = `notification toast ${type}`;
-        notification.innerHTML = `
+
+        showNotification(message, type = 'info') {
+            console.log(`🔔 Notificación [${type}]:`, message);
+
+            // Remover notificaciones existentes
+            const existing = document.querySelectorAll('.notification.toast');
+            existing.forEach(n => n.remove());
+
+            const notification = document.createElement('div');
+            notification.className = `notification toast ${type}`;
+            notification.innerHTML = `
             <div class="notification-content">
                 <span class="notification-icon">${this.getNotificationIcon(type)}</span>
                 <span class="notification-message">${message}</span>
             </div>
         `;
-        
-        notification.style.cssText = `
+
+            notification.style.cssText = `
             position: fixed;
             top: 2rem;
             right: 2rem;
@@ -1500,131 +1498,131 @@ class AvatarManagementSystem {
             backdrop-filter: blur(10px);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         `;
-        
-        // Colores según el tipo
-        if (type === 'success') {
-            notification.style.background = 'rgba(0, 255, 157, 0.9)';
-            notification.style.borderLeft = '4px solid #00ff9d';
-        } else if (type === 'error') {
-            notification.style.background = 'rgba(255, 68, 68, 0.9)';
-            notification.style.borderLeft = '4px solid #ff4444';
-        } else if (type === 'warning') {
-            notification.style.background = 'rgba(255, 193, 7, 0.9)';
-            notification.style.borderLeft = '4px solid #ffc107';
-        } else {
-            notification.style.background = 'rgba(0, 246, 255, 0.9)';
-            notification.style.borderLeft = '4px solid #00f6ff';
+
+            // Colores según el tipo
+            if (type === 'success') {
+                notification.style.background = 'rgba(0, 255, 157, 0.9)';
+                notification.style.borderLeft = '4px solid #00ff9d';
+            } else if (type === 'error') {
+                notification.style.background = 'rgba(255, 68, 68, 0.9)';
+                notification.style.borderLeft = '4px solid #ff4444';
+            } else if (type === 'warning') {
+                notification.style.background = 'rgba(255, 193, 7, 0.9)';
+                notification.style.borderLeft = '4px solid #ffc107';
+            } else {
+                notification.style.background = 'rgba(0, 246, 255, 0.9)';
+                notification.style.borderLeft = '4px solid #00f6ff';
+            }
+
+            document.body.appendChild(notification);
+
+            // Animar entrada
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+
+            // Auto remove
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
         }
-        
-        document.body.appendChild(notification);
-        
-        // Animar entrada
-        setTimeout(() => {
-            notification.style.opacity = '1';
-            notification.style.transform = 'translateX(0)';
-        }, 100);
-        
-        // Auto remove
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            notification.style.transform = 'translateX(100%)';
-            setTimeout(() => notification.remove(), 300);
-        }, 5000);
-    }
-    
-    getNotificationIcon(type) {
-        switch(type) {
-            case 'success': return '✅';
-            case 'error': return '❌';
-            case 'warning': return '⚠️';
-            default: return 'ℹ️';
-        }
-    }
-    
-    getCSRFToken() {
-        // 🔧 MÉTODO MEJORADO PARA OBTENER CSRF TOKEN
-        
-        // 1. Desde window (si existe)
-        if (typeof window.csrfToken !== 'undefined') {
-            console.log('🔑 CSRF desde window.csrfToken');
-            return window.csrfToken;
-        }
-        
-        // 2. Desde meta tag
-        const csrfMeta = document.querySelector('meta[name=csrf-token]');
-        if (csrfMeta) {
-            console.log('🔑 CSRF desde meta tag');
-            return csrfMeta.getAttribute('content');
-        }
-        
-        // 3. Desde cookies
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, 10) === 'csrftoken=') {
-                    cookieValue = decodeURIComponent(cookie.substring(10));
-                    break;
-                }
+
+        getNotificationIcon(type) {
+            switch (type) {
+                case 'success': return '✅';
+                case 'error': return '❌';
+                case 'warning': return '⚠️';
+                default: return 'ℹ️';
             }
         }
-        
-        if (cookieValue) {
-            console.log('🔑 CSRF desde cookie');
-            return cookieValue;
+
+        getCSRFToken() {
+            // 🔧 MÉTODO MEJORADO PARA OBTENER CSRF TOKEN
+
+            // 1. Desde window (si existe)
+            if (typeof window.csrfToken !== 'undefined') {
+                console.log('🔑 CSRF desde window.csrfToken');
+                return window.csrfToken;
+            }
+
+            // 2. Desde meta tag
+            const csrfMeta = document.querySelector('meta[name=csrf-token]');
+            if (csrfMeta) {
+                console.log('🔑 CSRF desde meta tag');
+                return csrfMeta.getAttribute('content');
+            }
+
+            // 3. Desde cookies
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, 10) === 'csrftoken=') {
+                        cookieValue = decodeURIComponent(cookie.substring(10));
+                        break;
+                    }
+                }
+            }
+
+            if (cookieValue) {
+                console.log('🔑 CSRF desde cookie');
+                return cookieValue;
+            }
+
+            // 4. Desde formulario oculto (si existe)
+            const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+            if (csrfInput) {
+                console.log('🔑 CSRF desde input oculto');
+                return csrfInput.value;
+            }
+
+            console.error('❌ No se pudo encontrar token CSRF');
+            return null;
         }
-        
-        // 4. Desde formulario oculto (si existe)
-        const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
-        if (csrfInput) {
-            console.log('🔑 CSRF desde input oculto');
-            return csrfInput.value;
+    }
+
+    // ===================================
+    // INICIALIZACIÓN MEJORADA
+    // ===================================
+
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('🚀 DOM cargado, verificando elementos...');
+
+        // Verificar que estamos en el marketplace
+        const avatarContainer = document.querySelector('.welcome-avatar-container');
+        const userAvatar = document.querySelector('.user-avatar');
+        const managementModal = document.getElementById('avatarManagementModal');
+
+        if ((avatarContainer || userAvatar) && managementModal) {
+            window.avatarManager = new AvatarManagementSystem();
+            console.log('✅ Sistema de gestión de avatar inicializado correctamente');
+        } else {
+            console.log('⚠️ No se encontraron elementos necesarios para el sistema de avatar');
+            console.log('Avatar container:', !!avatarContainer);
+            console.log('User avatar:', !!userAvatar);
+            console.log('Management modal:', !!managementModal);
         }
-        
-        console.error('❌ No se pudo encontrar token CSRF');
-        return null;
-    }
-}
-
-// ===================================
-// INICIALIZACIÓN MEJORADA
-// ===================================
-
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 DOM cargado, verificando elementos...');
-    
-    // Verificar que estamos en el marketplace
-    const avatarContainer = document.querySelector('.welcome-avatar-container');
-    const userAvatar = document.querySelector('.user-avatar');
-    const managementModal = document.getElementById('avatarManagementModal');
-    
-    if ((avatarContainer || userAvatar) && managementModal) {
-        window.avatarManager = new AvatarManagementSystem();
-        console.log('✅ Sistema de gestión de avatar inicializado correctamente');
-    } else {
-        console.log('⚠️ No se encontraron elementos necesarios para el sistema de avatar');
-        console.log('Avatar container:', !!avatarContainer);
-        console.log('User avatar:', !!userAvatar);
-        console.log('Management modal:', !!managementModal);
-    }
-});
-
-// ===================================
-// DEBUG HELPER
-// ===================================
-
-// Para debugging en desarrollo
-window.debugAvatar = function() {
-    console.log('🔍 DEBUG Avatar System:');
-    console.log('- Current URL:', window.avatarManager?.currentAvatarUrl);
-    console.log('- User ID:', window.avatarManager?.currentUserId);
-    console.log('- CSRF Token:', window.avatarManager?.getCSRFToken());
-    console.log('- Modals:', {
-        management: !!document.getElementById('avatarManagementModal'),
-        viewer: !!document.getElementById('photoViewerModal'),
-        change: !!document.getElementById('photoChangeModal'),
-        camera: !!document.getElementById('cameraModal')
     });
-};
+
+    // ===================================
+    // DEBUG HELPER
+    // ===================================
+
+    // Para debugging en desarrollo
+    window.debugAvatar = function () {
+        console.log('🔍 DEBUG Avatar System:');
+        console.log('- Current URL:', window.avatarManager?.currentAvatarUrl);
+        console.log('- User ID:', window.avatarManager?.currentUserId);
+        console.log('- CSRF Token:', window.avatarManager?.getCSRFToken());
+        console.log('- Modals:', {
+            management: !!document.getElementById('avatarManagementModal'),
+            viewer: !!document.getElementById('photoViewerModal'),
+            change: !!document.getElementById('photoChangeModal'),
+            camera: !!document.getElementById('cameraModal')
+        });
+    };
 </script>
