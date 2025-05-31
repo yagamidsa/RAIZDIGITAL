@@ -218,8 +218,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .avatar-option-buttons {
     display: flex;
+    justify-content: center; /* Centrar cuando solo hay un botón */
     gap: 1rem;
     margin-bottom: 1rem;
+}
+
+/* Hacer el botón más grande cuando es único */
+.photo-source-btn:only-child,
+.avatar-option-btn:only-child {
+    max-width: 300px;
+    width: 100%;
 }
 
 .avatar-option-btn {
@@ -509,7 +517,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <div class="avatar-feedback" id="avatarFeedback"></div>
                 </div>
-                <input type="file" class="avatar-input" id="avatarInput" name="foto_perfil" accept="image/*">
+                <input type="file" class="avatar-input" id="avatarInput" name="foto_perfil" accept="image/*" capture="environment">
             </div>
 
             <!-- MENSAJES DE ERROR Y ÉXITO -->
@@ -688,14 +696,6 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="avatar-options-content">
         <h3 class="avatar-options-title">Seleccionar foto de perfil</h3>
         <div class="avatar-option-buttons">
-            <button class="avatar-option-btn" id="cameraOption">
-                <svg viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
-                    <circle cx="12" cy="12" r="3.2"/>
-                    <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
-                </svg>
-                <span>Tomar foto</span>
-            </button>
             <button class="avatar-option-btn" id="galleryOption">
                 <svg viewBox="0 0 24 24">
                     <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
@@ -746,11 +746,6 @@ class AvatarUploadSystem {
         this.avatarFeedback = document.getElementById('avatarFeedback');
         
         this.optionsModal = document.getElementById('avatarOptionsModal');
-        this.cameraModal = document.getElementById('cameraCaptureModal');
-        this.video = document.getElementById('cameraVideo');
-        this.canvas = document.getElementById('cameraCanvas');
-        
-        this.stream = null;
         this.init();
     }
     
@@ -759,13 +754,9 @@ class AvatarUploadSystem {
         this.avatarContainer.addEventListener('click', () => this.showOptions());
         
         // Options
-        document.getElementById('cameraOption').addEventListener('click', () => this.openCamera());
         document.getElementById('galleryOption').addEventListener('click', () => this.openGallery());
         document.getElementById('cancelAvatarOption').addEventListener('click', () => this.hideOptions());
         
-        // Camera controls
-        document.getElementById('capturePhoto').addEventListener('click', () => this.capturePhoto());
-        document.getElementById('cancelCapture').addEventListener('click', () => this.closeCamera());
         
         // File input change
         this.avatarInput.addEventListener('change', (e) => this.handleFileSelect(e));
@@ -775,9 +766,6 @@ class AvatarUploadSystem {
             if (e.target === this.optionsModal) this.hideOptions();
         });
         
-        this.cameraModal.addEventListener('click', (e) => {
-            if (e.target === this.cameraModal) this.closeCamera();
-        });
     }
     
     showOptions() {
@@ -792,56 +780,6 @@ class AvatarUploadSystem {
     openGallery() {
         this.hideOptions();
         this.avatarInput.click();
-    }
-    
-    async openCamera() {
-        this.hideOptions();
-        this.cameraModal.classList.add('show');
-        
-        try {
-            this.stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: 'user',
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                } 
-            });
-            this.video.srcObject = this.stream;
-            this.showFeedback('Camera ready');
-        } catch (err) {
-            console.error('Error accessing camera:', err);
-            this.showFeedback('Camera access denied', 'error');
-            this.closeCamera();
-        }
-    }
-    
-    closeCamera() {
-        if (this.stream) {
-            this.stream.getTracks().forEach(track => track.stop());
-            this.stream = null;
-        }
-        this.video.srcObject = null;
-        this.cameraModal.classList.remove('show');
-    }
-    
-    capturePhoto() {
-        const context = this.canvas.getContext('2d');
-        this.canvas.width = this.video.videoWidth;
-        this.canvas.height = this.video.videoHeight;
-        context.drawImage(this.video, 0, 0);
-        
-        // Convert to blob
-        this.canvas.toBlob((blob) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                this.displayAvatar(reader.result);
-                this.avatarBase64.value = reader.result;
-                this.showFeedback('Photo captured successfully');
-            };
-            reader.readAsDataURL(blob);
-        }, 'image/jpeg', 0.9);
-        
-        this.closeCamera();
     }
     
     handleFileSelect(event) {
