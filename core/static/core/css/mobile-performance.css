@@ -1,95 +1,122 @@
-:root {
+/* ===================================
+   🚀 MOBILE PERFORMANCE CSS COMPLETO - SCROLL CORREGIDO
+   =================================== */
+
+   :root {
     --neon-green: #00ff9d;
     --cyber-blue: #00f6ff;
     --dark-matter: #0a192f;
     --dark-blue: #041222;
     --dark-green: #051f17;
+    --darker-bg: #061220;
+    --darkest-bg: #030a15;
 }
 
-/* ==================================================
-   🚀 OPTIMIZACIONES MÓVIL CONSERVADORAS - CORREGIDO
-   ================================================== */
+/* ===================================
+   🔧 RESET BÁSICO OPTIMIZADO
+   =================================== */
 
-/* 1. RESET BÁSICO - Sin cambios agresivos */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* 2. HTML Y BODY - SIN FORZAR ANCHO/ALTO */
+/* ===================================
+   🔧 HTML Y BODY - SCROLL FORZADO
+   =================================== */
+
 html {
-    height: 100%;
+    /* CRÍTICO: Scroll siempre habilitado */
+    height: auto !important;
+    min-height: 100% !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
 }
 
 body {
     background: linear-gradient(135deg, var(--dark-blue) 0%, #061826 50%, var(--dark-green) 100%);
-    font-family: 'Arial', sans-serif;
-    min-height: 100vh;
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
     color: white;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeSpeed;
+    line-height: 1.6;
     
-    /* SOLO prevenir scroll horizontal cuando sea necesario */
-    overflow-x: hidden;
-    /* CORREGIDO: Asegurar scroll vertical */
-    overflow-y: auto;
+    /* CRÍTICO: Scroll siempre habilitado */
+    height: auto !important;
+    min-height: 100vh !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: none;
 }
 
-/* 3. CANVAS OPTIMIZADO - CORREGIDO */
+/* ===================================
+   🔧 ELEMENTOS DE FONDO OPTIMIZADOS
+   =================================== */
+
+/* Canvas y elementos de fondo - MANTENIDOS FIJOS */
 canvas {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw; /* CAMBIADO: usar vw en lugar de % */
-    height: 100vh; /* CAMBIADO: usar vh en lugar de % */
+    width: 100vw;
+    height: 100vh;
     z-index: 1;
     pointer-events: none;
 }
 
-/* 4. ELEMENTOS DE FONDO - CORREGIDO */
 .cyber-grid,
 .organic-shapes,
 .particles-container,
-.news-background {
+.news-background,
+.floating-elements {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw; /* CAMBIADO: usar vw en lugar de % */
-    height: 100vh; /* CAMBIADO: usar vh en lugar de % */
+    width: 100vw;
+    height: 100vh;
     pointer-events: none;
     z-index: 1;
 }
 
-/* 5. CONTENEDORES PRINCIPALES - CORREGIDO */
+/* ===================================
+   🔧 CONTENEDORES PRINCIPALES - SIN RESTRICCIONES
+   =================================== */
+
 .page-container,
 .news-container,
 .welcome-container {
     position: relative;
     z-index: 10;
     width: 100%;
-    min-height: 100vh;
-    /* CRÍTICO: Nunca fijar altura */
-    height: auto;
-    /* CRÍTICO: Sin restricciones */
-    max-height: none;
-    overflow: visible;
+    /* CRÍTICO: Sin restricciones de altura */
+    height: auto !important;
+    min-height: 100vh !important;
+    max-height: none !important;
+    /* CRÍTICO: Sin restricciones de overflow */
+    overflow: visible !important;
 }
 
-/* 6. CONTENT WRAPPER - CORREGIDO */
 .content-wrapper {
     position: relative;
     z-index: 10;
     width: 100%;
-    min-height: 100vh;
-    height: auto;
-    /* CORREGIDO: Sin padding-top por defecto */
+    /* CRÍTICO: Sin restricciones de altura */
+    height: auto !important;
+    min-height: 100vh !important;
+    max-height: none !important;
+    /* CRÍTICO: Sin restricciones de overflow */
+    overflow: visible !important;
     padding-top: 0;
 }
 
-/* 7. ESPACIADO DEL MENÚ - CORREGIDO */
+/* Espaciado para menú */
 .has-menu .content-wrapper {
     padding-top: 70px;
 }
@@ -98,178 +125,98 @@ canvas {
     padding-top: 0;
 }
 
-/* 8. OPTIMIZACIONES MÓVIL CONSERVADORAS - ACTUALIZADO */
-@media (max-width: 768px) {
-    /* ===================================
-       🎨 IMPORTANTE: MANTENER AVATARES Y ELEMENTOS DE USUARIO
-       =================================== */
-    
-    /* NO ocultar estos elementos importantes */
-    .user-info,
-    .user-avatar,
-    .welcome-avatar-container,
-    .welcome-avatar,
-    .avatar-status,
-    .welcome-user-name,
-    .welcome-community,
-    .welcome-section {
-        display: block !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-    
-    /* Desactivar SOLO elementos pesados de fondo */
-    .cyber-grid,
-    .organic-shapes,
-    .particles-container,
-    .floating-elements,
-    .energy-wave-epic,
-    .ambient-light-epic,
-    .organic-shape,
-    .floating-circle {
-        display: none;
-    }
-    
-    /* Canvas más ligero en móvil pero NO oculto */
-    canvas {
-        opacity: 0.3;
-    }
-    
-    /* Scroll optimizado SIN forzar dimensiones */
-    html, body {
-        -webkit-text-size-adjust: 100%;
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior: none;
-    }
-    
-    /* Espaciado móvil ajustado */
-    .has-menu .content-wrapper {
-        padding-top: 60px;
-    }
+/* ===================================
+   🔧 CONTENIDO PRINCIPAL
+   =================================== */
 
-    /* Prevenir zoom en inputs */
-    input, select, textarea {
-        font-size: 16px;
-    }
-
-    /* Transiciones más rápidas */
-    * {
-        transition-duration: 0.2s;
-    }
-
-    /* Hover simplificado en móvil */
-    .btn-start:hover,
-    .btn-login:hover,
-    .nav-link:hover,
-    .mobile-nav-link:hover {
-        opacity: 0.8;
-    }
-    
-    /* ===================================
-       🎨 AJUSTES ESPECÍFICOS PARA AVATARES EN MÓVIL
-       =================================== */
-    
-    /* User info badge en esquina */
-    .user-info {
-        position: fixed !important;
-        top: 10px !important;
-        left: 10px !important;
-        z-index: 1000 !important;
-        display: flex !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-    
-    /* Avatar principal en marketplace */
-    .welcome-avatar-container {
-        width: 140px !important;
-        height: 140px !important;
-        margin: 0 auto 1.5rem !important;
-        display: block !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-    
-    .welcome-avatar {
-        width: 100% !important;
-        height: 100% !important;
-        display: flex !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-    
-    .welcome-avatar img,
-    .user-avatar img {
-        display: block !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-    
-    /* Mantener animaciones suaves para avatares */
-    .welcome-avatar-container,
-    .user-avatar {
-        transition: transform 0.3s ease !important;
-    }
-}
-
-/* 9. DISPOSITIVOS MUY LENTOS - ACTUALIZADO */
-@media (max-width: 480px) {
-    /* Canvas oculto completamente PERO mantener avatares */
-    canvas {
-        display: none;
-    }
-    
-    /* Background sólido para ahorrar recursos */
-    body {
-        background: #041222;
-    }
-    
-    /* MANTENER AVATARES VISIBLES */
-    .user-info,
-    .user-avatar,
-    .welcome-avatar-container,
-    .welcome-avatar {
-        display: block !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-    
-    /* Avatar más pequeño pero visible */
-    .welcome-avatar-container {
-        width: 120px !important;
-        height: 120px !important;
-    }
-}
-
-/* 10. SCROLLBAR LIGERA */
-::-webkit-scrollbar {
-    width: 6px;
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background: rgba(0, 255, 157, 0.3);
-    border-radius: 3px;
-}
-
-/* 11. CONTENEDORES RESPONSIVE - CORREGIDOS */
-.news-content,
-.main-content {
+.main-content,
+.news-content {
     position: relative;
     z-index: 10;
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 20px;
     /* CRÍTICO: Sin restricciones de altura */
-    height: auto;
-    min-height: auto;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    /* CRÍTICO: Sin restricciones de overflow */
+    overflow: visible !important;
+}
+
+/* ===================================
+   🔧 FORMULARIOS Y CONTENEDORES ESPECÍFICOS
+   =================================== */
+
+.register-container,
+.login-container,
+.recovery-container {
+    position: relative;
+    z-index: 10;
+    max-width: 450px;
+    margin: 0 auto;
+    padding: 2rem;
+    /* CRÍTICO: Sin restricciones de altura */
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    /* CRÍTICO: Sin centrado vertical problemático */
+    top: auto !important;
+    transform: none !important;
+    overflow: visible !important;
+}
+
+.create-news-container,
+.article-container {
+    position: relative;
+    z-index: 10;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    /* CRÍTICO: Sin restricciones de altura */
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    top: auto !important;
+    transform: none !important;
+    overflow: visible !important;
+}
+
+/* ===================================
+   🔧 NEWS GRID Y FEATURED ARTICLES
+   =================================== */
+
+.news-grid {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 24px;
+    padding: 0 20px;
+    /* CRÍTICO: Sin restricciones */
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
 }
 
 .featured-article {
     position: relative;
     z-index: 10;
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto 30px auto;
+    padding: 0 20px;
+    /* CRÍTICO: Sin restricciones */
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
 }
 
 .news-section-header {
@@ -280,113 +227,10 @@ canvas {
     padding: 30px 24px 60px 24px;
 }
 
-/* CONTENEDORES DE FORMULARIOS - CORREGIDOS */
-.create-news-container,
-.login-container,
-.recovery-container,
-.register-container {
-    position: relative;
-    z-index: 10;
-    max-width: 450px;
-    margin: 0 auto;
-    padding: 2rem;
-    /* CRÍTICO: Sin restricciones de altura */
-    height: auto;
-    min-height: auto;
-    /* CRÍTICO: Sin centrado vertical problemático */
-    top: auto;
-    transform: none;
-}
+/* ===================================
+   🔧 FORZAR VISIBILIDAD INMEDIATA
+   =================================== */
 
-.create-news-container {
-    max-width: 900px;
-}
-
-.article-container {
-    position: relative;
-    z-index: 10;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 30px 20px;
-    /* CRÍTICO: Sin restricciones de altura */
-    height: auto;
-    min-height: auto;
-    top: auto;
-    transform: none;
-}
-
-/* 12. MÓVIL RESPONSIVE - PADDING CONSERVADOR */
-@media (max-width: 768px) {
-    .news-content,
-    .main-content {
-        padding: 0 16px;
-    }
-    
-    .news-section-header {
-        padding: 20px 16px 40px 16px;
-    }
-    
-    .create-news-container,
-    .login-container,
-    .recovery-container,
-    .register-container {
-        padding: 1.5rem 15px;
-        margin: 20px auto;
-        max-width: calc(100% - 30px);
-        width: 100%;
-    }
-    
-    .article-container {
-        margin: 20px auto;
-        padding: 15px;
-        max-width: calc(100% - 30px);
-    }
-    
-    /* CORRECCIÓN CRÍTICA PARA PÁGINAS CON FORMULARIOS */
-    .page-container {
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
-        min-height: 100vh;
-        padding-top: 20px;
-    }
-}
-
-/* 13. TOUCH OPTIMIZATIONS */
-@media (pointer: coarse) {
-    button, a {
-        min-height: 44px;
-        min-width: 44px;
-    }
-}
-
-/* 14. MENÚ MÓVIL */
-.mobile-menu-content {
-    max-height: 85vh;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-/* 15. IMÁGENES RESPONSIVE */
-img, video {
-    max-width: 100%;
-    height: auto;
-}
-
-/* 16. CORRECCIONES ESPECÍFICAS PARA EVITAR SALTOS */
-
-/* BACK BUTTON - POSICIONAMIENTO CORREGIDO */
-.back-button {
-    position: relative;
-    z-index: 100;
-    display: inline-flex;
-    margin: 10px 0 20px 0;
-    /* CRÍTICO: No usar position absolute */
-}
-
-/* FORZAR VISIBILIDAD INMEDIATA DE CONTENEDORES */
 .register-content,
 .login-content,
 .recovery-content,
@@ -400,7 +244,7 @@ img, video {
     transform: none !important;
 }
 
-/* ELIMINAR TRANSICIONES PROBLEMÁTICAS EN CARGA */
+/* Eliminar transiciones problemáticas en carga */
 .register-container,
 .login-container,
 .recovery-container,
@@ -410,112 +254,18 @@ img, video {
     animation: none !important;
 }
 
-/* PREVENIR CONFLICTOS CON LIBRERÍAS DE ANIMACIÓN */
-[data-aos] {
-    transform: none !important;
-    opacity: 1 !important;
-}
-
-.gsap-element {
-    transform: none !important;
-}
-
-/* 17. CORRECCIONES PARA CENTRADO VERTICAL PROBLEMÁTICO */
-@media (max-width: 768px) {
-    /* Eliminar centrado vertical que causa problemas en móvil */
-    .register-container,
-    .login-container,
-    .recovery-container {
-        position: static !important;
-        top: auto !important;
-        transform: none !important;
-        margin-top: 20px !important;
-        margin-bottom: 20px !important;
-    }
-}
-
-/* 18. PERFORMANCE DEBUG (temporal) */
-@media (max-width: 768px) {
-    .debug-mobile-performance {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        background: rgba(0, 255, 157, 0.8);
-        color: black;
-        padding: 4px 8px;
-        font-size: 10px;
-        z-index: 10000;
-        border-radius: 3px;
-        font-weight: bold;
-    }
-}
-
-/* 19. VIEWPORT META FIXES PARA MÓVIL */
-@media screen and (max-width: 768px) {
-    /* Prevenir zoom en inputs */
-    input, select, textarea {
-        font-size: 16px !important;
-        transform-origin: left top !important;
-    }
-    
-    /* Asegurar scroll suave */
-    html {
-        -webkit-text-size-adjust: 100% !important;
-        -webkit-overflow-scrolling: touch !important;
-    }
-    
-    body {
-        -webkit-overflow-scrolling: touch !important;
-        overscroll-behavior: none !important;
-    }
-}
-
-/* 20. CORRECCIÓN FINAL PARA ELEMENTOS PRINCIPALES */
-.welcome-container .main-content {
-    position: relative;
-    z-index: 10;
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    height: auto;
-    min-height: auto;
-}
-
-/* MARKETPLACE ESPECÍFICO */
-.marketplace-container {
-    position: relative;
-    z-index: 10;
-    width: 100%;
-    min-height: 100vh;
-    height: auto;
-    padding: 20px;
-}
-
-/* NEWS GRID CORREGIDO */
-.news-grid {
-    position: relative;
-    z-index: 10;
-    display: grid;
-    gap: 24px;
-    margin-top: 20px;
-}
-
-/* 21. ÚLTIMO RECURSO - FORZAR POSICIONAMIENTO CORRECTO */
-.page-container > *,
-.news-container > *,
-.welcome-container > * {
-    position: relative;
-    z-index: 10;
-}
-
 /* ===================================
-   🎨 REGLAS ESPECÍFICAS PARA AVATARES - MÁXIMA PRIORIDAD
+   🎨 MANTENER AVATARES Y ELEMENTOS DE USUARIO
    =================================== */
+
+/* CRÍTICO: Mantener avatares siempre visibles */
 .user-info,
 .user-avatar,
 .welcome-avatar-container,
 .welcome-avatar,
+.avatar-status,
+.welcome-user-name,
+.welcome-community,
 .welcome-section {
     display: block !important;
     opacity: 1 !important;
@@ -532,27 +282,8 @@ img, video {
     object-fit: cover !important;
 }
 
-
-
-
-
-
-/* 3. AGREGAR AL FINAL DE mobile-performance.css */
-
 /* ===================================
-   🎨 CORRECCIÓN CRÍTICA USER-INFO AVATAR
-   =================================== */
-
-/* ELIMINAR EL BORDE DE DEBUG ROJO */
-.user-avatar::after {
-    /* REMOVER COMPLETAMENTE ESTE DEBUG */
-    display: none !important;
-    content: none !important;
-    border: none !important;
-}
-
-/* ===================================
-   🎨 USER-INFO RESPONSIVE MEJORADO
+   🎨 USER-INFO SISTEMA COMPLETO
    =================================== */
 
 /* User info component base */
@@ -597,7 +328,6 @@ img, video {
     overflow: hidden !important;
     flex-shrink: 0 !important;
     transition: all 0.3s ease !important;
-    /* IMPORTANTE: SIN BORDES DE DEBUG */
     position: relative !important;
 }
 
@@ -639,34 +369,211 @@ img, video {
 }
 
 /* ===================================
-   🎨 RESPONSIVE MÓVIL OPTIMIZADO
+   🎨 WELCOME AVATAR SISTEMA
    =================================== */
 
-/* Tablet */
-@media (max-width: 1024px) {
-    .user-info {
-        top: 12px !important;
-        left: 12px !important;
-        padding: 6px 12px !important;
-    }
-    
-    .user-avatar {
-        width: 34px !important;
-        height: 34px !important;
-    }
-    
-    .user-avatar svg {
-        width: 18px !important;
-        height: 18px !important;
-    }
-    
-    .user-name {
-        font-size: 0.85rem !important;
-    }
+.welcome-section {
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+    z-index: 10;
 }
 
-/* Móvil Grande */
+.welcome-avatar-container {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    margin: 0 auto 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.welcome-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(0, 255, 157, 0.1) 0%, rgba(0, 246, 255, 0.05) 100%);
+    border: 4px solid rgba(0, 255, 157, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 
+        0 0 30px rgba(0, 255, 157, 0.3),
+        inset 0 0 30px rgba(0, 255, 157, 0.05);
+    transition: all 0.3s ease;
+}
+
+.welcome-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.welcome-avatar svg {
+    width: 80px;
+    height: 80px;
+    fill: rgba(0, 255, 157, 0.8);
+    filter: drop-shadow(0 0 10px rgba(0, 255, 157, 0.5));
+}
+
+/* Status indicator */
+.avatar-status {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    width: 24px;
+    height: 24px;
+    background: var(--neon-green);
+    border-radius: 50%;
+    border: 3px solid var(--dark-matter);
+    box-shadow: 0 0 10px rgba(0, 255, 157, 0.8);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.welcome-user-name {
+    font-size: 2rem;
+    color: var(--neon-green);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    text-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+    letter-spacing: 1px;
+}
+
+.welcome-community {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 0.5rem;
+}
+
+/* ===================================
+   📱 OPTIMIZACIONES MÓVIL ESPECÍFICAS
+   =================================== */
+
 @media (max-width: 768px) {
+    /* ===================================
+       🔧 FORZAR SCROLL EN MÓVIL
+       =================================== */
+    
+    html, body {
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        height: auto !important;
+        min-height: 100% !important;
+        max-height: none !important;
+        -webkit-text-size-adjust: 100% !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior: none !important;
+    }
+    
+    /* ===================================
+       🔧 CONTENEDORES PRINCIPALES MÓVIL
+       =================================== */
+    
+    .page-container,
+    .news-container,
+    .welcome-container,
+    .content-wrapper {
+        /* CRÍTICO: Sin restricciones de altura */
+        height: auto !important;
+        min-height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+    
+    .page-container {
+        padding: 10px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
+        min-height: 100vh !important;
+        padding-top: 20px !important;
+    }
+    
+    /* ===================================
+       🔧 ESPACIADO MENÚ MÓVIL
+       =================================== */
+    
+    .has-menu .content-wrapper {
+        padding-top: 60px !important;
+    }
+    
+    /* ===================================
+       🔧 CONTENIDO PRINCIPAL MÓVIL
+       =================================== */
+    
+    .news-content,
+    .main-content {
+        padding: 0 16px !important;
+        margin-top: 0 !important;
+        /* CRÍTICO: Sin restricciones */
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+    
+    .news-section-header {
+        padding: 20px 16px 40px 16px !important;
+    }
+    
+    /* ===================================
+       🔧 FORMULARIOS MÓVIL
+       =================================== */
+    
+    .register-container,
+    .login-container,
+    .recovery-container {
+        position: static !important;
+        top: auto !important;
+        transform: none !important;
+        padding: 1.5rem 15px !important;
+        margin: 20px auto !important;
+        max-width: calc(100% - 30px) !important;
+        width: 100% !important;
+        /* CRÍTICO: Sin restricciones */
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+    
+    .create-news-container,
+    .article-container {
+        margin: 20px auto !important;
+        padding: 15px !important;
+        max-width: calc(100% - 30px) !important;
+        /* CRÍTICO: Sin restricciones */
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+    
+    /* ===================================
+       🔧 NEWS GRID MÓVIL
+       =================================== */
+    
+    .news-grid {
+        grid-template-columns: 1fr !important;
+        padding: 0 15px !important;
+        gap: 20px !important;
+    }
+    
+    .featured-article {
+        padding: 0 15px !important;
+        margin: 0 auto 20px auto !important;
+    }
+    
+    /* ===================================
+       🎨 AVATARES MÓVIL
+       =================================== */
+    
+    /* User info responsive */
     .user-info {
         top: 10px !important;
         left: 10px !important;
@@ -689,16 +596,116 @@ img, video {
     .user-name {
         font-size: 0.8rem !important;
     }
+    
+    /* Welcome avatar móvil */
+    .welcome-avatar-container {
+        width: 140px !important;
+        height: 140px !important;
+    }
+    
+    .welcome-avatar svg {
+        width: 60px !important;
+        height: 60px !important;
+    }
+    
+    .welcome-user-name {
+        font-size: 1.5rem !important;
+    }
+    
+    .welcome-community {
+        font-size: 1rem !important;
+    }
+    
+    .avatar-status {
+        width: 20px !important;
+        height: 20px !important;
+        bottom: 10px !important;
+        right: 10px !important;
+    }
+    
+    /* ===================================
+       🔧 ELEMENTOS DE FONDO MÓVIL
+       =================================== */
+    
+    /* Desactivar elementos pesados pero mantener avatares */
+    .cyber-grid,
+    .organic-shapes .organic-shape,
+    .particles-container,
+    .floating-elements,
+    .energy-wave-epic,
+    .ambient-light-epic {
+        display: none !important;
+    }
+    
+    /* Canvas más ligero */
+    canvas {
+        opacity: 0.3 !important;
+    }
+    
+    /* ===================================
+       🔧 NAVEGACIÓN MÓVIL
+       =================================== */
+    
+    .mobile-menu-toggle {
+        display: flex !important;
+        z-index: 1001 !important;
+    }
+    
+    .desktop-nav {
+        display: none !important;
+    }
+    
+    /* ===================================
+       🔧 OPTIMIZACIONES TÁCTILES
+       =================================== */
+    
+    /* Prevenir zoom en inputs */
+    input, select, textarea {
+        font-size: 16px !important;
+        transform-origin: left top !important;
+    }
+    
+    /* Transiciones más rápidas */
+    * {
+        transition-duration: 0.2s !important;
+    }
+    
+    /* Hover simplificado */
+    .btn-start:hover,
+    .btn-login:hover,
+    .nav-link:hover,
+    .mobile-nav-link:hover {
+        opacity: 0.8 !important;
+    }
+    
+    /* Scroll suave en formularios */
+    .form-input:focus {
+        scroll-margin-top: 100px;
+    }
 }
 
-/* Móvil Mediano */
+/* ===================================
+   📱 MÓVIL MEDIANO
+   =================================== */
+
 @media (max-width: 480px) {
+    /* Canvas oculto completamente */
+    canvas {
+        display: none !important;
+    }
+    
+    /* Background sólido para performance */
+    body {
+        background: var(--dark-blue) !important;
+    }
+    
+    /* User info más pequeño */
     .user-info {
         top: 8px !important;
         left: 8px !important;
         padding: 5px 8px !important;
         gap: 6px !important;
-        max-width: calc(100vw - 120px) !important; /* Evitar overflow */
+        max-width: calc(100vw - 120px) !important;
     }
     
     .user-avatar {
@@ -718,9 +725,31 @@ img, video {
         overflow: hidden !important;
         text-overflow: ellipsis !important;
     }
+    
+    /* Welcome avatar más pequeño */
+    .welcome-avatar-container {
+        width: 120px !important;
+        height: 120px !important;
+    }
+    
+    .welcome-avatar {
+        border-width: 3px !important;
+    }
+    
+    .welcome-avatar svg {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    
+    .welcome-user-name {
+        font-size: 1.3rem !important;
+    }
 }
 
-/* Móvil Pequeño */
+/* ===================================
+   📱 MÓVIL PEQUEÑO
+   =================================== */
+
 @media (max-width: 360px) {
     .user-info {
         top: 5px !important;
@@ -747,10 +776,81 @@ img, video {
 }
 
 /* ===================================
-   🎨 ESTADOS ESPECIALES
+   🔧 SCROLLBAR PERSONALIZADA
    =================================== */
 
-/* Cuando el usuario está activo */
+::-webkit-scrollbar {
+    width: 6px;
+    background: transparent;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 157, 0.3);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 157, 0.5);
+}
+
+/* ===================================
+   🔧 TOUCH OPTIMIZATIONS
+   =================================== */
+
+@media (pointer: coarse) {
+    html, body {
+        -webkit-overflow-scrolling: touch !important;
+        scroll-behavior: smooth !important;
+    }
+    
+    button, a {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* ===================================
+   🔧 MENÚ MÓVIL CONTENT
+   =================================== */
+
+.mobile-menu-content {
+    max-height: 85vh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+/* ===================================
+   🔧 IMÁGENES RESPONSIVE
+   =================================== */
+
+img, video {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ===================================
+   🔧 PREVENIR CONFLICTOS CON LIBRERÍAS
+   =================================== */
+
+/* Eliminar animaciones problemáticas de AOS/GSAP */
+[data-aos] {
+    transform: none !important;
+    opacity: 1 !important;
+}
+
+.gsap-element {
+    transform: none !important;
+}
+
+/* ===================================
+   🔧 ESTADOS ESPECIALES
+   =================================== */
+
+/* Usuario activo */
 .user-info.active {
     border-color: var(--neon-green) !important;
     box-shadow: 0 4px 20px rgba(0, 255, 157, 0.4) !important;
@@ -777,10 +877,9 @@ img, video {
 }
 
 /* ===================================
-   🎨 MODO OSCURO Y CONTRASTE
+   🔧 MODO OSCURO Y CONTRASTE
    =================================== */
 
-/* Mejorar contraste en pantallas OLED */
 @media (prefers-contrast: high) {
     .user-info {
         background: rgba(0, 0, 0, 0.9) !important;
@@ -793,69 +892,30 @@ img, video {
     }
 }
 
-/* Reducir movimiento para usuarios sensibles */
+/* ===================================
+   🔧 REDUCED MOTION
+   =================================== */
+
 @media (prefers-reduced-motion: reduce) {
     .user-info,
-    .user-avatar {
+    .user-avatar,
+    .welcome-avatar-container {
         transition: none !important;
         animation: none !important;
     }
     
-    .user-info:hover {
-        transform: none !important;
-    }
-    
+    .user-info:hover,
     .user-avatar:hover {
         transform: none !important;
     }
-}
-
-/* ===================================
-   🎨 ASEGURAR VISIBILIDAD MÁXIMA
-   =================================== */
-
-/* Forzar visibilidad en todos los breakpoints */
-.user-info,
-.user-avatar,
-.user-avatar img,
-.user-name {
-    display: block !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
-}
-
-.user-info {
-    display: flex !important;
-}
-
-/* Evitar que otros elementos lo oculten */
-.user-info {
-    z-index: 1001 !important;
-    position: fixed !important;
-}
-
-/* ===================================
-   🎨 FALLBACKS PARA NAVEGADORES VIEJOS
-   =================================== */
-
-/* Fallback para navegadores sin backdrop-filter */
-@supports not (backdrop-filter: blur(15px)) {
-    .user-info {
-        background: rgba(10, 25, 47, 0.95) !important;
+    
+    .avatar-status {
+        animation: none !important;
     }
 }
 
-/* Fallback para navegadores sin CSS Grid */
-.user-info {
-    display: -webkit-flex !important;
-    display: flex !important;
-    -webkit-align-items: center !important;
-    align-items: center !important;
-}
-
 /* ===================================
-   🎨 ORIENTACIÓN LANDSCAPE EN MÓVIL
+   🔧 ORIENTACIÓN LANDSCAPE MÓVIL
    =================================== */
 
 @media (max-width: 768px) and (orientation: landscape) {
@@ -873,5 +933,463 @@ img, video {
     
     .user-name {
         font-size: 0.75rem !important;
+    }
+}
+
+/* ===================================
+   🔧 DEBUG HELPER (TEMPORAL)
+   =================================== */
+
+@media (max-width: 768px) {
+    .debug-mobile-performance {
+        position: fixed !important;
+        top: 50% !important;
+        right: 10px !important;
+        background: rgba(0, 255, 157, 0.9) !important;
+        color: black !important;
+        padding: 4px 8px !important;
+        font-size: 10px !important;
+        z-index: 9999 !important;
+        border-radius: 3px !important;
+        font-weight: bold !important;
+        pointer-events: none !important;
+    }
+}
+
+/* ===================================
+   🔧 FALLBACKS PARA NAVEGADORES VIEJOS
+   =================================== */
+
+@supports not (backdrop-filter: blur(15px)) {
+    .user-info {
+        background: rgba(10, 25, 47, 0.95) !important;
+    }
+}
+
+.user-info {
+    display: -webkit-flex !important;
+    display: flex !important;
+    -webkit-align-items: center !important;
+    align-items: center !important;
+}
+
+/* ===================================
+   🔧 ASEGURAR VISIBILIDAD MÁXIMA
+   =================================== */
+
+.user-info,
+.user-avatar,
+.user-avatar img,
+.user-name,
+.welcome-avatar-container,
+.welcome-avatar,
+.welcome-section {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+.user-info {
+    display: flex !important;
+}
+
+/* Evitar que otros elementos lo oculten */
+.user-info {
+    z-index: 1001 !important;
+    position: fixed !important;
+}
+
+/* ===================================
+   🔧 ÚLTIMO RECURSO - FORZAR SCROLL
+   =================================== */
+
+/* Si todo lo demás falla */
+html {
+    overflow-y: auto !important;
+    height: auto !important;
+}
+
+body {
+    overflow-y: auto !important;
+    height: auto !important;
+    min-height: 100vh !important;
+}
+
+.page-container,
+.news-container,
+.welcome-container,
+.content-wrapper {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+}
+
+/* ===================================
+   🔧 MARKETPLACE ESPECÍFICO
+   =================================== */
+
+.marketplace-container {
+    position: relative !important;
+    z-index: 10 !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    height: auto !important;
+    padding: 20px !important;
+    overflow: visible !important;
+}
+
+.welcome-container .main-content {
+    position: relative !important;
+    z-index: 10 !important;
+    width: 100% !important;
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 20px !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+}
+
+/* ===================================
+   🔧 CARDS CONTAINER - SCROLL ENABLED
+   =================================== */
+
+.cards-container {
+    position: relative !important;
+    z-index: 10 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin-bottom: 50px !important;
+    padding-bottom: 50px !important;
+}
+
+.cards-container.show-cards {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 2rem !important;
+    padding: 2rem 0 !important;
+}
+
+/* ===================================
+   🔧 NEON CARDS - NO HEIGHT RESTRICTIONS
+   =================================== */
+
+.neon-card {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 350px !important;
+    height: auto !important;
+    min-height: 350px !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin-bottom: 20px !important;
+}
+
+/* ===================================
+   🔧 BTN-START - ALWAYS VISIBLE
+   =================================== */
+
+.btn-start {
+    position: relative !important;
+    z-index: 9999 !important;
+    pointer-events: auto !important;
+    display: inline-block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* ===================================
+   🔧 BACK BUTTON - PROPER POSITIONING
+   =================================== */
+
+.back-button {
+    position: relative !important;
+    z-index: 100 !important;
+    display: inline-flex !important;
+    margin: 10px 0 20px 0 !important;
+    /* CRÍTICO: No usar position absolute */
+    top: auto !important;
+    left: auto !important;
+}
+
+/* ===================================
+   🔧 WELCOME TITLE - NO RESTRICTIONS
+   =================================== */
+
+.welcome-title {
+    position: relative !important;
+    z-index: 10 !important;
+    text-align: center !important;
+    margin-bottom: 2rem !important;
+}
+
+.welcome-subtitle {
+    position: relative !important;
+    z-index: 10 !important;
+    text-align: center !important;
+    margin-bottom: 3rem !important;
+}
+
+/* ===================================
+   🔧 FORM GROUPS - AUTO HEIGHT
+   =================================== */
+
+.form-group {
+    margin-bottom: 1.5rem !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 44px !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+.form-textarea {
+    min-height: 100px !important;
+    resize: vertical !important;
+}
+
+/* ===================================
+   🔧 MODAL SYSTEMS - SCROLL INSIDE
+   =================================== */
+
+.modal-container,
+.modal-content {
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+/* ===================================
+   🔧 REGISTRO Y LOGIN - SPECIFIC FIXES
+   =================================== */
+
+.register-form,
+.login-form,
+.recovery-form {
+    width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* ===================================
+   🔧 NEWS SPECIFIC - NO HEIGHT LIMITS
+   =================================== */
+
+.news-content,
+.news-main {
+    position: relative !important;
+    z-index: 10 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-bottom: 100px !important;
+}
+
+.news-grid,
+.related-articles {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* ===================================
+   🔧 ARTICLE DETAIL - SCROLL ENABLED
+   =================================== */
+
+.article-content {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-bottom: 50px !important;
+}
+
+/* ===================================
+   🔧 PAGINATION - PROPER SPACING
+   =================================== */
+
+.news-pagination {
+    position: relative !important;
+    z-index: 10 !important;
+    margin: 50px 0 100px 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+/* ===================================
+   🔧 EMERGENCY MOBILE FIXES
+   =================================== */
+
+@media (max-width: 768px) {
+    /* FORZAR CONTENIDO MÍNIMO PARA SCROLL */
+    .main-content,
+    .news-content {
+        min-height: 150vh !important;
+        padding-bottom: 200px !important;
+    }
+    
+    /* CARDS EN MÓVIL */
+    .cards-container.show-cards {
+        flex-direction: column !important;
+        align-items: center !important;
+        padding: 1rem 0 3rem 0 !important;
+    }
+    
+    .card-link {
+        max-width: 100% !important;
+        margin-bottom: 30px !important;
+    }
+    
+    .neon-card {
+        min-height: 300px !important;
+        margin-bottom: 20px !important;
+        width: calc(100% - 40px) !important;
+    }
+    
+    /* WELCOME SECTION MÓVIL */
+    .welcome-section {
+        margin-bottom: 2rem !important;
+        padding: 1rem 0 !important;
+    }
+    
+    /* BTN START MÓVIL */
+    .btn-start {
+        margin: 2rem 0 3rem 0 !important;
+        position: relative !important;
+        z-index: 9999 !important;
+    }
+    
+    /* FORMULARIOS MÓVIL */
+    .register-container,
+    .login-container {
+        min-height: 100vh !important;
+        padding: 2rem 1rem 3rem 1rem !important;
+    }
+}
+
+/* ===================================
+   🔧 FINAL OVERRIDES - CRITICAL
+   =================================== */
+
+/* FORZAR TODO VISIBLE */
+* {
+    max-height: none !important;
+}
+
+/* CONTENEDORES CRÍTICOS */
+.page-container,
+.news-container,
+.welcome-container,
+.content-wrapper,
+.main-content,
+.news-content {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* FORMULARIOS CRÍTICOS */
+.register-container,
+.login-container,
+.recovery-container,
+.create-news-container,
+.article-container {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    position: relative !important;
+    top: auto !important;
+    transform: none !important;
+}
+
+/* HTML Y BODY FINAL */
+html, body {
+    height: auto !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+/* ===================================
+   🎯 SUCCESS INDICATOR
+   =================================== */
+
+/* Indicador visual de que el CSS está cargado */
+.mobile-performance-loaded::before {
+    content: "Mobile Performance CSS Loaded ✅";
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0, 255, 157, 0.9);
+    color: black;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 10000;
+    pointer-events: none;
+    animation: fadeOut 3s forwards;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* Aplicar indicador al body */
+body {
+    position: relative;
+}
+
+body::after {
+    content: "📱 Mobile Scroll: ENABLED";
+    position: fixed;
+    top: 50%;
+    right: 10px;
+    background: rgba(0, 255, 157, 0.9);
+    color: black;
+    padding: 5px 8px;
+    border-radius: 15px;
+    font-size: 10px;
+    font-weight: bold;
+    z-index: 9999;
+    pointer-events: none;
+    transform: translateY(-50%);
+    animation: mobileIndicator 5s forwards;
+}
+
+@keyframes mobileIndicator {
+    0% { opacity: 1; transform: translateY(-50%) translateX(0); }
+    80% { opacity: 1; transform: translateY(-50%) translateX(0); }
+    100% { opacity: 0; transform: translateY(-50%) translateX(20px); }
+}
+
+@media (min-width: 769px) {
+    body::after {
+        display: none;
     }
 }
