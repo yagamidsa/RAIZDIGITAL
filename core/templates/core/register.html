@@ -6,22 +6,22 @@
 {% if success %}
 {% include 'core/includes/success_modal.html' %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const userData = {
-        username: '{{ form_data.username|default:"" }}',
-        email: '{{ form_data.email|default:"" }}'
-    };
-    
-    // Mostrar el modal automáticamente
-    if (window.showEpicSuccessModal) {
-        window.showEpicSuccessModal({
-            title: "¡REGISTRO EXITOSO!",
-            subtitle: "Bienvenido a Raíz Digital",
-            message: "Tu cuenta ha sido creada exitosamente para " + userData.username + ".",
-            verificationText: "Hemos enviado un enlace de verificación a " + userData.email + ". Por favor revisa tu bandeja de entrada."
-        });
-    }
-});
+    document.addEventListener('DOMContentLoaded', function () {
+        const userData = {
+            username: '{{ form_data.username|default:"" }}',
+            email: '{{ form_data.email|default:"" }}'
+        };
+
+        // Mostrar el modal automáticamente
+        if (window.showEpicSuccessModal) {
+            window.showEpicSuccessModal({
+                title: "¡REGISTRO EXITOSO!",
+                subtitle: "Bienvenido a Raíz Digital",
+                message: "Tu cuenta ha sido creada exitosamente para " + userData.username + ".",
+                verificationText: "Hemos enviado un enlace de verificación a " + userData.email + ". Por favor revisa tu bandeja de entrada."
+            });
+        }
+    });
 </script>
 {% endif %}
 
@@ -37,428 +37,434 @@ document.addEventListener('DOMContentLoaded', function() {
 <link rel="stylesheet" href="{% static 'core/css/register.css' %}?v=3">
 
 <style>
-/* ===================================
+    /* ===================================
    🎨 AVATAR UPLOAD SYSTEM - LINUX STYLE
    =================================== */
-   
-.avatar-upload-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 2rem 0;
-    position: relative;
-}
 
-.avatar-container {
-    position: relative;
-    width: 150px;
-    height: 150px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.avatar-preview {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: linear-gradient(135deg, rgba(0, 255, 157, 0.1) 0%, rgba(0, 246, 255, 0.05) 100%);
-    border: 3px solid rgba(0, 255, 157, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    position: relative;
-    transition: all 0.3s ease;
-    box-shadow: 
-        0 0 20px rgba(0, 255, 157, 0.2),
-        inset 0 0 20px rgba(0, 255, 157, 0.05);
-}
-
-.avatar-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: none;
-}
-
-.avatar-preview.has-image img {
-    display: block;
-}
-
-.avatar-placeholder {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: rgba(0, 255, 157, 0.8);
-    transition: all 0.3s ease;
-}
-
-.avatar-preview.has-image .avatar-placeholder {
-    opacity: 0;
-    visibility: hidden;
-}
-
-.avatar-icon {
-    width: 50px;
-    height: 50px;
-    margin-bottom: 10px;
-    fill: currentColor;
-    filter: drop-shadow(0 0 5px rgba(0, 255, 157, 0.5));
-}
-
-.avatar-text {
-    font-size: 0.75rem;
-    text-align: center;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    opacity: 0.8;
-}
-
-/* Plus sign overlay */
-.avatar-plus {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    width: 40px;
-    height: 40px;
-    background: var(--neon-green);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(0, 255, 157, 0.4);
-    transition: all 0.3s ease;
-    z-index: 2;
-}
-
-.avatar-plus svg {
-    width: 24px;
-    height: 24px;
-    fill: var(--dark-matter);
-}
-
-/* Hover effects */
-.avatar-container:hover .avatar-preview {
-    border-color: var(--neon-green);
-    box-shadow: 
-        0 0 30px rgba(0, 255, 157, 0.4),
-        inset 0 0 30px rgba(0, 255, 157, 0.1);
-    transform: scale(1.05);
-}
-
-.avatar-container:hover .avatar-plus {
-    background: var(--cyber-blue);
-    transform: rotate(90deg) scale(1.1);
-    box-shadow: 0 4px 20px rgba(0, 246, 255, 0.6);
-}
-
-.avatar-container:hover .avatar-placeholder {
-    color: var(--neon-green);
-}
-
-/* Active/Focus state */
-.avatar-container:active .avatar-preview {
-    transform: scale(0.98);
-}
-
-/* Hidden file input */
-.avatar-input {
-    display: none;
-}
-
-/* Camera/Gallery options modal */
-.avatar-options-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(10px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.avatar-options-modal.show {
-    display: flex;
-    opacity: 1;
-}
-
-.avatar-options-content {
-    background: linear-gradient(135deg, var(--dark-matter) 0%, #0a1929 100%);
-    border-radius: 20px;
-    padding: 2rem;
-    max-width: 400px;
-    width: 90%;
-    border: 1px solid rgba(0, 255, 157, 0.3);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    transform: scale(0.9);
-    transition: transform 0.3s ease;
-}
-
-.avatar-options-modal.show .avatar-options-content {
-    transform: scale(1);
-}
-
-.avatar-options-title {
-    font-size: 1.3rem;
-    color: var(--neon-green);
-    margin-bottom: 1.5rem;
-    text-align: center;
-    font-weight: 700;
-}
-
-.avatar-option-buttons {
-    display: flex;
-    justify-content: center; /* Centrar cuando solo hay un botón */
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-/* Hacer el botón más grande cuando es único */
-.photo-source-btn:only-child,
-.avatar-option-btn:only-child {
-    max-width: 300px;
-    width: 100%;
-}
-
-.avatar-option-btn {
-    flex: 1;
-    padding: 1rem;
-    background: rgba(0, 255, 157, 0.1);
-    border: 2px solid rgba(0, 255, 157, 0.3);
-    border-radius: 12px;
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.avatar-option-btn:hover {
-    background: rgba(0, 255, 157, 0.2);
-    border-color: var(--neon-green);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(0, 255, 157, 0.3);
-}
-
-.avatar-option-btn svg {
-    width: 40px;
-    height: 40px;
-    fill: var(--neon-green);
-}
-
-.avatar-cancel-btn {
-    width: 100%;
-    padding: 0.8rem;
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    color: rgba(255, 255, 255, 0.7);
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.avatar-cancel-btn:hover {
-    border-color: rgba(255, 255, 255, 0.4);
-    color: white;
-}
-
-/* Progress indicator */
-.avatar-upload-progress {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    background: rgba(10, 25, 47, 0.9);
-    z-index: 3;
-}
-
-.avatar-upload-progress.show {
-    display: flex;
-}
-
-.progress-spinner {
-    width: 50px;
-    height: 50px;
-    border: 3px solid rgba(0, 255, 157, 0.1);
-    border-top: 3px solid var(--neon-green);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .avatar-container {
-        width: 120px;
-        height: 120px;
+    .avatar-upload-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 2rem 0;
+        position: relative;
     }
-    
+
+    .avatar-container {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .avatar-preview {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(0, 255, 157, 0.1) 0%, rgba(0, 246, 255, 0.05) 100%);
+        border: 3px solid rgba(0, 255, 157, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+        transition: all 0.3s ease;
+        box-shadow:
+            0 0 20px rgba(0, 255, 157, 0.2),
+            inset 0 0 20px rgba(0, 255, 157, 0.05);
+    }
+
+    .avatar-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: none;
+    }
+
+    .avatar-preview.has-image img {
+        display: block;
+    }
+
+    .avatar-placeholder {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: rgba(0, 255, 157, 0.8);
+        transition: all 0.3s ease;
+    }
+
+    .avatar-preview.has-image .avatar-placeholder {
+        opacity: 0;
+        visibility: hidden;
+    }
+
     .avatar-icon {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 10px;
+        fill: currentColor;
+        filter: drop-shadow(0 0 5px rgba(0, 255, 157, 0.5));
+    }
+
+    .avatar-text {
+        font-size: 0.75rem;
+        text-align: center;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        opacity: 0.8;
+    }
+
+    /* Plus sign overlay */
+    .avatar-plus {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
         width: 40px;
         height: 40px;
+        background: var(--neon-green);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 255, 157, 0.4);
+        transition: all 0.3s ease;
+        z-index: 2;
     }
-    
-    .avatar-plus {
-        width: 35px;
-        height: 35px;
-        bottom: 5px;
-        right: 5px;
-    }
-    
+
     .avatar-plus svg {
-        width: 20px;
-        height: 20px;
+        width: 24px;
+        height: 24px;
+        fill: var(--dark-matter);
     }
-    
+
+    /* Hover effects */
+    .avatar-container:hover .avatar-preview {
+        border-color: var(--neon-green);
+        box-shadow:
+            0 0 30px rgba(0, 255, 157, 0.4),
+            inset 0 0 30px rgba(0, 255, 157, 0.1);
+        transform: scale(1.05);
+    }
+
+    .avatar-container:hover .avatar-plus {
+        background: var(--cyber-blue);
+        transform: rotate(90deg) scale(1.1);
+        box-shadow: 0 4px 20px rgba(0, 246, 255, 0.6);
+    }
+
+    .avatar-container:hover .avatar-placeholder {
+        color: var(--neon-green);
+    }
+
+    /* Active/Focus state */
+    .avatar-container:active .avatar-preview {
+        transform: scale(0.98);
+    }
+
+    /* Hidden file input */
+    .avatar-input {
+        display: none;
+    }
+
+    /* Camera/Gallery options modal */
+    .avatar-options-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(10px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .avatar-options-modal.show {
+        display: flex;
+        opacity: 1;
+    }
+
+    .avatar-options-content {
+        background: linear-gradient(135deg, var(--dark-matter) 0%, #0a1929 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        max-width: 400px;
+        width: 90%;
+        border: 1px solid rgba(0, 255, 157, 0.3);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+    }
+
+    .avatar-options-modal.show .avatar-options-content {
+        transform: scale(1);
+    }
+
+    .avatar-options-title {
+        font-size: 1.3rem;
+        color: var(--neon-green);
+        margin-bottom: 1.5rem;
+        text-align: center;
+        font-weight: 700;
+    }
+
     .avatar-option-buttons {
+        display: flex;
+        justify-content: center;
+        /* Centrar cuando solo hay un botón */
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Hacer el botón más grande cuando es único */
+    .photo-source-btn:only-child,
+    .avatar-option-btn:only-child {
+        max-width: 300px;
+        width: 100%;
+    }
+
+    .avatar-option-btn {
+        flex: 1;
+        padding: 1rem;
+        background: rgba(0, 255, 157, 0.1);
+        border: 2px solid rgba(0, 255, 157, 0.3);
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
         flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
     }
-}
 
-@media (max-width: 480px) {
-    .avatar-container {
-        width: 100px;
-        height: 100px;
+    .avatar-option-btn:hover {
+        background: rgba(0, 255, 157, 0.2);
+        border-color: var(--neon-green);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(0, 255, 157, 0.3);
     }
-    
-    .avatar-icon {
-        width: 35px;
-        height: 35px;
-        margin-bottom: 5px;
+
+    .avatar-option-btn svg {
+        width: 40px;
+        height: 40px;
+        fill: var(--neon-green);
     }
-    
-    .avatar-text {
-        font-size: 0.65rem;
+
+    .avatar-cancel-btn {
+        width: 100%;
+        padding: 0.8rem;
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        color: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+        transition: all 0.3s ease;
     }
-}
 
-/* Camera capture styles */
-.camera-capture-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.95);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 3000;
-}
+    .avatar-cancel-btn:hover {
+        border-color: rgba(255, 255, 255, 0.4);
+        color: white;
+    }
 
-.camera-capture-modal.show {
-    display: flex;
-}
+    /* Progress indicator */
+    .avatar-upload-progress {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(10, 25, 47, 0.9);
+        z-index: 3;
+    }
 
-.camera-container {
-    position: relative;
-    max-width: 600px;
-    width: 100%;
-    background: #000;
-    border-radius: 20px;
-    overflow: hidden;
-    border: 2px solid var(--neon-green);
-}
+    .avatar-upload-progress.show {
+        display: flex;
+    }
 
-#cameraVideo {
-    width: 100%;
-    height: auto;
-    display: block;
-}
+    .progress-spinner {
+        width: 50px;
+        height: 50px;
+        border: 3px solid rgba(0, 255, 157, 0.1);
+        border-top: 3px solid var(--neon-green);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
 
-.camera-controls {
-    position: absolute;
-    bottom: 20px;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-}
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
 
-.camera-btn {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    border: 3px solid white;
-    background: rgba(255, 255, 255, 0.2);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+        100% {
+            transform: rotate(360deg);
+        }
+    }
 
-.camera-btn:hover {
-    background: rgba(255, 255, 255, 0.4);
-    transform: scale(1.1);
-}
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .avatar-container {
+            width: 120px;
+            height: 120px;
+        }
 
-.camera-btn.capture {
-    width: 80px;
-    height: 80px;
-    background: var(--neon-green);
-    border-color: var(--neon-green);
-}
+        .avatar-icon {
+            width: 40px;
+            height: 40px;
+        }
 
-.camera-btn.capture:active {
-    transform: scale(0.95);
-}
+        .avatar-plus {
+            width: 35px;
+            height: 35px;
+            bottom: 5px;
+            right: 5px;
+        }
 
-.camera-btn svg {
-    width: 30px;
-    height: 30px;
-    fill: white;
-}
+        .avatar-plus svg {
+            width: 20px;
+            height: 20px;
+        }
 
-/* Terminal-style feedback */
-.avatar-feedback {
-    position: absolute;
-    bottom: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.8);
-    color: var(--neon-green);
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    font-family: 'Courier New', monospace;
-    font-size: 0.8rem;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-}
+        .avatar-option-buttons {
+            flex-direction: column;
+        }
+    }
 
-.avatar-feedback.show {
-    opacity: 1;
-}
+    @media (max-width: 480px) {
+        .avatar-container {
+            width: 100px;
+            height: 100px;
+        }
 
-.avatar-feedback::before {
-    content: '$ ';
-    opacity: 0.7;
-}
+        .avatar-icon {
+            width: 35px;
+            height: 35px;
+            margin-bottom: 5px;
+        }
+
+        .avatar-text {
+            font-size: 0.65rem;
+        }
+    }
+
+    /* Camera capture styles */
+    .camera-capture-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.95);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 3000;
+    }
+
+    .camera-capture-modal.show {
+        display: flex;
+    }
+
+    .camera-container {
+        position: relative;
+        max-width: 600px;
+        width: 100%;
+        background: #000;
+        border-radius: 20px;
+        overflow: hidden;
+        border: 2px solid var(--neon-green);
+    }
+
+    #cameraVideo {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .camera-controls {
+        position: absolute;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .camera-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: 3px solid white;
+        background: rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .camera-btn:hover {
+        background: rgba(255, 255, 255, 0.4);
+        transform: scale(1.1);
+    }
+
+    .camera-btn.capture {
+        width: 80px;
+        height: 80px;
+        background: var(--neon-green);
+        border-color: var(--neon-green);
+    }
+
+    .camera-btn.capture:active {
+        transform: scale(0.95);
+    }
+
+    .camera-btn svg {
+        width: 30px;
+        height: 30px;
+        fill: white;
+    }
+
+    /* Terminal-style feedback */
+    .avatar-feedback {
+        position: absolute;
+        bottom: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: var(--neon-green);
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
+
+    .avatar-feedback.show {
+        opacity: 1;
+    }
+
+    .avatar-feedback::before {
+        content: '$ ';
+        opacity: 0.7;
+    }
 </style>
 {% endblock %}
 
@@ -486,9 +492,11 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="register-header">
                 <div class="app-icon">
                     <svg viewBox="0 0 24 24">
-                        <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/>
-                        <path d="M12 4.5c-4.136 0-7.5 3.364-7.5 7.5s3.364 7.5 7.5 7.5 7.5-3.364 7.5-7.5-3.364-7.5-7.5-7.5zm0 14c-3.584 0-6.5-2.916-6.5-6.5s2.916-6.5 6.5-6.5 6.5 2.916 6.5 6.5-2.916 6.5-6.5 6.5z"/>
-                        <circle cx="12" cy="12" r="2.5"/>
+                        <path
+                            d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z" />
+                        <path
+                            d="M12 4.5c-4.136 0-7.5 3.364-7.5 7.5s3.364 7.5 7.5 7.5 7.5-3.364 7.5-7.5-3.364-7.5-7.5-7.5zm0 14c-3.584 0-6.5-2.916-6.5-6.5s2.916-6.5 6.5-6.5 6.5 2.916 6.5 6.5-2.916 6.5-6.5 6.5z" />
+                        <circle cx="12" cy="12" r="2.5" />
                     </svg>
                 </div>
                 <h2 class="register-title">Crear Cuenta</h2>
@@ -502,14 +510,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         <img id="avatarImage" src="" alt="Avatar">
                         <div class="avatar-placeholder">
                             <svg class="avatar-icon" viewBox="0 0 24 24">
-                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                <path
+                                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                             </svg>
                             <span class="avatar-text">Foto de perfil</span>
                         </div>
                     </div>
                     <div class="avatar-plus">
                         <svg viewBox="0 0 24 24">
-                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
                         </svg>
                     </div>
                     <div class="avatar-upload-progress" id="avatarProgress">
@@ -532,28 +541,28 @@ document.addEventListener('DOMContentLoaded', function() {
             {% endif %}
 
             {% if messages %}
-                {% for message in messages %}
-                    {% if message.tags == 'success' %}
-                        <div class="success-message">
-                            {{ message }}
-                        </div>
-                    {% endif %}
-                {% endfor %}
+            {% for message in messages %}
+            {% if message.tags == 'success' %}
+            <div class="success-message">
+                {{ message }}
+            </div>
+            {% endif %}
+            {% endfor %}
             {% endif %}
 
-            <form class="register-form" method="post" action="{% url 'core:register' %}" enctype="multipart/form-data" novalidate>
+            <form class="register-form" method="post" action="{% url 'core:register' %}" enctype="multipart/form-data"
+                novalidate>
                 {% csrf_token %}
-                
+
                 <!-- Campo oculto para la imagen en base64 si se toma con cámara -->
                 <input type="hidden" id="avatarBase64" name="foto_perfil_base64" value="">
-                
+
                 <!-- Nombre -->
                 <div class="form-group">
                     <label class="form-label required">Nombre</label>
                     <div class="input-wrapper">
-                        <input type="text" class="form-input" name="nombre" 
-                               value="{{ form_data.nombre|default:'' }}" 
-                               placeholder="Tu nombre" required>
+                        <input type="text" class="form-input" name="nombre" value="{{ form_data.nombre|default:'' }}"
+                            placeholder="Tu nombre" required>
                         <div class="input-effect"></div>
                     </div>
                 </div>
@@ -562,9 +571,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="form-group">
                     <label class="form-label required">Apellido</label>
                     <div class="input-wrapper">
-                        <input type="text" class="form-input" name="apellido" 
-                               value="{{ form_data.apellido|default:'' }}" 
-                               placeholder="Tu apellido" required>
+                        <input type="text" class="form-input" name="apellido"
+                            value="{{ form_data.apellido|default:'' }}" placeholder="Tu apellido" required>
                         <div class="input-effect"></div>
                     </div>
                 </div>
@@ -573,9 +581,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="form-group">
                     <label class="form-label required">Usuario</label>
                     <div class="input-wrapper">
-                        <input type="text" class="form-input" name="username" 
-                               value="{{ form_data.username|default:'' }}" 
-                               placeholder="Nombre de usuario único" required>
+                        <input type="text" class="form-input" name="username"
+                            value="{{ form_data.username|default:'' }}" placeholder="Nombre de usuario único" required>
                         <div class="input-effect"></div>
                     </div>
                 </div>
@@ -584,9 +591,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="form-group">
                     <label class="form-label required">Email</label>
                     <div class="input-wrapper">
-                        <input type="email" class="form-input" name="email" 
-                               value="{{ form_data.email|default:'' }}" 
-                               placeholder="tu@email.com" required>
+                        <input type="email" class="form-input" name="email" value="{{ form_data.email|default:'' }}"
+                            placeholder="tu@email.com" required>
                         <div class="input-effect"></div>
                     </div>
                 </div>
@@ -595,8 +601,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="form-group">
                     <label class="form-label required">Contraseña</label>
                     <div class="input-wrapper">
-                        <input type="password" class="form-input" name="password" 
-                               placeholder="Mínimo 8 caracteres" required>
+                        <input type="password" class="form-input" name="password" placeholder="Mínimo 8 caracteres"
+                            required>
                         <div class="input-effect"></div>
                     </div>
                 </div>
@@ -605,8 +611,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="form-group">
                     <label class="form-label required">Confirmar Contraseña</label>
                     <div class="input-wrapper">
-                        <input type="password" class="form-input" name="password_confirm" 
-                               placeholder="Repite tu contraseña" required>
+                        <input type="password" class="form-input" name="password_confirm"
+                            placeholder="Repite tu contraseña" required>
                         <div class="input-effect"></div>
                     </div>
                 </div>
@@ -616,7 +622,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <label class="form-label">Fecha de Nacimiento</label>
                     <div class="input-wrapper">
                         <input type="date" class="form-input" name="fecha_nacimiento"
-                               value="{{ form_data.fecha_nacimiento|default:'' }}">
+                            value="{{ form_data.fecha_nacimiento|default:'' }}">
                         <div class="input-effect"></div>
                     </div>
                 </div>
@@ -625,9 +631,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="form-group">
                     <label class="form-label">Teléfono</label>
                     <div class="input-wrapper">
-                        <input type="tel" class="form-input" name="telefono" 
-                               value="{{ form_data.telefono|default:'' }}" 
-                               placeholder="+57 300 123 4567">
+                        <input type="tel" class="form-input" name="telefono" value="{{ form_data.telefono|default:'' }}"
+                            placeholder="+57 300 123 4567">
                         <div class="input-effect"></div>
                     </div>
                 </div>
@@ -639,8 +644,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <select class="form-select" name="id_comunidad" required>
                             <option value="">Selecciona tu comunidad</option>
                             {% for comunidad in comunidades %}
-                            <option value="{{ comunidad.id }}" 
-                                    {% if form_data.id_comunidad|default:'' == comunidad.id|stringformat:"s" %}selected{% endif %}>
+                            <option value="{{ comunidad.id }}" {% if
+                                form_data.id_comunidad|default:''==comunidad.id|stringformat:"s" %}selected{% endif %}>
                                 {{ comunidad.display_name }}
                             </option>
                             {% endfor %}
@@ -656,9 +661,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="form-group">
                     <label class="form-label">Dirección</label>
                     <div class="input-wrapper">
-                        <input type="text" class="form-input" name="direccion" 
-                               value="{{ form_data.direccion|default:'' }}" 
-                               placeholder="Tu dirección (opcional)">
+                        <input type="text" class="form-input" name="direccion"
+                            value="{{ form_data.direccion|default:'' }}" placeholder="Tu dirección (opcional)">
                         <div class="input-effect"></div>
                     </div>
                 </div>
@@ -667,8 +671,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="form-group">
                     <label class="form-label">Cuéntanos sobre ti</label>
                     <div class="input-wrapper">
-                        <textarea class="form-input" name="biografia" rows="3" 
-                                  placeholder="Breve descripción sobre ti y tus intereses en las tradiciones (opcional)">{{ form_data.biografia|default:'' }}</textarea>
+                        <textarea class="form-input" name="biografia" rows="3"
+                            placeholder="Breve descripción sobre ti y tus intereses en las tradiciones (opcional)">{{ form_data.biografia|default:'' }}</textarea>
                         <div class="input-effect"></div>
                     </div>
                 </div>
@@ -680,7 +684,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             <div class="verification-info">
                 <strong>📧 Verificación de Email:</strong><br>
-                Después del registro, enviaremos un email de verificación a tu correo. 
+                Después del registro, enviaremos un email de verificación a tu correo.
                 Debes verificar tu cuenta para poder acceder completamente a la plataforma.
             </div>
 
@@ -698,7 +702,8 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="avatar-option-buttons">
             <button class="avatar-option-btn" id="galleryOption">
                 <svg viewBox="0 0 24 24">
-                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                    <path
+                        d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
                 </svg>
                 <span>Elegir de galería</span>
             </button>
@@ -715,13 +720,15 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="camera-controls">
             <button class="camera-btn" id="cancelCapture">
                 <svg viewBox="0 0 24 24">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    <path
+                        d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
                 </svg>
             </button>
             <button class="camera-btn capture" id="capturePhoto">
                 <svg viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="3.2"/>
-                    <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                    <circle cx="12" cy="12" r="3.2" />
+                    <path
+                        d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" />
                 </svg>
             </button>
         </div>
@@ -734,237 +741,237 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="{% static 'core/js/digital-effects.js' %}"></script>
 
 <script>
-// 🎨 AVATAR UPLOAD SYSTEM
-class AvatarUploadSystem {
-    constructor() {
-        this.avatarContainer = document.getElementById('avatarContainer');
-        this.avatarPreview = document.getElementById('avatarPreview');
-        this.avatarImage = document.getElementById('avatarImage');
-        this.avatarInput = document.getElementById('avatarInput');
-        this.avatarBase64 = document.getElementById('avatarBase64');
-        this.avatarProgress = document.getElementById('avatarProgress');
-        this.avatarFeedback = document.getElementById('avatarFeedback');
-        
-        this.optionsModal = document.getElementById('avatarOptionsModal');
-        this.init();
-    }
-    
-    init() {
-        // Main avatar click
-        this.avatarContainer.addEventListener('click', () => this.showOptions());
-        
-        // Options
-        document.getElementById('galleryOption').addEventListener('click', () => this.openGallery());
-        document.getElementById('cancelAvatarOption').addEventListener('click', () => this.hideOptions());
-        
-        
-        // File input change
-        this.avatarInput.addEventListener('change', (e) => this.handleFileSelect(e));
-        
-        // Close modals on backdrop click
-        this.optionsModal.addEventListener('click', (e) => {
-            if (e.target === this.optionsModal) this.hideOptions();
-        });
-        
-    }
-    
-    showOptions() {
-        this.optionsModal.classList.add('show');
-        this.showFeedback('Select avatar source');
-    }
-    
-    hideOptions() {
-        this.optionsModal.classList.remove('show');
-    }
-    
-    openGallery() {
-        this.hideOptions();
-        this.avatarInput.click();
-    }
-    
-    handleFileSelect(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        // Validate file
-        if (!file.type.startsWith('image/')) {
-            this.showFeedback('Invalid file type', 'error');
-            return;
-        }
-        
-        if (file.size > 5 * 1024 * 1024) { // 5MB limit
-            this.showFeedback('File too large (max 5MB)', 'error');
-            return;
-        }
-        
-        // Show progress
-        this.avatarProgress.classList.add('show');
-        
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            this.displayAvatar(reader.result);
-            this.avatarProgress.classList.remove('show');
-            this.showFeedback('Avatar uploaded');
-        };
-        reader.readAsDataURL(file);
-    }
-    
-    displayAvatar(imageSrc) {
-        this.avatarImage.src = imageSrc;
-        this.avatarPreview.classList.add('has-image');
-        
-        // Animate the change
-        if (typeof gsap !== 'undefined') {
-            gsap.fromTo(this.avatarImage, 
-                { scale: 0.8, opacity: 0 },
-                { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(1.7)" }
-            );
-        }
-    }
-    
-    showFeedback(message, type = 'success') {
-        this.avatarFeedback.textContent = message;
-        this.avatarFeedback.classList.add('show');
-        
-        if (type === 'error') {
-            this.avatarFeedback.style.color = '#ff4444';
-        } else {
-            this.avatarFeedback.style.color = 'var(--neon-green)';
-        }
-        
-        setTimeout(() => {
-            this.avatarFeedback.classList.remove('show');
-        }, 3000);
-    }
-}
+    // 🎨 AVATAR UPLOAD SYSTEM
+    class AvatarUploadSystem {
+        constructor() {
+            this.avatarContainer = document.getElementById('avatarContainer');
+            this.avatarPreview = document.getElementById('avatarPreview');
+            this.avatarImage = document.getElementById('avatarImage');
+            this.avatarInput = document.getElementById('avatarFileInput');
+            this.avatarBase64 = document.getElementById('avatarBase64');
+            this.avatarProgress = document.getElementById('avatarProgress');
+            this.avatarFeedback = document.getElementById('avatarFeedback');
 
-// Initialize on DOM load
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Registro con Avatar - Sistema inicializado');
-    
-    // Initialize avatar system
-    const avatarSystem = new AvatarUploadSystem();
-    
-    // Form validation
-    const form = document.querySelector('.register-form');
-    const inputs = form.querySelectorAll('.form-input, .form-select');
-    const submitBtn = form.querySelector('.btn-submit');
-
-    // Real-time validation
-    inputs.forEach(input => {
-        input.addEventListener('input', function() {
-            validateField(this);
-        });
-        
-        input.addEventListener('blur', function() {
-            validateField(this);
-        });
-    });
-
-    function validateField(field) {
-        const value = field.value.trim();
-        const fieldName = field.name;
-        let isValid = true;
-
-        field.classList.remove('valid', 'invalid');
-
-        if (value.length === 0) {
-            return true;
+            this.optionsModal = document.getElementById('avatarOptionsModal');
+            this.init();
         }
 
-        switch(fieldName) {
-            case 'nombre':
-            case 'apellido':
-                isValid = value.length >= 2;
-                break;
-            case 'username':
-                isValid = value.length >= 3 && /^[a-zA-Z0-9_]+$/.test(value);
-                break;
-            case 'email':
-                isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-                break;
-            case 'password':
-                isValid = value.length >= 8;
-                break;
-            case 'password_confirm':
-                const password = document.querySelector('input[name="password"]').value;
-                isValid = value === password;
-                break;
-        }
+        init() {
+            // Main avatar click
+            this.avatarContainer.addEventListener('click', () => this.showOptions());
 
-        if (isValid) {
-            field.classList.add('valid');
-        } else {
-            field.classList.add('invalid');
-        }
+            // Options
+            document.getElementById('galleryOption').addEventListener('click', () => this.openGallery());
+            document.getElementById('cancelAvatarOption').addEventListener('click', () => this.hideOptions());
 
-        return isValid;
-    }
-    
-    // Form submission
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            console.log('📝 Enviando formulario...');
-            
-            // Validate required fields
-            const requiredFields = form.querySelectorAll('input[required], select[required]');
-            let allValid = true;
-            
-            requiredFields.forEach(field => {
-                if (!field.value.trim()) {
-                    field.classList.add('invalid');
-                    allValid = false;
-                }
+
+            // File input change
+            this.avatarInput.addEventListener('change', (e) => this.handleFileSelect(e));
+
+            // Close modals on backdrop click
+            this.optionsModal.addEventListener('click', (e) => {
+                if (e.target === this.optionsModal) this.hideOptions();
             });
-            
-            if (!allValid) {
-                e.preventDefault();
-                showNotification('Por favor, completa todos los campos obligatorios', 'error');
+
+        }
+
+        showOptions() {
+            this.optionsModal.classList.add('show');
+            this.showFeedback('Select avatar source');
+        }
+
+        hideOptions() {
+            this.optionsModal.classList.remove('show');
+        }
+
+        openGallery() {
+            this.hideOptions();
+            this.avatarInput.click();
+        }
+
+        handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file
+            if (!file.type.startsWith('image/')) {
+                this.showFeedback('Invalid file type', 'error');
                 return;
             }
-            
-            // Validate passwords
-            const password = document.querySelector('input[name="password"]').value;
-            const confirmPassword = document.querySelector('input[name="password_confirm"]').value;
-            
-            if (password !== confirmPassword) {
-                e.preventDefault();
-                showNotification('Las contraseñas no coinciden', 'error');
+
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                this.showFeedback('File too large (max 5MB)', 'error');
                 return;
             }
-            
-            if (password.length < 8) {
-                e.preventDefault();
-                showNotification('La contraseña debe tener al menos 8 caracteres', 'error');
-                return;
+
+            // Show progress
+            this.avatarProgress.classList.add('show');
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                this.displayAvatar(reader.result);
+                this.avatarProgress.classList.remove('show');
+                this.showFeedback('Avatar uploaded');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        displayAvatar(imageSrc) {
+            this.avatarImage.src = imageSrc;
+            this.avatarPreview.classList.add('has-image');
+
+            // Animate the change
+            if (typeof gsap !== 'undefined') {
+                gsap.fromTo(this.avatarImage,
+                    { scale: 0.8, opacity: 0 },
+                    { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(1.7)" }
+                );
             }
-            
-            // Add loading to button
-            if (submitBtn) {
-                submitBtn.classList.add('loading');
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span>Creando cuenta...</span>';
+        }
+
+        showFeedback(message, type = 'success') {
+            this.avatarFeedback.textContent = message;
+            this.avatarFeedback.classList.add('show');
+
+            if (type === 'error') {
+                this.avatarFeedback.style.color = '#ff4444';
+            } else {
+                this.avatarFeedback.style.color = 'var(--neon-green)';
             }
-            
-            console.log('✅ Formulario válido, enviando...');
-        });
+
+            setTimeout(() => {
+                this.avatarFeedback.classList.remove('show');
+            }, 3000);
+        }
     }
 
-    // Notification system
-    function showNotification(message, type = 'info') {
-        const existing = document.querySelectorAll('.notification');
-        existing.forEach(n => n.remove());
-        
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.innerHTML = `
+    // Initialize on DOM load
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('🚀 Registro con Avatar - Sistema inicializado');
+
+        // Initialize avatar system
+        const avatarSystem = new AvatarUploadSystem();
+
+        // Form validation
+        const form = document.querySelector('.register-form');
+        const inputs = form.querySelectorAll('.form-input, .form-select');
+        const submitBtn = form.querySelector('.btn-submit');
+
+        // Real-time validation
+        inputs.forEach(input => {
+            input.addEventListener('input', function () {
+                validateField(this);
+            });
+
+            input.addEventListener('blur', function () {
+                validateField(this);
+            });
+        });
+
+        function validateField(field) {
+            const value = field.value.trim();
+            const fieldName = field.name;
+            let isValid = true;
+
+            field.classList.remove('valid', 'invalid');
+
+            if (value.length === 0) {
+                return true;
+            }
+
+            switch (fieldName) {
+                case 'nombre':
+                case 'apellido':
+                    isValid = value.length >= 2;
+                    break;
+                case 'username':
+                    isValid = value.length >= 3 && /^[a-zA-Z0-9_]+$/.test(value);
+                    break;
+                case 'email':
+                    isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+                    break;
+                case 'password':
+                    isValid = value.length >= 8;
+                    break;
+                case 'password_confirm':
+                    const password = document.querySelector('input[name="password"]').value;
+                    isValid = value === password;
+                    break;
+            }
+
+            if (isValid) {
+                field.classList.add('valid');
+            } else {
+                field.classList.add('invalid');
+            }
+
+            return isValid;
+        }
+
+        // Form submission
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                console.log('📝 Enviando formulario...');
+
+                // Validate required fields
+                const requiredFields = form.querySelectorAll('input[required], select[required]');
+                let allValid = true;
+
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        field.classList.add('invalid');
+                        allValid = false;
+                    }
+                });
+
+                if (!allValid) {
+                    e.preventDefault();
+                    showNotification('Por favor, completa todos los campos obligatorios', 'error');
+                    return;
+                }
+
+                // Validate passwords
+                const password = document.querySelector('input[name="password"]').value;
+                const confirmPassword = document.querySelector('input[name="password_confirm"]').value;
+
+                if (password !== confirmPassword) {
+                    e.preventDefault();
+                    showNotification('Las contraseñas no coinciden', 'error');
+                    return;
+                }
+
+                if (password.length < 8) {
+                    e.preventDefault();
+                    showNotification('La contraseña debe tener al menos 8 caracteres', 'error');
+                    return;
+                }
+
+                // Add loading to button
+                if (submitBtn) {
+                    submitBtn.classList.add('loading');
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span>Creando cuenta...</span>';
+                }
+
+                console.log('✅ Formulario válido, enviando...');
+            });
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const existing = document.querySelectorAll('.notification');
+            existing.forEach(n => n.remove());
+
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
             <div style="display: flex; align-items: center; gap: 0.75rem;">
                 <div class="notification-icon">${getNotificationIcon(type)}</div>
                 <span>${message}</span>
             </div>
         `;
-        
-        notification.style.cssText = `
+
+            notification.style.cssText = `
             position: fixed;
             top: 2rem;
             right: 2rem;
@@ -979,126 +986,126 @@ document.addEventListener('DOMContentLoaded', function() {
             transform: translateX(100%);
             transition: transform 0.4s ease;
         `;
-        
-        if (type === 'error') {
-            notification.style.background = 'rgba(240, 65, 65, 0.9)';
-            notification.style.color = 'white';
-            notification.style.borderColor = '#f04141';
-        } else if (type === 'success') {
-            notification.style.background = 'rgba(0, 224, 133, 0.9)';
-            notification.style.color = 'white';
-            notification.style.borderColor = '#00ff9d';
-        }
-        
-        // Mobile adjustments
-        if (window.innerWidth <= 768) {
-            notification.style.top = '1rem';
-            notification.style.right = '1rem';
-            notification.style.left = '1rem';
-            notification.style.maxWidth = 'none';
-        }
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.style.transform = 'translateX(0)';
-        }, 100);
-        
-        setTimeout(() => {
-            notification.style.transform = 'translateX(100%)';
-            setTimeout(() => notification.remove(), 400);
-        }, 4000);
-    }
 
-    function getNotificationIcon(type) {
-        switch(type) {
-            case 'error': return '⚠️';
-            case 'success': return '✅';
-            default: return '💚';
-        }
-    }
-    
-    // Initialize animations
-    if (typeof AOS !== 'undefined' && window.innerWidth > 768) {
-        AOS.init({
-            duration: 600,
-            easing: 'ease-out-cubic',
-            once: true,
-            offset: 30,
-            disable: window.innerWidth <= 768
-        });
-    }
-
-    if (typeof gsap !== 'undefined' && window.innerWidth > 768) {
-        gsap.fromTo('.register-container', 
-            { scale: 0.98, opacity: 0, y: 20 },
-            { scale: 1, opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
-        );
-        
-        // Animate avatar section
-        gsap.fromTo('.avatar-upload-section',
-            { scale: 0.9, opacity: 0 },
-            { scale: 1, opacity: 1, duration: 0.5, delay: 0.3, ease: "back.out(1.5)" }
-        );
-    }
-    
-    // Mobile optimizations
-    if (window.innerWidth <= 768) {
-        console.log('📱 Modo móvil detectado - aplicando optimizaciones');
-        
-        // Prevent zoom on inputs
-        const allInputs = document.querySelectorAll('input, select, textarea');
-        allInputs.forEach(input => {
-            input.style.fontSize = '16px';
-        });
-        
-        // Smooth scroll for form fields
-        inputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                setTimeout(() => {
-                    this.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'center',
-                        inline: 'nearest'
-                    });
-                }, 300);
-            });
-        });
-    }
-    
-    // Handle orientation change
-    window.addEventListener('orientationchange', function() {
-        setTimeout(() => {
-            if (window.innerWidth <= 768) {
-                document.body.style.height = 'auto';
-                window.scrollTo(0, 0);
+            if (type === 'error') {
+                notification.style.background = 'rgba(240, 65, 65, 0.9)';
+                notification.style.color = 'white';
+                notification.style.borderColor = '#f04141';
+            } else if (type === 'success') {
+                notification.style.background = 'rgba(0, 224, 133, 0.9)';
+                notification.style.color = 'white';
+                notification.style.borderColor = '#00ff9d';
             }
-        }, 200);
+
+            // Mobile adjustments
+            if (window.innerWidth <= 768) {
+                notification.style.top = '1rem';
+                notification.style.right = '1rem';
+                notification.style.left = '1rem';
+                notification.style.maxWidth = 'none';
+            }
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 400);
+            }, 4000);
+        }
+
+        function getNotificationIcon(type) {
+            switch (type) {
+                case 'error': return '⚠️';
+                case 'success': return '✅';
+                default: return '💚';
+            }
+        }
+
+        // Initialize animations
+        if (typeof AOS !== 'undefined' && window.innerWidth > 768) {
+            AOS.init({
+                duration: 600,
+                easing: 'ease-out-cubic',
+                once: true,
+                offset: 30,
+                disable: window.innerWidth <= 768
+            });
+        }
+
+        if (typeof gsap !== 'undefined' && window.innerWidth > 768) {
+            gsap.fromTo('.register-container',
+                { scale: 0.98, opacity: 0, y: 20 },
+                { scale: 1, opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
+            );
+
+            // Animate avatar section
+            gsap.fromTo('.avatar-upload-section',
+                { scale: 0.9, opacity: 0 },
+                { scale: 1, opacity: 1, duration: 0.5, delay: 0.3, ease: "back.out(1.5)" }
+            );
+        }
+
+        // Mobile optimizations
+        if (window.innerWidth <= 768) {
+            console.log('📱 Modo móvil detectado - aplicando optimizaciones');
+
+            // Prevent zoom on inputs
+            const allInputs = document.querySelectorAll('input, select, textarea');
+            allInputs.forEach(input => {
+                input.style.fontSize = '16px';
+            });
+
+            // Smooth scroll for form fields
+            inputs.forEach(input => {
+                input.addEventListener('focus', function () {
+                    setTimeout(() => {
+                        this.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center',
+                            inline: 'nearest'
+                        });
+                    }, 300);
+                });
+            });
+        }
+
+        // Handle orientation change
+        window.addEventListener('orientationchange', function () {
+            setTimeout(() => {
+                if (window.innerWidth <= 768) {
+                    document.body.style.height = 'auto';
+                    window.scrollTo(0, 0);
+                }
+            }, 200);
+        });
+
+        console.log('✨ Sistema de registro con avatar completamente inicializado');
     });
-    
-    console.log('✨ Sistema de registro con avatar completamente inicializado');
-});
 </script>
 
 {% if success %}
 {% include 'core/includes/success_modal.html' %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const userData = {
-        username: '{{ form_data.username|default:"" }}',
-        email: '{{ form_data.email|default:"" }}'
-    };
-    
-    // Mostrar el modal automáticamente
-    if (window.showEpicSuccessModal) {
-        window.showEpicSuccessModal({
-            title: "¡REGISTRO EXITOSO!",
-            subtitle: "Bienvenido a Raíz Digital",
-            message: "Tu cuenta ha sido creada exitosamente para " + userData.username + ".",
-            verificationText: "Hemos enviado un enlace de verificación a " + userData.email + ". Por favor revisa tu bandeja de entrada."
-        });
-    }
-});
+    document.addEventListener('DOMContentLoaded', function () {
+        const userData = {
+            username: '{{ form_data.username|default:"" }}',
+            email: '{{ form_data.email|default:"" }}'
+        };
+
+        // Mostrar el modal automáticamente
+        if (window.showEpicSuccessModal) {
+            window.showEpicSuccessModal({
+                title: "¡REGISTRO EXITOSO!",
+                subtitle: "Bienvenido a Raíz Digital",
+                message: "Tu cuenta ha sido creada exitosamente para " + userData.username + ".",
+                verificationText: "Hemos enviado un enlace de verificación a " + userData.email + ". Por favor revisa tu bandeja de entrada."
+            });
+        }
+    });
 </script>
 {% endif %}
 {% endblock %}
